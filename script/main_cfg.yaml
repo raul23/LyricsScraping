@@ -1,7 +1,7 @@
 #=============================
 #      DATABASE CONFIG
 #=============================
-music_db_filepath: ~/data/nlp-test/music.sqlite
+music_db_filepath: ~/data/lyrics-scraper/music.sqlite
 autocommit: False
 overwrite_db: False
 #=============================
@@ -10,14 +10,14 @@ overwrite_db: False
 # Lyrics websites supported: azlyrics.com only for the moment
 lyrics_urls:
 #- https://www.dsadsawhateverdjkdsa.com/hello.html
-- https://www.azlyrics.com/d/depeche.html
-#- https://www.azlyrics.com/b/bowie.html
+#- https://www.azlyrics.com/d/depeche.html
+- https://www.azlyrics.com/b/bowie.html
 #- https://www.azlyrics.com/lyrics/davidbowie/spaceoddity.html
 # - https://www.azlyrics.com/19/50cent.html
 #=============================
 #       SAVING CONFIG
 #=============================
-cache_webpages: ~/data/nlp-test/cache
+cache_webpages: ~/data/lyrics-scraper/cache
 overwrite_webpages: False
 #=============================
 #     HTTP REQUEST CONFIG

@@ -19,11 +19,11 @@ handlers:
     class: logging.StreamHandler
     formatter: console
 loggers:
-  lyrics_scraper.run_scraper.c:
+  script.run_scraper.c:
     level: INFO
     handlers: [console]
     propagate: False
-  lyrics_scraper.run_scraper.f:
+  script.run_scraper.f:
     level: DEBUG
     handlers: [file]
     propagate: False

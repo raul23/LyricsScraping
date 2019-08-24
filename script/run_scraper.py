@@ -5,7 +5,7 @@ import sys
 # Third-party modules
 import ipdb
 # Own modules
-from music_scraper.azlyrics_scraper import LyricsScraper
+from scrapers.azlyrics_scraper import LyricsScraper
 import utilities.exc as exc
 from utilities.genutils import read_yaml_config
 from utilities.script_boilerplate import ScriptBoilerplate

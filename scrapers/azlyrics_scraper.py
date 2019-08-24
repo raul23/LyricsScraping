@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 import ipdb
 from bs4 import BeautifulSoup
 # Own modules
-import music_scraper.exc as music_exc
+import scrapers.exc as music_exc
 import utilities.exc as utils_exc
 from utilities.genutils import add_plural, connect_db, create_directory
 from utilities.save_webpages import SaveWebpages
@@ -36,7 +36,7 @@ class LyricsScraper:
     def start_scraping(self):
         # Connect to the music database
         try:
-            self.logger.debug(
+            self.logger.info(
                 "Connecting to db '{}'".format(self.music_db_filepath))
             self.music_conn = connect_db(self.music_db_filepath)
         except sqlite3.Error as e:

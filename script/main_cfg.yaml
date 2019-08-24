@@ -1,0 +1,30 @@
+#=============================
+#      DATABASE CONFIG
+#=============================
+music_db_filepath: ~/data/nlp-test/music.sqlite
+autocommit: False
+overwrite_db: False
+#=============================
+#       LYRICS URLS
+#=============================
+# Lyrics websites supported: azlyrics.com only for the moment
+lyrics_urls:
+#- https://www.dsadsawhateverdjkdsa.com/hello.html
+- https://www.azlyrics.com/d/depeche.html
+#- https://www.azlyrics.com/b/bowie.html
+#- https://www.azlyrics.com/lyrics/davidbowie/spaceoddity.html
+# - https://www.azlyrics.com/19/50cent.html
+#=============================
+#       SAVING CONFIG
+#=============================
+cache_webpages: ~/data/nlp-test/cache
+overwrite_webpages: False
+#=============================
+#     HTTP REQUEST CONFIG
+#=============================
+# All in seconds
+http_get_timeout: 8
+delay_between_requests: 8
+headers:
+  User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36c"
+  Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"

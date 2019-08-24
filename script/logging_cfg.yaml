@@ -1,0 +1,33 @@
+version: 1
+disable_existing_loggers: False
+formatters:
+  console:
+    format: "%(name)-30s: %(levelname)-8s %(message)s"
+  simple:
+    format: "%(levelname)-8s %(message)s"
+  verbose:
+    format: "%(asctime)s | %(name)-40s | %(levelname)-8s | %(message)s"
+handlers:
+  file:
+    level: DEBUG
+    class: logging.FileHandler
+    filename: "debug.log"
+    mode: a
+    formatter: verbose
+  console:
+    level: INFO
+    class: logging.StreamHandler
+    formatter: console
+loggers:
+  lyrics_scraper.run_scraper.c:
+    level: INFO
+    handlers: [console]
+    propagate: False
+  lyrics_scraper.run_scraper.f:
+    level: DEBUG
+    handlers: [file]
+    propagate: False
+root:
+  level: DEBUG
+  handlers: [console]
+  propagate: False

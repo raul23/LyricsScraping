@@ -10,8 +10,8 @@ overwrite_db: False
 # Lyrics websites supported: azlyrics.com only for the moment
 lyrics_urls:
 #- https://www.dsadsawhateverdjkdsa.com/hello.html
-#- https://www.azlyrics.com/d/depeche.html
-- https://www.azlyrics.com/b/bowie.html
+- https://www.azlyrics.com/d/depeche.html
+#- https://www.azlyrics.com/b/bowie.html
 #- https://www.azlyrics.com/lyrics/davidbowie/spaceoddity.html
 # - https://www.azlyrics.com/19/50cent.html
 #=============================

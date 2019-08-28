@@ -1,19 +1,40 @@
+"""Module summary
+
+Module extended summary
+
+"""
 import os
 import sqlite3
-# NOTE 1: I'm using `requests` in ../save_webpages/run_saver.py
-# NOTE 2: For urllib with Python 2, it is
+# NOTES:
+# * I'm using `requests` in ../save_webpages/run_saver.py
+# * For urllib with Python 2, it is
 # `from six.moves.urllib.parse import urlparse`
 import urllib
 # Third-party modules
 import ipdb
-# Own modules
+# Custom modules
 import scrapers.exc as music_exc
 from utilities.genutils import connect_db, get_logger
 from utilities.save_webpages import SaveWebpages
 
 
-# Scrapes and saves webpages locally
 class LyricsScraper:
+    """Base class for scraping and saving webpages locally
+
+    Parameters
+    ----------
+    main_cfg : dict
+        Description
+    logger : dict or LoggingWrapper
+        If `logger` is a ``dict``, then a new logger will be setup. If `logger`
+        is a ``LoggingWrapper``, then the same logger will be reused.
+
+    Attributes
+    ----------
+
+
+    """
+
     def __init__(self, main_cfg, logger=None):
         self.main_cfg = main_cfg
         self.logger_p = get_logger(__name__,
@@ -29,6 +50,15 @@ class LyricsScraper:
                                   logger=logger)
 
     def start_scraping(self):
+        """
+
+        Returns
+        -------
+
+        Attributes
+        ----------
+
+        """
         # Connect to the music database
         self._connect_db()
         # Process list of URLs to lyrics websites
@@ -50,6 +80,12 @@ class LyricsScraper:
                 self.logger_p.info("Skipping the URL {}".format(url))
 
     def _connect_db(self):
+        """
+
+        Returns
+        -------
+
+        """
         # Connect to the music database
         try:
             self.logger_p.info(
@@ -61,6 +97,16 @@ class LyricsScraper:
             self.logger_p.debug("Db connection established!")
 
     def _check_url_in_db(self, url):
+        """
+
+        Parameters
+        ----------
+        url
+
+        Returns
+        -------
+
+        """
         # Check first if the URL was already processed, i.e. is found in the db
         res = self._select_song(url)
         if len(res) == 1:
@@ -84,15 +130,59 @@ class LyricsScraper:
                 "db".format(url))
 
     def _crawl_artist_page(self, artist_filename, artist_url):
+        """
+
+        Parameters
+        ----------
+        artist_filename
+        artist_url
+
+        Returns
+        -------
+
+        """
         raise NotImplementedError
 
     def _crawl_lyrics_page(self, lyrics_filename, lyrics_url):
+        """
+
+        Parameters
+        ----------
+        lyrics_filename
+        lyrics_url
+
+        Returns
+        -------
+
+        """
         raise NotImplementedError
 
     def _process_url(self, url):
+        """
+
+        Parameters
+        ----------
+        url
+
+        Returns
+        -------
+
+        """
         raise NotImplementedError
 
     def _execute_sql(self, cur, sql, values):
+        """
+
+        Parameters
+        ----------
+        cur
+        sql
+        values
+
+        Returns
+        -------
+
+        """
         self.sanity_check_sql(sql, values)
         try:
             cur.execute(sql, values)
@@ -107,6 +197,16 @@ class LyricsScraper:
             return cur.lastrowid
 
     def _insert_album(self, album):
+        """
+
+        Parameters
+        ----------
+        album
+
+        Returns
+        -------
+
+        """
         self.logger_p.debug(
             "Inserting the album: album_title={}, artist_name={}, "
             "year={}".format(album[0], album[1], album[2]))
@@ -116,12 +216,32 @@ class LyricsScraper:
         self._execute_sql(cur, sql, album)
 
     def _insert_artist(self, artist_name):
+        """
+
+        Parameters
+        ----------
+        artist_name
+
+        Returns
+        -------
+
+        """
         self.logger_p.debug("Inserting the artist: {}".format(artist_name[0]))
         sql = '''INSERT INTO artists (artist_name) VALUES (?)'''
         cur = self.music_conn.cursor()
         self._execute_sql(cur, sql, artist_name)
 
     def _insert_song(self, song):
+        """
+
+        Parameters
+        ----------
+        song
+
+        Returns
+        -------
+
+        """
         self.logger_p.debug(
             "Inserting the song: song_title={}, artist_name={}, "
             "album_title={}".format(song[0], song[1], song[4]))
@@ -131,6 +251,16 @@ class LyricsScraper:
         self._execute_sql(cur, sql, song)
 
     def _select_song(self, lyrics_url):
+        """
+
+        Parameters
+        ----------
+        lyrics_url
+
+        Returns
+        -------
+
+        """
         self.logger_p.debug(
             "Selecting the song where lyrics_url={}".format(lyrics_url))
         sql = "SELECT * FROM songs WHERE lyrics_url='{}'".format(
@@ -141,6 +271,17 @@ class LyricsScraper:
 
     @staticmethod
     def sanity_check_sql(sql, val):
+        """
+
+        Parameters
+        ----------
+        sql
+        val
+
+        Returns
+        -------
+
+        """
         assert type(val) is tuple, \
             "The values for the SQL expression are not of `tuple` type"
         assert len(val) == sql.count('?'), \

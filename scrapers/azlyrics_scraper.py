@@ -9,9 +9,7 @@ from bs4 import BeautifulSoup
 import scrapers.exc as music_exc
 from scrapers.lyrics_scraper import LyricsScraper
 import utilities.exc as utils_exc
-from utilities.genutils import add_plural, create_directory
-from utilities.logging_boilerplate import LoggingBoilerplate
-from utilities.logging_wrapper import LoggingWrapper
+from utilities.genutils import add_plural, create_directory, get_logger
 
 
 # Scrapes and saves webpages locally
@@ -20,17 +18,10 @@ class AZLyricsScraper(LyricsScraper):
 
     def __init__(self, main_cfg, logger):
         super().__init__(main_cfg, logger)
-        if isinstance(logger, dict):
-            lb = LoggingBoilerplate(__name__,
-                                    __file__,
-                                    os.getcwd(),
-                                    logger)
-            self.logger = lb.get_logger()
-        else:
-            # Sanity check on `logger`
-            assert isinstance(logger, LoggingWrapper), \
-                "`logger` must be of type `LoggingWrapper`"
-            self.logger = logger
+        self.logger = get_logger(__name__,
+                                 __file__,
+                                 os.getcwd(),
+                                 logger)
 
     def _crawl_artist_page(self, artist_filename, artist_url):
         self.logger.debug(

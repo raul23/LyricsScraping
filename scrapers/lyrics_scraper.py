@@ -8,9 +8,7 @@ import urllib
 import ipdb
 # Own modules
 import scrapers.exc as music_exc
-from utilities.genutils import connect_db
-from utilities.logging_boilerplate import LoggingBoilerplate
-from utilities.logging_wrapper import LoggingWrapper
+from utilities.genutils import connect_db, get_logger
 from utilities.save_webpages import SaveWebpages
 
 
@@ -18,17 +16,10 @@ from utilities.save_webpages import SaveWebpages
 class LyricsScraper:
     def __init__(self, main_cfg, logger=None):
         self.main_cfg = main_cfg
-        if isinstance(logger, dict):
-            lb = LoggingBoilerplate(__name__,
-                                    __file__,
-                                    os.getcwd(),
-                                    logger)
-            self.logger_p = lb.get_logger()
-        else:
-            # Sanity check on `logger`
-            assert isinstance(logger, LoggingWrapper), \
-                "`logger` must be of type `LoggingWrapper`"
-            self.logger_p = logger
+        self.logger_p = get_logger(__name__,
+                                   __file__,
+                                   os.getcwd(),
+                                   logger)
         self.music_db_filepath = \
             os.path.expanduser(main_cfg['music_db_filepath'])
         self.cache_webpages = os.path.expanduser(main_cfg['cache_webpages'])

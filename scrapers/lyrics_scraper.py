@@ -31,7 +31,25 @@ class LyricsScraper:
 
     Attributes
     ----------
+    main_cfg : dict
+        Description
+    logger_p : LoggingWrapper
+        Description
+    music_db_filepath : str
+        Description
+    cache_webpages : str
+        Description
+    lyrics_urls : list of str
+        Description
+    music_conn :
+        Description
+    saver : SaveWebpages
+        Description
 
+    Methods
+    -------
+    start_scraping()
+        Description
 
     """
 
@@ -54,9 +72,6 @@ class LyricsScraper:
 
         Returns
         -------
-
-        Attributes
-        ----------
 
         """
         # Connect to the music database

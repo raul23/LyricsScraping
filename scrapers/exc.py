@@ -1,3 +1,10 @@
+"""Module summary
+
+Extended module summary
+
+"""
+
+
 class InvalidURLCategoryError(Exception):
     """The URL is not recognized as belonging to neither of the valid
     categories"""

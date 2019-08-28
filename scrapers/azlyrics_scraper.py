@@ -1,3 +1,9 @@
+"""Module summary
+
+Extended module summary
+
+"""
+
 import os
 import re
 from urllib.request import urlopen
@@ -5,7 +11,7 @@ from urllib.parse import urlparse
 # Third-party modules
 import ipdb
 from bs4 import BeautifulSoup
-# Own modules
+# Custom modules
 import scrapers.exc as music_exc
 from scrapers.lyrics_scraper import LyricsScraper
 import utilities.exc as utils_exc
@@ -14,7 +20,27 @@ from utilities.genutils import add_plural, create_directory, get_logger
 
 # Scrapes and saves webpages locally
 class AZLyricsScraper(LyricsScraper):
+    """Derived class for scraping and saving webpages locally
+
+    Parameters
+    ----------
+    main_cfg : dict
+        Description
+    logger : dict or LoggingWrapper
+        If `logger` is a ``dict``, then a new logger will be setup for each
+        module. If `logger` is a ``LoggingWrapper``, then the same logger will
+        be reused throughout the modules.
+
+    Attributes
+    ----------
+    logger : LoggingWrapper
+        Used to log on the console and on file
+
+    """
+
     VALID_DOMAIN = "www.azlyrics.com"
+    """Only URLs from this domain will be processed (str)
+    """
 
     def __init__(self, main_cfg, logger):
         super().__init__(main_cfg, logger)
@@ -24,6 +50,19 @@ class AZLyricsScraper(LyricsScraper):
                                  logger)
 
     def _crawl_artist_page(self, artist_filename, artist_url):
+        """
+
+        Parameters
+        ----------
+        artist_filename : str
+            Description
+        artist_url : str
+            Description
+
+        Returns
+        -------
+
+        """
         self.logger.debug(
             "Crawling the artist webpage {}".format(artist_url))
         # Load the webpage or save the webpage and retrieve its html
@@ -65,6 +104,19 @@ class AZLyricsScraper(LyricsScraper):
             self._crawl_lyrics_page(lyrics_filename, lyrics_url)
 
     def _crawl_lyrics_page(self, lyrics_filename, lyrics_url):
+        """
+
+        Parameters
+        ----------
+        lyrics_filename : str
+            Description
+        lyrics_url : str
+            Description
+
+        Returns
+        -------
+
+        """
         try:
             # Check first if the URL was already processed, i.e. is found in
             # the db
@@ -147,6 +199,17 @@ class AZLyricsScraper(LyricsScraper):
                 "Skipping the lyrics URL {}".format(lyrics_url))
 
     def _process_url(self, url):
+        """
+
+        Parameters
+        ----------
+        url : str
+            Description
+
+        Returns
+        -------
+
+        """
         self.logger.info("Processing the URL {}".format(url))
         # Check first if the URL was already processed, i.e. is found in the db
         self._check_url_in_db(url)

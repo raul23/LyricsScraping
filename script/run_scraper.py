@@ -1,10 +1,16 @@
+"""Script summary
+
+Extended summary
+
+"""
+
 import argparse
 import os
 import sqlite3
 import sys
 # Third-party modules
 import ipdb
-# Own modules
+# Custom modules
 from scrapers.azlyrics_scraper import AZLyricsScraper
 import utilities.exc as exc
 from utilities.genutils import read_yaml_config

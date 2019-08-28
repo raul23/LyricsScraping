@@ -1,8 +1,9 @@
 """Module summary
 
-Module extended summary
+Extended module summary
 
 """
+
 import os
 import sqlite3
 # NOTES:
@@ -26,8 +27,9 @@ class LyricsScraper:
     main_cfg : dict
         Description
     logger : dict or LoggingWrapper
-        If `logger` is a ``dict``, then a new logger will be setup. If `logger`
-        is a ``LoggingWrapper``, then the same logger will be reused.
+        If `logger` is a ``dict``, then a new logger will be setup for each
+        module. If `logger` is a ``LoggingWrapper``, then the same logger will
+        be reused throughout the modules.
 
     Attributes
     ----------
@@ -53,7 +55,7 @@ class LyricsScraper:
 
     """
 
-    def __init__(self, main_cfg, logger=None):
+    def __init__(self, main_cfg, logger):
         self.main_cfg = main_cfg
         self.logger_p = get_logger(__name__,
                                    __file__,

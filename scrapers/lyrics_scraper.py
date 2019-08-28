@@ -15,7 +15,8 @@ import urllib
 import ipdb
 # Custom modules
 import scrapers.scraper_exceptions as scraper_exc
-from utilities.databases.dbutils import connect_db
+from utilities.databases.dbutils import connect_db, sql_sanity_check
+import utilities.exceptions.sql as sql_exc
 from utilities.logging.logutils import get_logger
 from utilities.save_webpages import SaveWebpages
 
@@ -44,10 +45,10 @@ class LyricsScraper:
         Absolute path to cache directory where webpages will be saved
     lyrics_urls : list of str
         List of URLs to lyrics webpages from azlyrics.com
-    music_conn :
-        Description
+    music_conn : sqlite3.Connection
+        SQLite database connection
     saver : SaveWebpages
-        Description
+        For retrieving and saving webpage in cache
 
     Methods
     -------
@@ -71,10 +72,15 @@ class LyricsScraper:
                                   logger=logger)
 
     def start_scraping(self):
-        """
+        """Starts the web scraping of lyrics webpages
 
-        Returns
-        -------
+        This is the only public function. It is where everything starts: db
+        connection, processing of each lyrics URL, and catching of all
+        exceptions that prevent a given URL of being processed further.
+
+        However, all the important tasks (db connection, URL processing) are
+        actually delegated to separate methods (_db_connection(),
+        _process_url()).
 
         """
         # Connect to the music database
@@ -89,7 +95,8 @@ class LyricsScraper:
                     "The URL {} seems to be down!".format(url))
                 self.logger_p.info("Skipping the URL {}".format(url))
             except (scraper_exc.InvalidURLDomainError,
-                    scraper_exc.InvalidURLCategoryError) as e:
+                    scraper_exc.InvalidURLCategoryError,
+                    sql_exc.SQLSanityCheckError) as e:
                 self.logger_p.error(e)
                 self.logger_p.info("Skipping the URL {}".format(url))
             except (scraper_exc.MultipleLyricsURLError,
@@ -214,17 +221,21 @@ class LyricsScraper:
             return cur.fetchall()
         else:
             # Insert query
-            self.sanity_check_sql(sql, values)
             try:
+                sql_sanity_check(sql, values)
                 cur.execute(sql, values)
             except sqlite3.IntegrityError as e:
                 self.logger_p.debug(e)
                 return None
+            except (TypeError, AssertionError) as e:
+                self.logger_p.error(e)
+                raise sql_exc.SQLSanityCheckError(e)
             else:
                 if not self.main_cfg['autocommit']:
                     self.music_conn.commit()
                 self.logger_p.debug(
-                    "Query execution successful! lastrowid={}".format(cur.lastrowid))
+                    "Query execution successful! lastrowid={}".format(
+                        cur.lastrowid))
                 return cur.lastrowid
 
     def _insert_album(self, album):
@@ -288,19 +299,3 @@ class LyricsScraper:
         sql = "SELECT * FROM songs WHERE lyrics_url='{}'".format(
             lyrics_url)
         return self._execute_sql(sql)
-
-    @staticmethod
-    def sanity_check_sql(sql, val):
-        """
-
-        Parameters
-        ----------
-        sql
-        val
-
-        """
-        assert type(val) is tuple, \
-            "The values for the SQL expression are not of `tuple` type"
-        assert len(val) == sql.count('?'), \
-            "Wrong number of values ({}) in the SQL expression '{}'".format(
-                len(val), sql)

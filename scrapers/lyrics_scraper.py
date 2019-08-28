@@ -14,8 +14,9 @@ import urllib
 # Third-party modules
 import ipdb
 # Custom modules
-import scrapers.exc as music_exc
-from utilities.genutils import connect_db, get_logger
+import scrapers.scraper_exceptions as scraper_exc
+from utilities.databases.dbutils import connect_db
+from utilities.logging.logutils import get_logger
 from utilities.save_webpages import SaveWebpages
 
 
@@ -34,15 +35,15 @@ class LyricsScraper:
     Attributes
     ----------
     main_cfg : dict
-        Description
+        Logging configuration ``dict``
     logger_p : LoggingWrapper
         Description
     music_db_filepath : str
-        Description
-    cache_webpages : str
-        Description
+        Absolute path to music SQLite db
+    cache_filepath : str
+        Absolute path to cache directory where webpages will be saved
     lyrics_urls : list of str
-        Description
+        List of URLs to lyrics webpages from azlyrics.com
     music_conn :
         Description
     saver : SaveWebpages
@@ -63,7 +64,7 @@ class LyricsScraper:
                                    logger)
         self.music_db_filepath = \
             os.path.expanduser(main_cfg['music_db_filepath'])
-        self.cache_webpages = os.path.expanduser(main_cfg['cache_webpages'])
+        self.cache_filepath = os.path.expanduser(main_cfg['cache_filepath'])
         self.lyrics_urls = main_cfg['lyrics_urls']
         self.music_conn = None
         self.saver = SaveWebpages(main_cfg=self.main_cfg,
@@ -87,12 +88,12 @@ class LyricsScraper:
                 self.logger_p.warning(
                     "The URL {} seems to be down!".format(url))
                 self.logger_p.info("Skipping the URL {}".format(url))
-            except (music_exc.InvalidURLDomainError,
-                    music_exc.InvalidURLCategoryError) as e:
+            except (scraper_exc.InvalidURLDomainError,
+                    scraper_exc.InvalidURLCategoryError) as e:
                 self.logger_p.error(e)
                 self.logger_p.info("Skipping the URL {}".format(url))
-            except (music_exc.MultipleLyricsURLError,
-                    music_exc.OverwriteSongError) as e:
+            except (scraper_exc.MultipleLyricsURLError,
+                    scraper_exc.OverwriteSongError) as e:
                 self.logger_p.info(e)
                 self.logger_p.info("Skipping the URL {}".format(url))
 
@@ -101,6 +102,9 @@ class LyricsScraper:
 
         Returns
         -------
+
+        Raises
+        ------
 
         """
         # Connect to the music database
@@ -123,6 +127,9 @@ class LyricsScraper:
         Returns
         -------
 
+        Raises
+        ------
+
         """
         # Check first if the URL was already processed, i.e. is found in the db
         res = self._select_song(url)
@@ -135,14 +142,14 @@ class LyricsScraper:
                     "will be processed and the music db will be updated as a "
                     "consequence")
             else:
-                raise music_exc.OverwriteSongError(
+                raise scraper_exc.OverwriteSongError(
                     "Since the 'overwrite_db' flag is set to False, the URL "
                     "will be ignored")
         elif len(res) == 0:
             self.logger_p.debug(
                 "The lyrics URL {} was not found in the music db".format(url))
         else:
-            raise music_exc.MultipleLyricsURLError(
+            raise scraper_exc.MultipleLyricsURLError(
                 "The lyrics URL {} was found more than once in the music "
                 "db".format(url))
 
@@ -154,8 +161,8 @@ class LyricsScraper:
         artist_filename
         artist_url
 
-        Returns
-        -------
+        Raises
+        ------
 
         """
         raise NotImplementedError
@@ -168,8 +175,8 @@ class LyricsScraper:
         lyrics_filename
         lyrics_url
 
-        Returns
-        -------
+        Raises
+        ------
 
         """
         raise NotImplementedError
@@ -181,37 +188,44 @@ class LyricsScraper:
         ----------
         url
 
-        Returns
-        -------
+        Raises
+        ------
 
         """
         raise NotImplementedError
 
-    def _execute_sql(self, cur, sql, values):
+    def _execute_sql(self, sql, values=None):
         """
 
         Parameters
         ----------
         cur
         sql
-        values
+        values : tuple, optional
 
         Returns
         -------
 
         """
-        self.sanity_check_sql(sql, values)
-        try:
-            cur.execute(sql, values)
-        except sqlite3.IntegrityError as e:
-            self.logger_p.debug(e)
-            return None
+        cur = self.music_conn.cursor()
+        if values is None:
+            # Select query
+            cur.execute(sql)
+            return cur.fetchall()
         else:
-            if not self.main_cfg['autocommit']:
-                self.music_conn.commit()
-            self.logger_p.debug(
-                "Query execution successful! lastrowid={}".format(cur.lastrowid))
-            return cur.lastrowid
+            # Insert query
+            self.sanity_check_sql(sql, values)
+            try:
+                cur.execute(sql, values)
+            except sqlite3.IntegrityError as e:
+                self.logger_p.debug(e)
+                return None
+            else:
+                if not self.main_cfg['autocommit']:
+                    self.music_conn.commit()
+                self.logger_p.debug(
+                    "Query execution successful! lastrowid={}".format(cur.lastrowid))
+                return cur.lastrowid
 
     def _insert_album(self, album):
         """
@@ -220,17 +234,13 @@ class LyricsScraper:
         ----------
         album
 
-        Returns
-        -------
-
         """
         self.logger_p.debug(
             "Inserting the album: album_title={}, artist_name={}, "
             "year={}".format(album[0], album[1], album[2]))
         sql = "INSERT INTO albums (album_title, artist_name, year) " \
               "VALUES (?, ?, ?)"
-        cur = self.music_conn.cursor()
-        self._execute_sql(cur, sql, album)
+        self._execute_sql(sql, album)
 
     def _insert_artist(self, artist_name):
         """
@@ -239,14 +249,10 @@ class LyricsScraper:
         ----------
         artist_name
 
-        Returns
-        -------
-
         """
         self.logger_p.debug("Inserting the artist: {}".format(artist_name[0]))
         sql = '''INSERT INTO artists (artist_name) VALUES (?)'''
-        cur = self.music_conn.cursor()
-        self._execute_sql(cur, sql, artist_name)
+        self._execute_sql(sql, artist_name)
 
     def _insert_song(self, song):
         """
@@ -264,8 +270,7 @@ class LyricsScraper:
             "album_title={}".format(song[0], song[1], song[4]))
         sql = "INSERT INTO songs (song_title, artist_name, lyrics, " \
               "lyrics_url, album_title, year) VALUES (?, ?, ?, ?, ?, ?)"
-        cur = self.music_conn.cursor()
-        self._execute_sql(cur, sql, song)
+        self._execute_sql(sql, song)
 
     def _select_song(self, lyrics_url):
         """
@@ -282,9 +287,7 @@ class LyricsScraper:
             "Selecting the song where lyrics_url={}".format(lyrics_url))
         sql = "SELECT * FROM songs WHERE lyrics_url='{}'".format(
             lyrics_url)
-        cur = self.music_conn.cursor()
-        cur.execute(sql)
-        return cur.fetchall()
+        return self._execute_sql(sql)
 
     @staticmethod
     def sanity_check_sql(sql, val):
@@ -294,9 +297,6 @@ class LyricsScraper:
         ----------
         sql
         val
-
-        Returns
-        -------
 
         """
         assert type(val) is tuple, \

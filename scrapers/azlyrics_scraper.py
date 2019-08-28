@@ -9,13 +9,14 @@ import re
 from urllib.request import urlopen
 from urllib.parse import urlparse
 # Third-party modules
-import ipdb
 from bs4 import BeautifulSoup
 # Custom modules
-import scrapers.exc as music_exc
+import scrapers.scraper_exceptions as music_exc
 from scrapers.lyrics_scraper import LyricsScraper
-import utilities.exc as utils_exc
-from utilities.genutils import add_plural, create_directory, get_logger
+import utilities.exceptions.files as files_exc
+import utilities.exceptions.connection as connec_exc
+from utilities.genutils import add_plural, create_directory
+from utilities.logging.logutils import get_logger
 
 
 # Scrapes and saves webpages locally
@@ -70,7 +71,7 @@ class AZLyricsScraper(LyricsScraper):
         try:
             html, webpage_accessed = \
                 self.saver.save_webpage(artist_filename, artist_url, False)
-        except utils_exc.WebPageNotFoundError as e:
+        except connec_exc.WebPageNotFoundError as e:
             self.logger.exception(e)
         bs_obj = BeautifulSoup(html, 'lxml')
         # Get the name of the artist
@@ -128,9 +129,9 @@ class AZLyricsScraper(LyricsScraper):
             try:
                 html, webpage_accessed = \
                     self.saver.save_webpage(lyrics_filename, lyrics_url, False)
-            except utils_exc.WebPageNotFoundError as e:
+            except connec_exc.WebPageNotFoundError as e:
                 self.logger.exception(e)
-                raise utils_exc.WebPageNotFoundError(e)
+                raise connec_exc.WebPageNotFoundError(e)
             bs_obj = BeautifulSoup(html, 'lxml')
             # Get the following data from the lyrics webpage:
             # - the title of the song
@@ -184,7 +185,7 @@ class AZLyricsScraper(LyricsScraper):
                                        lyrics_url, album_title, song_year))
                     # Insert the relevant album's data into the db
                     self._insert_album((album_title, artist_name, song_year))
-        except (utils_exc.WebPageNotFoundError,
+        except (connec_exc.WebPageNotFoundError,
                 music_exc.MultipleAlbumError,
                 music_exc.NonUniqueLyricsError,
                 music_exc.NonUniqueAlbumYearError,
@@ -215,7 +216,7 @@ class AZLyricsScraper(LyricsScraper):
         self._check_url_in_db(url)
         domain = urlparse(url).netloc
         # Create the name of the folder where the webpage will be saved
-        dir_path = os.path.join(self.cache_webpages, domain)
+        dir_path = os.path.join(self.cache_filepath, domain)
         webpage_filename = os.path.join(dir_path, os.path.basename(url))
 
         # Check if the webpage associated with the URL is already cached

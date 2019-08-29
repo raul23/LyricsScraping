@@ -22,7 +22,7 @@ from utilities.save_webpages import SaveWebpages
 
 
 class LyricsScraper:
-    """Base class for scraping and saving webpages locally
+    """Base class for scraping and saving webpages locally.
 
     Parameters
     ----------
@@ -36,19 +36,19 @@ class LyricsScraper:
     Attributes
     ----------
     main_cfg : dict
-        Logging configuration ``dict``
+        Logging configuration ``dict``.
     logger_p : LoggingWrapper
         Description
     music_db_filepath : str
-        Absolute path to music SQLite db
+        Absolute path to music SQLite db.
     cache_filepath : str
-        Absolute path to cache directory where webpages will be saved
+        Absolute path to cache directory where webpages will be saved.
     lyrics_urls : list of str
         List of URLs to lyrics webpages from azlyrics.com
     music_conn : sqlite3.Connection
-        SQLite database connection
+        SQLite database connection.
     saver : SaveWebpages
-        For retrieving and saving webpage in cache
+        For retrieving and saving webpage in cache.
 
     Methods
     -------
@@ -72,15 +72,20 @@ class LyricsScraper:
                                   logger=logger)
 
     def start_scraping(self):
-        """Starts the web scraping of lyrics webpages
+        """Starts the web scraping of lyrics webpages.
 
-        This is the only public function. It is where everything starts: db
+        This is the only public method. It is where everything starts: db
         connection, processing of each lyrics URL, and catching of all
         exceptions that prevent a given URL of being processed further.
 
         However, all the important tasks (db connection, URL processing) are
         actually delegated to separate methods (_db_connection(),
         _process_url()).
+
+        Notes
+        ----
+        Any exceptions that are not caught here are redirected to the main
+        script calling this method. See for example .../script/run_scraper.py
 
         """
         # Connect to the music database
@@ -105,13 +110,13 @@ class LyricsScraper:
                 self.logger_p.info("Skipping the URL {}".format(url))
 
     def _connect_db(self):
-        """
-
-        Returns
-        -------
+        """Connects to the SQLite music database.
 
         Raises
         ------
+        sqlite3.Error
+             Raised if any SQLite-related error occurs, such as IntegrityError
+             or OperationalError.
 
         """
         # Connect to the music database
@@ -125,20 +130,28 @@ class LyricsScraper:
             self.logger_p.debug("Db connection established!")
 
     def _check_url_in_db(self, url):
-        """
+        """Check if a lyrics URL is already present in the database.
+
+        The first thing to do when processing a given artist or lyrics URL is
+        to check if it has not already been processed previously, i.e. verify
+        if the lyrics URL is already in the db. Hence, we speed up the
+        program execution.
 
         Parameters
         ----------
-        url
-
-        Returns
-        -------
+        url : str
+            Lyrics URL to be checked if it is already in the db.
 
         Raises
         ------
+        MultipleLyricsURLError
+            Raised if a lyrics URL was found more than once in the music db.
+
+        OverwriteSongError
+            Raised if a song was already found in the db and the db can't be
+            updated because the ``overwrite_db`` flag is disabled.
 
         """
-        # Check first if the URL was already processed, i.e. is found in the db
         res = self._select_song(url)
         if len(res) == 1:
             self.logger_p.debug(
@@ -170,6 +183,8 @@ class LyricsScraper:
 
         Raises
         ------
+        NotImplementedError
+            Raised if the derived class didn't implement this method.
 
         """
         raise NotImplementedError
@@ -184,6 +199,8 @@ class LyricsScraper:
 
         Raises
         ------
+        NotImplementedError
+            Raised if the derived class didn't implement this method.
 
         """
         raise NotImplementedError
@@ -197,6 +214,8 @@ class LyricsScraper:
 
         Raises
         ------
+        NotImplementedError
+            Raised if the derived class didn't implement this method.
 
         """
         raise NotImplementedError
@@ -239,11 +258,11 @@ class LyricsScraper:
                 return cur.lastrowid
 
     def _insert_album(self, album):
-        """
+        """Insert an info about an album in the database.
 
         Parameters
         ----------
-        album
+        album :
 
         """
         self.logger_p.debug(

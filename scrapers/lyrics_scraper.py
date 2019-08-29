@@ -173,8 +173,8 @@ class LyricsScraper:
                 "The lyrics URL {} was found more than once in the music "
                 "db".format(url))
 
-    def _crawl_artist_page(self, artist_filename, artist_url):
-        """
+    def _scrape_artist_page(self, artist_filename, artist_url):
+        """Scrape the artist webpage from azlyrics.com
 
         Parameters
         ----------
@@ -189,7 +189,7 @@ class LyricsScraper:
         """
         raise NotImplementedError
 
-    def _crawl_lyrics_page(self, lyrics_filename, lyrics_url):
+    def _scrape_lyrics_page(self, lyrics_filename, lyrics_url):
         """
 
         Parameters
@@ -262,7 +262,8 @@ class LyricsScraper:
 
         Parameters
         ----------
-        album :
+        album : tuple
+            Description
 
         """
         self.logger_p.debug(

@@ -50,7 +50,7 @@ class AZLyricsScraper(LyricsScraper):
                                  os.getcwd(),
                                  logger)
 
-    def _crawl_artist_page(self, artist_filename, artist_url):
+    def _scrape_artist_page(self, artist_filename, artist_url):
         """
 
         Parameters
@@ -65,7 +65,7 @@ class AZLyricsScraper(LyricsScraper):
 
         """
         self.logger.debug(
-            "Crawling the artist webpage {}".format(artist_url))
+            "Scraping the artist webpage {}".format(artist_url))
         # Load the webpage or save the webpage and retrieve its html
         html = None
         try:
@@ -102,9 +102,9 @@ class AZLyricsScraper(LyricsScraper):
             # Build the filename where the lyrics webpage will be saved
             lyrics_filename = os.path.join(os.path.dirname(artist_filename),
                                            os.path.basename(lyrics_url))
-            self._crawl_lyrics_page(lyrics_filename, lyrics_url)
+            self._scrape_lyrics_page(lyrics_filename, lyrics_url)
 
-    def _crawl_lyrics_page(self, lyrics_filename, lyrics_url):
+    def _scrape_lyrics_page(self, lyrics_filename, lyrics_url):
         """
 
         Parameters
@@ -123,7 +123,7 @@ class AZLyricsScraper(LyricsScraper):
             # the db
             self._check_url_in_db(lyrics_url)
             self.logger.debug(
-                "Crawling the lyrics webpage {}".format(lyrics_url))
+                "Scraping the lyrics webpage {}".format(lyrics_url))
             # Load the webpage or save the webpage and retrieve its html
             html = None
             try:
@@ -280,11 +280,11 @@ class AZLyricsScraper(LyricsScraper):
                 self.logger.warning(e)
 
         # Check if the azlyrics URL belongs to a lyrics or artist
-        # and start the crawling of the actual webpage with BeautifulSoup
+        # and start the scraping of the actual webpage with BeautifulSoup
         if urlparse(url).path.startswith('/lyrics/'):
             self.logger.debug(
                 "The URL {} refers to a lyrics' webpage".format(url))
-            self._crawl_lyrics_page(webpage_filename, url)
+            self._scrape_lyrics_page(webpage_filename, url)
         elif urlparse(url).path.startswith('/19/') or \
                 urlparse(url).path[1].isalpha():
             # NOTE: webpages of artists' names that start with a number are
@@ -292,7 +292,7 @@ class AZLyricsScraper(LyricsScraper):
             # e.g. https://www.azlyrics.com/19/50cent.html
             self.logger.debug(
                 "The URL {} refers to an artist's webpage".format(url))
-            self._crawl_artist_page(webpage_filename, url)
+            self._scrape_artist_page(webpage_filename, url)
         else:
             raise music_exc.InvalidURLCategoryError(
                 "The URL {} is not recognized as referring to neither "

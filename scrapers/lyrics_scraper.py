@@ -1,6 +1,6 @@
-"""Module summary
+"""Module that defines the base class for scraping lyrics websites.
 
-Extended module summary
+The base class ``LyricsScraper``
 
 """
 
@@ -176,13 +176,25 @@ class LyricsScraper:
     def _scrape_artist_page(self, artist_filename, artist_url):
         """Scrape the artist webpage
 
-        It crawls the webpage and scrapes any useful info to be inserted in the
-        music database, such as
+        It crawls the artist webpage and scrapes any useful info to be inserted
+        in the music database, such as the artist's name.
+
+        The artist webpage is cached so that we reduce the number of HTTP
+        requests to the website.
 
         Parameters
         ----------
-        artist_filename
-        artist_url
+        artist_filename : str
+            Filename of the artist webpage that is being scraped. The filename
+            will be used to save the HTML document in cache.
+        artist_url : str
+            URL to the artist webpage that is being scraped.
+
+        NOTES
+        -----
+        Not all lyrics websites will have an artist webpage, on top of the
+        lyrics webpage. azlyrics.com has an artist webpage, along with a lyrics
+        webpage.
 
         Raises
         ------
@@ -193,12 +205,21 @@ class LyricsScraper:
         raise NotImplementedError
 
     def _scrape_lyrics_page(self, lyrics_filename, lyrics_url):
-        """
+        """Scrape the lyrics webpage
+
+        It crawls the lyrics webpage and scrapes any useful info to be inserted
+        in the music database, such as the song's title and the lyrics text.
+
+        The lyrics webpage is cached so that we reduce the number of HTTP
+        requests to the website.
 
         Parameters
         ----------
-        lyrics_filename
-        lyrics_url
+        lyrics_filename : str
+            Filename of the lyrics webpage that is being scraped. The filename
+            will be used to save the HTML document in cache.
+        lyrics_url : str
+            URL to the lyrics webpage that is being scraped.
 
         Raises
         ------
@@ -209,11 +230,15 @@ class LyricsScraper:
         raise NotImplementedError
 
     def _process_url(self, url):
-        """
+        """Process each URL defined in the YAML config file.
+
+        The URLs can refer to artist or lyrics webpages. This
 
         Parameters
         ----------
-        url
+        url : str
+            URL to be processed, i.e. crawled and scraped for useful info to
+            be inserted in the music db.
 
         Raises
         ------
@@ -224,16 +249,35 @@ class LyricsScraper:
         raise NotImplementedError
 
     def _execute_sql(self, sql, values=None):
-        """
+        """Execute an SQL expression.
+
+        The SQL expression can be a SELECT or INSERT query.
+
+        `values` is needed only in the case of an INSERT query since we are
+        inserting data into the db, unlike a SELECT query which only retrieve
+        data from the db.
 
         Parameters
         ----------
-        cur
-        sql
+        cur :
+            Description
+        sql : str
+            Description
         values : tuple of ?, optional
+            Description
 
         Returns
         -------
+        None
+            Description
+        lastrowid : int
+            Description
+
+        Raises
+        ------
+        SQLSanityCheckError
+            Raised if the sanity check on the SQL query failed.
+            This is a custom exception.
 
         """
         cur = self.music_conn.cursor()
@@ -261,7 +305,10 @@ class LyricsScraper:
                 return cur.lastrowid
 
     def _insert_album(self, album):
-        """Insert an info about an album in the database.
+        """Insert data about an album in the database.
+
+        Data about an album can be the album' title and the year the album was
+        published.
 
         Parameters
         ----------
@@ -277,7 +324,7 @@ class LyricsScraper:
         self._execute_sql(sql, album)
 
     def _insert_artist(self, artist_name):
-        """
+        """Insert data about an artist in the database.
 
         Parameters
         ----------
@@ -290,7 +337,7 @@ class LyricsScraper:
         self._execute_sql(sql, artist_name)
 
     def _insert_song(self, song):
-        """
+        """Insert data about a song in the database.
 
         Parameters
         ----------
@@ -306,12 +353,15 @@ class LyricsScraper:
         self._execute_sql(sql, song)
 
     def _select_song(self, lyrics_url):
-        """
+        """Select a song from the database based on a lyrics URL.
+
+        The lyrics URL is used as the WHERE condition to be used for retrieving
+        the associated song from the database.
 
         Parameters
         ----------
         lyrics_url : str
-            Description
+            Lyrics URL to be used as the WHERE condition in the SELECT query.
 
         Returns
         -------

@@ -1,6 +1,16 @@
-"""Module summary
+"""Module that defines the derived class for scraping artist and lyrics
+webpages from www.azlyrics.com
 
-Extended module summary
+``AZLyricsScraper`` is derived from the base class ``LyricsScraper``. This
+class crawls and scrapes artist and lyrics webpages from www.azlyrics.com
+for useful data to be added in the music database, such as the artist's name,
+the album's title, and the lyrics text.
+
+In order to reduce the number of HTTP requests to the lyrics website, the
+webpages are saved in cache.
+
+See the structure of the music database as defined in the `music.sql schema
+<https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
 """
 
@@ -10,6 +20,7 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 # Third-party modules
 from bs4 import BeautifulSoup
+import ipdb
 # Custom modules
 import scrapers.scraper_exceptions as music_exc
 from scrapers.lyrics_scraper import LyricsScraper
@@ -49,27 +60,47 @@ class AZLyricsScraper(LyricsScraper):
                                  os.getcwd(),
                                  logger)
 
-    def _scrape_artist_page(self, artist_filename, artist_url):
-        """
+    def _scrape_artist_page(self, artist_filepath, artist_url):
+        """Scrape the artist webpage.
+
+        It crawls the artist webpage and scrapes any useful info to be added
+        in the music database, such as the artist's name.
+
+        The artist webpage is cached so that we reduce the number of HTTP
+        requests to the lyrics website.
 
         Parameters
         ----------
-        artist_filename : str
-            Description
+        artist_filepath : str
+            The file path of the artist webpage that is being scraped. The file
+            path will be used to save the HTML document in cache.
         artist_url : str
-            Description
+            URL to the artist webpage that is being scraped.
 
-        Returns
-        -------
+        Raises
+        ------
+        NotImplementedError
+            Raised if the derived class didn't implement this method.
+
+        See Also
+        --------
+        azlyrics_scraper._scrape_lyrics_page : Scrape a lyrics webpage instead.
+
+        Notes
+        -----
+        Not all lyrics websites will have an artist webpage, on top of the
+        lyrics webpage. azlyrics.com has an artist webpage, along with a lyrics
+        webpage.
 
         """
+        ipdb.set_trace()
         self.logger.debug(
             "Scraping the artist webpage {}".format(artist_url))
         # Load the webpage or save the webpage and retrieve its html
         html = None
         try:
             html, webpage_accessed = \
-                self.saver.save_webpage(artist_filename, artist_url, False)
+                self.saver.save_webpage(artist_filepath, artist_url, False)
         except connec_exc.WebPageNotFoundError as e:
             self.logger.exception(e)
         bs_obj = BeautifulSoup(html, 'lxml')
@@ -99,22 +130,46 @@ class AZLyricsScraper(LyricsScraper):
                                                 parsed_url.hostname,
                                                 lyrics_url[2:])
             # Build the filename where the lyrics webpage will be saved
-            lyrics_filename = os.path.join(os.path.dirname(artist_filename),
+            lyrics_filename = os.path.join(os.path.dirname(artist_filepath),
                                            os.path.basename(lyrics_url))
             self._scrape_lyrics_page(lyrics_filename, lyrics_url)
 
     def _scrape_lyrics_page(self, lyrics_filename, lyrics_url):
-        """
+        """Scrape the lyrics webpage.
+
+        It crawls the lyrics webpage and scrapes any useful info to be added
+        in the music database, such as the song's title and the lyrics text.
+
+        The lyrics webpage is cached so that we reduce the number of HTTP
+        requests to the lyrics website.
 
         Parameters
         ----------
         lyrics_filename : str
-            Description
+            Filename of the lyrics webpage that is being scraped. The filename
+            will be used to save the HTML document in cache.
         lyrics_url : str
-            Description
+            URL to the lyrics webpage that is being scraped.
 
-        Returns
-        -------
+        Raises
+        ------
+        NonUniqueAlbumYearError
+            Raised if
+            Custom exception.
+        NonUniqueLyricsError
+            Raised if
+            Custom exception.
+        WebPageNotFoundError
+            Raised if
+            Custom exception.
+        WrongAlbumYearError
+            Raised if
+            Custom exception.
+
+        See Also
+        --------
+        azlyrics_scraper._scrape_artist_page : Scrape an artist webpage
+                                               instead.
 
         """
         try:
@@ -199,15 +254,33 @@ class AZLyricsScraper(LyricsScraper):
                 "Skipping the lyrics URL {}".format(lyrics_url))
 
     def _process_url(self, url):
-        """
+        """Process each URL defined in the YAML config file.
+
+        The URLs can refer to an artist or lyrics webpage. In order to reduce
+        the number of HTTP requests to the lyrics website, the URL is first
+        checked if it is already in the database.
 
         Parameters
         ----------
         url : str
-            Description
+            URL to be processed, i.e. crawled and scraped for useful info to
+            be added in the music database.
 
-        Returns
-        -------
+        Raises
+        ------
+        InvalidURLCategoryError
+            Raised if the URL is not recognized as referring to neither an
+            artist's nor a song's webpage.
+            Custom exception.
+        InvalidURLDomainError
+            Raised if the URL is not from the domain wwww.azlyrics.com
+            Custom exception.
+
+        Notes
+        -----
+        The method saves the webpage HTML in cache and according to the type of
+        the URL (artist or lyrics webpage), it calls the relevant method (
+        _scrape_artist_page or _scrape_lyrics_page).
 
         """
         self.logger.info("Processing the URL {}".format(url))
@@ -233,10 +306,7 @@ class AZLyricsScraper(LyricsScraper):
             # Check if the URL is available
             # NOTE: it can also be done with `requests` which is not
             # installed by default on Python.
-            # References:
-            # -
-            # -
-            # -
+            # TODO: add the three references
             self.logger.debug(
                 "Checking if the URL {} is available".format(url))
             code = urlopen(url).getcode()
@@ -295,4 +365,4 @@ class AZLyricsScraper(LyricsScraper):
         else:
             raise music_exc.InvalidURLCategoryError(
                 "The URL {} is not recognized as referring to neither "
-                "an artist's nor a song's webpage ".format(url))
+                "an artist's nor a song's webpage".format(url))

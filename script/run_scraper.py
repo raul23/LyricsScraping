@@ -1,6 +1,6 @@
 """Script summary
 
-Extended summary
+Extended script summary
 
 """
 
@@ -52,7 +52,7 @@ if __name__ == '__main__':
                   os.path.expanduser(main_cfg['music_db_filepath']),
                   os.path.expanduser(main_cfg['music_schema_filepath']),
                   sb.logging_cfg_dict)
-        # Start the scraping of job posts
+        # Start the scraping of lyrics webpages
         logger.info("Starting the web scraping")
         AZLyricsScraper(main_cfg=main_cfg,
                         logger=sb.logging_cfg_dict).start_scraping()

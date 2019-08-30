@@ -4,11 +4,11 @@ More specifically, the derived classes (e.g. ``AZLyricsScraper``) are the ones
 that do the actual scraping of the lyrics webpages.
 
 The base class ``LyricsScraper`` is responsible of connecting to the music
-database and thus accessing the database for data retrieval (SELECT) or
+database and thus accessing the database for data retrieval (SELECT) and
 updating (INSERT).
 
-See the structure of the music database as defined in the `music.sql schema
-<https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+See the structure of the music database as defined in the
+`music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
 """
 
@@ -35,7 +35,10 @@ class LyricsScraper:
     Parameters
     ----------
     main_cfg : dict
-        Description
+        Main configuration dictionary that defines among other important
+        options, the list of URLs to be processed and the path to the cache
+        directory. See the content of the config dict as defined in
+        `main_cfg.yaml <https://github.com/raul23/lyrics-scraper/blob/master/script/main_cfg.yaml/>`_.
     logger : dict or LoggingWrapper
         If `logger` is a ``dict``, then a new logger will be setup for each
         module. If `logger` is a ``LoggingWrapper``, then the same logger will
@@ -46,13 +49,13 @@ class LyricsScraper:
     main_cfg : dict
         Logging configuration ``dict``.
     logger_p : LoggingWrapper
-        Description
+        Logger for logging to console and file, at the same time.
     music_db_filepath : str
-        Absolute path to music SQLite db.
+        File path to the SQLite music database.
     cache_filepath : str
-        Absolute path to cache directory where webpages will be saved.
+        File path to the cache directory where webpages are saved.
     lyrics_urls : list of str
-        List of URLs to lyrics webpages
+        List of URLs to lyrics webpages.
     music_conn : sqlite3.Connection
         SQLite database connection.
     saver : SaveWebpages
@@ -61,7 +64,14 @@ class LyricsScraper:
     Methods
     -------
     start_scraping()
-        Description
+        Start the web scraping of the lyrics website.
+
+    Notes
+    -----
+    `logger_p` is a logger that is associated with the base class
+    ``LyricsScraper``. The derive classes, such as ``AzlyricsScraper``, have
+    their own logger. Hence, we can differentiate whose logs belong to what
+    class, when reading the log file.
 
     """
 
@@ -80,7 +90,7 @@ class LyricsScraper:
                                   logger=logger)
 
     def start_scraping(self):
-        """Start the web scraping of lyrics webpages.
+        """Start the web scraping of the lyrics website.
 
         This is the only public method. It is where everything starts: db
         connection, processing of each lyrics URL, and catching of all
@@ -120,6 +130,12 @@ class LyricsScraper:
     def _connect_db(self):
         """Connect to the SQLite music database.
 
+        The SQLite music database is used for saving any relevant data from the
+        scraped webpages.
+
+        See the structure of the music database as defined in the
+        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+
         Raises
         ------
         sqlite3.Error
@@ -154,7 +170,7 @@ class LyricsScraper:
         ------
         MultipleLyricsURLError
             Raised if a lyrics URL was found more than once in the music db.
-
+            This is a custom exception
         OverwriteSongError
             Raised if a song was already found in the db and the db can't be
             updated because the ``overwrite_tables`` flag is disabled.
@@ -208,6 +224,12 @@ class LyricsScraper:
         azlyrics_scraper._scrape_artist_page : an example of an implemented
                                                method.
 
+        Notes
+        -----
+        Not all lyrics websites will have an artist webpage, on top of the
+        lyrics webpage. `www.azlyrics.com <https://www.azlyrics.com/>`_ has an
+        artist webpage, along with a lyrics webpage.
+
         """
         raise NotImplementedError
 
@@ -220,11 +242,13 @@ class LyricsScraper:
         This method needs to be implemented by the derived class. If it's not,
         then an ``NotImplementedError`` exception is raised.
 
-
         Parameters
         ----------
-        lyrics_filename
-        lyrics_url
+        lyrics_filename : str
+            Filename of the lyrics webpage that is being scraped. The filename
+            will be used to save the HTML document in cache.
+        lyrics_url : str
+            URL to the lyrics webpage that is being scraped.
 
         Raises
         ------
@@ -251,7 +275,7 @@ class LyricsScraper:
         Parameters
         ----------
         url : str
-            Description
+            URL to the artist's or lyrics webpage that will be scraped.
 
         Raises
         ------
@@ -274,42 +298,69 @@ class LyricsScraper:
         inserting data into the db, unlike a SELECT query which only retrieve
         data from the db.
 
-        See the structure of the music database as defined in the `music.sql
-        schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the structure of the music database as defined in the
+        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
         Parameters
         ----------
         sql : str
             SQL query to be executed.
-        values : tuple of ?, optional
-            (the default is None, which implies that the SQL query is a SELECT
-            expression).
+        values : tuple of str, optional
+            The values to be inserted in the database (the default is None,
+            which implies that the SQL query is a SELECT expression).
 
         Returns
         -------
+        cur.fetchall() : list of tuple
+            List of tuple from the executed SELECT query, where each tuple
+            represents one row entry [1].
+
+            IMPORTANT: this returned value only happens with SELECT queries.
         None
-            Description
-        cur.fetchall() : list
-            Description
+            Returned if the table couldn't be updated because of an
+            sqlite3.IntegrityError exception.
+
+            IMPORTANT: this returned value only happens with INSERT queries.
+
+            It is not a fatal exception that should stop the program execution
+            since the exception can occur when the data to be inserted is
+            already in the database which is a common case (e.g. if we re-run
+            the program multiple times, we will catch this exception). If this
+            case happens, we only skip the URL and process the next URL in the
+            list.
         lastrowid : int
-            Description
+            The id of the last row in the updated table, after the insertion
+            was successful.
+
+            IMPORTANT: this returned value only happens with INSERT queries.
 
         Raises
         ------
         SQLSanityCheckError
-            Raised if the sanity check on the SQL query failed.
+            Raised if the sanity check on the SQL query failed, e.g. the
+            query's values are not of ``tuple`` type or wrong number of values
+            in the SQL query.
+
             This is a custom exception.
+
+        Notes
+        -----
+        The returned value (i.e. the `lastrowid`) when executing an INSERT
+        query is not used within the respective INSERT methods, e.g.
+        _insert_album().
+
+        References
+        ----------
+        .. [1] `A thorough guide to SQLite database operations in Python <https://sebastianraschka.com/Articles/2014_sqlite_in_python_tutorial.html/>`_.
 
         """
         cur = self.music_conn.cursor()
         if values is None:
             # Select query
-            ipdb.set_trace()
             cur.execute(sql)
             return cur.fetchall()
         else:
             # Insert query
-            ipdb.set_trace()
             try:
                 sql_sanity_check(sql, values)
                 cur.execute(sql, values)
@@ -333,16 +384,17 @@ class LyricsScraper:
         Data about an album can consist in the album' title and the year the
         album was published.
 
-        See the `albums` table as defined in the `music.sql schema
-        <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `albums` table as defined in the
+        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
         Parameters
         ----------
         album : tuple of str
-            Description
+            The tuple contains the relevant data about an album that will be
+            added to the database, such as the album title, the artist name, and
+            the year the album was published.
 
         """
-        ipdb.set_trace()
         self.logger_p.debug(
             "Inserting the album: album_title={}, artist_name={}, "
             "year={}".format(album[0], album[1], album[2]))
@@ -355,8 +407,8 @@ class LyricsScraper:
 
         An artist's name can refer to a group or an individual (solo).
 
-        See the `artists` table as defined in the `music.sql schema
-        <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `artists` table as defined in the
+        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
         Parameters
         ----------
@@ -365,7 +417,6 @@ class LyricsScraper:
             database.
 
         """
-        ipdb.set_trace()
         self.logger_p.debug("Inserting the artist: {}".format(artist_name[0]))
         sql = '''INSERT INTO artists (artist_name) VALUES (?)'''
         self._execute_sql(sql, artist_name)
@@ -376,16 +427,17 @@ class LyricsScraper:
         The data about a song that will be added to the database can consist to
         the song title, artist name, and album title.
 
-        See the `songs` table as defined in the `music.sql schema
-        <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `songs` table as defined in the
+        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
         Parameters
         ----------
         song : tuple of str
-            Description
+            The tuple contains the relevant data about a song that will be
+            added to the database, such as the song title, the artist name, and
+            the lyrics text.
 
         """
-        ipdb.set_trace()
         self.logger_p.debug(
             "Inserting the song: song_title={}, artist_name={}, "
             "album_title={}".format(song[0], song[1], song[4]))
@@ -399,8 +451,8 @@ class LyricsScraper:
         The lyrics URL is used as the WHERE condition to be used for retrieving
         the associated song from the database.
 
-        See the `songs` table as defined in the `music.sql schema
-        <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `songs` table as defined in the
+        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
         Parameters
         ----------
@@ -409,10 +461,9 @@ class LyricsScraper:
 
         Returns
         -------
-        None
-            Description
-        cur.fetchall()
-            Description
+        cur.fetchall() : list of tuple
+            List of tuple from the executed SELECT query, where each tuple
+            represents one row entry [1].
 
         """
         self.logger_p.debug(

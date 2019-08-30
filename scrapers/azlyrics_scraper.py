@@ -9,8 +9,8 @@ the album's title, and the lyrics text.
 In order to reduce the number of HTTP requests to the lyrics website, the
 webpages are saved in cache.
 
-See the structure of the music database as defined in the `music.sql schema
-<https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+See the structure of the music database as defined in the
+`music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
 """
 
@@ -45,7 +45,7 @@ class AZLyricsScraper(LyricsScraper):
     Attributes
     ----------
     logger : LoggingWrapper
-        Used to log on the console and on file
+        Used to log on the console and in a file.
 
     """
 
@@ -77,23 +77,11 @@ class AZLyricsScraper(LyricsScraper):
         artist_url : str
             URL to the artist webpage that is being scraped.
 
-        Raises
-        ------
-        NotImplementedError
-            Raised if the derived class didn't implement this method.
-
         See Also
         --------
         azlyrics_scraper._scrape_lyrics_page : Scrape a lyrics webpage instead.
 
-        Notes
-        -----
-        Not all lyrics websites will have an artist webpage, on top of the
-        lyrics webpage. azlyrics.com has an artist webpage, along with a lyrics
-        webpage.
-
         """
-        ipdb.set_trace()
         self.logger.debug(
             "Scraping the artist webpage {}".format(artist_url))
         # Load the webpage or save the webpage and retrieve its html
@@ -154,17 +142,21 @@ class AZLyricsScraper(LyricsScraper):
         Raises
         ------
         NonUniqueAlbumYearError
-            Raised if
-            Custom exception.
+            Raised if the album's year extraction doesn't result in a UNIQUE
+            number.
+            This is a custom exception.
         NonUniqueLyricsError
-            Raised if
-            Custom exception.
+            Raised if the lyrics extraction scheme broke: no lyrics found or
+            more than one lyrics were found on the lyrics webpage.
+            This is a custom exception.
         WebPageNotFoundError
-            Raised if
-            Custom exception.
+            Raised if the webpage HTML could not be retrieved for any reasons,
+            e.g. 404 error, or OSError.
+            This is a custom exception.
         WrongAlbumYearError
-            Raised if
-            Custom exception.
+            Raised if the album's year is in the wrong century: only songs
+            published in the 20th and 21th centuries are supported.
+            This is a custom exception.
 
         See Also
         --------
@@ -263,18 +255,17 @@ class AZLyricsScraper(LyricsScraper):
         Parameters
         ----------
         url : str
-            URL to be processed, i.e. crawled and scraped for useful info to
-            be added in the music database.
+            URL to the artist's or lyrics webpage that will be scraped.
 
         Raises
         ------
         InvalidURLCategoryError
             Raised if the URL is not recognized as referring to neither an
             artist's nor a song's webpage.
-            Custom exception.
+            This is a custom exception.
         InvalidURLDomainError
             Raised if the URL is not from the domain wwww.azlyrics.com
-            Custom exception.
+            This is a custom exception.
 
         Notes
         -----

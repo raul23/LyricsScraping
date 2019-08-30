@@ -44,7 +44,7 @@ class LyricsScraper:
     cache_filepath : str
         Absolute path to cache directory where webpages will be saved.
     lyrics_urls : list of str
-        List of URLs to lyrics webpages from azlyrics.com
+        List of URLs to lyrics webpages
     music_conn : sqlite3.Connection
         SQLite database connection.
     saver : SaveWebpages
@@ -72,7 +72,7 @@ class LyricsScraper:
                                   logger=logger)
 
     def start_scraping(self):
-        """Starts the web scraping of lyrics webpages.
+        """Start the web scraping of lyrics webpages.
 
         This is the only public method. It is where everything starts: db
         connection, processing of each lyrics URL, and catching of all
@@ -85,7 +85,7 @@ class LyricsScraper:
         Notes
         ----
         Any exceptions that are not caught here are redirected to the main
-        script calling this method. See for example .../script/run_scraper.py
+        script calling this method. See for example ../script/run_scraper.py
 
         """
         # Connect to the music database
@@ -110,7 +110,7 @@ class LyricsScraper:
                 self.logger_p.info("Skipping the URL {}".format(url))
 
     def _connect_db(self):
-        """Connects to the SQLite music database.
+        """Connect to the SQLite music database.
 
         Raises
         ------
@@ -149,21 +149,21 @@ class LyricsScraper:
 
         OverwriteSongError
             Raised if a song was already found in the db and the db can't be
-            updated because the ``overwrite_db`` flag is disabled.
+            updated because the ``overwrite_tables`` flag is disabled.
 
         """
         res = self._select_song(url)
         if len(res) == 1:
             self.logger_p.debug(
                 "There is already a song with the same URL {}".format(url))
-            if self.main_cfg['overwrite_db']:
+            if self.main_cfg['overwrite_tables']:
                 self.logger_p.debug(
-                    "Since the 'overwrite_db' flag is set to True, the URL "
+                    "Since the 'overwrite_tables' flag is set to True, the URL "
                     "will be processed and the music db will be updated as a "
                     "consequence")
             else:
                 raise scraper_exc.OverwriteSongError(
-                    "Since the 'overwrite_db' flag is set to False, the URL "
+                    "Since the 'overwrite_tables' flag is set to False, the URL "
                     "will be ignored")
         elif len(res) == 0:
             self.logger_p.debug(
@@ -174,7 +174,10 @@ class LyricsScraper:
                 "db".format(url))
 
     def _scrape_artist_page(self, artist_filename, artist_url):
-        """Scrape the artist webpage from azlyrics.com
+        """Scrape the artist webpage
+
+        It crawls the webpage and scrapes any useful info to be inserted in the
+        music database, such as
 
         Parameters
         ----------
@@ -227,7 +230,7 @@ class LyricsScraper:
         ----------
         cur
         sql
-        values : tuple, optional
+        values : tuple of ?, optional
 
         Returns
         -------
@@ -262,7 +265,7 @@ class LyricsScraper:
 
         Parameters
         ----------
-        album : tuple
+        album : tuple of str
             Description
 
         """
@@ -278,7 +281,8 @@ class LyricsScraper:
 
         Parameters
         ----------
-        artist_name
+        artist_name : tuple of str
+            Description
 
         """
         self.logger_p.debug("Inserting the artist: {}".format(artist_name[0]))
@@ -290,10 +294,8 @@ class LyricsScraper:
 
         Parameters
         ----------
-        song
-
-        Returns
-        -------
+        song : tuple of str
+            Description
 
         """
         self.logger_p.debug(
@@ -308,7 +310,8 @@ class LyricsScraper:
 
         Parameters
         ----------
-        lyrics_url
+        lyrics_url : str
+            Description
 
         Returns
         -------

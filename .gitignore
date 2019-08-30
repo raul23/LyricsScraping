@@ -108,3 +108,6 @@ venv.bak/
 
 # Mac files
 .DS_Store
+
+# SQlite files
+*.sqlite

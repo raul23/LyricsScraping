@@ -14,7 +14,6 @@ from bs4 import BeautifulSoup
 import scrapers.scraper_exceptions as music_exc
 from scrapers.lyrics_scraper import LyricsScraper
 import utilities.exceptions.connection as connec_exc
-import utilities.exceptions.sql as sql_exc
 from utilities.genutils import add_plural, create_directory
 from utilities.logging.logutils import get_logger
 

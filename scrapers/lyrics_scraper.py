@@ -270,6 +270,8 @@ class LyricsScraper:
         -------
         None
             Description
+        cur.fetchall()
+            Description
         lastrowid : int
             Description
 
@@ -365,6 +367,10 @@ class LyricsScraper:
 
         Returns
         -------
+        None
+            Description
+        cur.fetchall()
+            Description
 
         """
         self.logger_p.debug(

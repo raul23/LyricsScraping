@@ -306,7 +306,8 @@ class AZLyricsScraper(LyricsScraper):
             self.logger.debug("Validating the URL's domain")
 
             # Validate URL's domain
-            # There is a more robust parsing of the TLD, use a specialized
+            # TODO: add following comments in method's docstring
+            # There is a more robust parsing of the TLD: use a specialized
             # library (e.g. `tldextract`). For example, `urlparse` will
             # not be able to extract the right domain from a more complex
             # URL such as 'http://forums.news.cnn.com/'. On the other hand,

@@ -1,6 +1,8 @@
-"""Module summary
+"""Module that defines exception related to web scraping of lyrics websites.
 
-Extended module summary
+These are all the exceptions that are raised when running code from the
+``scrapers`` package which defines the classes responsible for scraping
+lyrics webpages.
 
 """
 

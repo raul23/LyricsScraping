@@ -1,10 +1,10 @@
 #=============================
 #      DATABASE CONFIG
 #=============================
-music_schema_filepath: ~/PycharmProjects/lyrics-scraper/database/music.sql
+music_schema_filepath: ~/PycharmProjects/lyrics-scraper/database/musics.sql
 music_db_filepath: ~/data/lyrics-scraper/music.sqlite
 autocommit: False
-overwrite_db: False
+overwrite_db: True
 overwrite_tables: False
 #=============================
 #       LYRICS URLS

@@ -1,6 +1,16 @@
-"""Script summary
+"""Script for scraping lyrics websites.
 
-Extended script summary
+The script scrapes lyrics from webpages and saves them locally in a database.
+`main_cfg.yaml` is the config file for configuring the script such as the list
+of URLS to lyrics webpages, the path to the cache directory where all lyrics
+webpages are saved, and the path to the SQLite music database where all the
+scraped are saved.
+
+IMPORTANT: don't confuse the options `overwrite_db` and `overwrite_tables`.
+* `overwrite_db` : this relates to the whole SQLite database file. Thus, if it
+                   is True, then the file can be overwritten.
+* `overwrite_tables` : this relates to the tables in the database. Thus, if it
+                       is True, then the tables can be updated.
 
 """
 

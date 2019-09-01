@@ -1,7 +1,7 @@
 #=============================
 #      DATABASE CONFIG
 #=============================
-music_schema_filepath: ~/PycharmProjects/lyrics-scraper/database/musics.sql
+music_schema_filepath: ~/PycharmProjects/lyrics-scraper/database/music.sql
 music_db_filepath: ~/data/lyrics-scraper/music.sqlite
 autocommit: False
 overwrite_db: True
@@ -13,7 +13,7 @@ overwrite_tables: False
 lyrics_urls:
 #- https://www.dsadsawhateverdjkdsa.com/hello.html
 - https://www.azlyrics.com/d/depeche.html
-- https://www.azlyrics.com/b/bowie.html
+#- https://www.azlyrics.com/b/bowie.html
 #- https://www.azlyrics.com/lyrics/davidbowie/spaceoddity.html
 # - https://www.azlyrics.com/19/50cent.html
 #=============================

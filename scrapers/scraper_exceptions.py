@@ -1,4 +1,4 @@
-"""Module that defines exception related to web scraping of lyrics websites.
+"""Module that defines exceptions related to web scraping of lyrics websites.
 
 These are all the exceptions that are raised when running code from the
 ``scrapers`` package which defines the classes responsible for scraping

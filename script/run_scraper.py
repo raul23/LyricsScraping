@@ -53,8 +53,9 @@ if __name__ == '__main__':
         logger.info("Starting the web scraping")
         AZLyricsScraper(main_cfg=main_cfg,
                         logger=sb.logging_cfg_dict).start_scraping()
-    except (FileNotFoundError, KeyboardInterrupt, OSError, sqlite3.Error,
-            sqlite3.OperationalError, EmptyQueryResultSetError) as e:
+    except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
+            sqlite3.Error, sqlite3.OperationalError,
+            EmptyQueryResultSetError) as e:
         logger.exception(e)
         logger.warning("Program will exit")
     else:

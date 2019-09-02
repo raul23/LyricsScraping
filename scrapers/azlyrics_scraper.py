@@ -273,6 +273,20 @@ class AZLyricsScraper(LyricsScraper):
         the URL (artist or lyrics webpage), it calls the relevant method (
         _scrape_artist_page or _scrape_lyrics_page).
 
+        There is a more robust parsing of the TLD: use a specialized library
+        (e.g. `tldextract`). For example, `urlparse` will not be able to
+        extract the right domain from a more complex URL such as
+        'http://forums.news.cnn.com/'. On the other hand, `tldextract` will
+        output 'cnn' which is correct.
+
+        References
+        ----------
+        * `tldextract is a more efficient version of urlparse <https://stackoverflow.com/a/44022572>`_.
+        * `Use urlparse but it might have some problems with some URLs <https://stackoverflow.com/a/44021937>`_
+        * `Use urlparse and how to get the domain without the subdomain <https://stackoverflow.com/a/44113853>`_
+        * `tldextract also works with emails and you install it with 'pip install tldextract' <https://stackoverflow.com/a/45022556>`_
+        * `Use os.path.basename if you want to extract a filename from the URL but it has its own problems with URLS having a query string <https://stackoverflow.com/a/51726087>`_
+
         """
         self.logger.info("Processing the URL {}".format(url))
         # Check first if the URL was already processed, i.e. is found in the db
@@ -306,26 +320,6 @@ class AZLyricsScraper(LyricsScraper):
             self.logger.debug("Validating the URL's domain")
 
             # Validate URL's domain
-            # TODO: add following comments in method's docstring
-            # There is a more robust parsing of the TLD: use a specialized
-            # library (e.g. `tldextract`). For example, `urlparse` will
-            # not be able to extract the right domain from a more complex
-            # URL such as 'http://forums.news.cnn.com/'. On the other hand,
-            # `tldextract` will ouput 'cnn' which is correct.
-            # References:
-            # - https://stackoverflow.com/a/44022572 : tldextract is more
-            #   efficient version of `urlparse`
-            # - https://stackoverflow.com/a/44021937 : use `urlparse` but
-            #   it might have some problems with some URLs
-            # - https://stackoverflow.com/a/44113853 : use `urlparse` and
-            #   how to get the domain without the subdomain
-            # - https://stackoverflow.com/a/45022556 : `tldextract` also
-            #   works with emails and you install it with
-            #   `pip install tldextract`
-            # - https://stackoverflow.com/a/51726087 : use
-            #   `os.path.basename` if you want to extract a filename from
-            #   the URL but it has its own problems with URLS having a
-            #   query string
             if domain in self.VALID_DOMAIN:
                 self.logger.debug(
                     "The domain '{}' is valid".format(domain))

@@ -9,9 +9,9 @@ scraped data are saved.
 IMPORTANT: Don't confuse the options `overwrite_db` and `overwrite_tables` in
 `main_cfg.yaml`:
 * `overwrite_db` : this relates to the whole SQLite database file. Thus, if it
-                   is True, then the file can be overwritten.
+                   is True, then the **file** can be overwritten.
 * `overwrite_tables` : this relates to the tables in the database. Thus, if it
-                       is True, then the tables can be updated.
+                       is True, then the **tables** can be updated.
 
 """
 
@@ -24,10 +24,10 @@ import ipdb
 # Custom modules
 from scrapers.azlyrics_scraper import AZLyricsScraper
 from utilities.databases.dbutils import create_db
-from utilities.exceptions.sql import EmptyQueryResultSetError
 from utilities.genutils import read_yaml
 from utilities.script_boilerplate import ScriptBoilerplate
-
+import utilities.exceptions.log as log_exc
+import utilities.exceptions.sql as sql_exc
 
 if __name__ == '__main__':
     sb = ScriptBoilerplate(
@@ -54,8 +54,8 @@ if __name__ == '__main__':
         AZLyricsScraper(main_cfg=main_cfg,
                         logger=sb.logging_cfg_dict).start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
-            sqlite3.Error, sqlite3.OperationalError,
-            EmptyQueryResultSetError) as e:
+            sqlite3.Error, sqlite3.OperationalError, log_exc.AddLoggerError,
+            sql_exc.EmptyQueryResultSetError) as e:
         logger.exception(e)
         logger.warning("Program will exit")
     else:

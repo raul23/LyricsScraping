@@ -30,6 +30,7 @@ import utilities.exceptions.log as log_exc
 import utilities.exceptions.sql as sql_exc
 
 if __name__ == '__main__':
+    # TODO: add temporary and basic console logger before the ``try``?
     sb = ScriptBoilerplate(
         module_name=__name__,
         module_file=__file__,

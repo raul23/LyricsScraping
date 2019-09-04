@@ -35,8 +35,8 @@ if __name__ == '__main__':
         module_name=__name__,
         module_file=__file__,
         cwd=os.getcwd(),
-        parser_desc="Scrape lyrics from webpages and saved them locally in a "
-                    "database",
+        script_desc="Scrape lyrics from webpages and save them locally in a "
+                    "SQLite database",
         parser_formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     sb.parse_args()
     logger = sb.get_logger()

@@ -23,8 +23,9 @@ from bs4 import BeautifulSoup
 import ipdb
 # Custom modules
 import scrapers.scraper_exceptions as music_exc
-from scrapers.lyrics_scraper import LyricsScraper
 import utilities.exceptions.connection as connec_exc
+import utilities.exceptions.files as files_exc
+from scrapers.lyrics_scraper import LyricsScraper
 from utilities.genutils import add_plural, create_directory
 from utilities.logging.logutils import get_logger
 
@@ -77,6 +78,18 @@ class AZLyricsScraper(LyricsScraper):
         artist_url : str
             URL to the artist webpage that is being scraped.
 
+        Raises
+        ------
+        HTTP404Error
+            Raised if the server returns a 404 status code because the webpage
+            is not found.
+        OverwriteFileError
+            Raised if an existing file is being overwritten and the flag to
+            allow to overwrite is disabled.
+        OSError
+            Raised if an error occurs while writing the webpage on disk, e.g.
+            the file doesn't exist.
+
         See Also
         --------
         azlyrics_scraper._scrape_lyrics_page : Scrape a lyrics webpage instead.
@@ -89,8 +102,11 @@ class AZLyricsScraper(LyricsScraper):
         try:
             html, webpage_accessed = \
                 self.saver.save_webpage(artist_filepath, artist_url, False)
-        except connec_exc.WebPageNotFoundError as e:
-            self.logger.exception(e)
+        except (connec_exc.HTTP404Error,
+                files_exc.OverwriteFileError,
+                OSError) as e:
+            # TODO: is it correct or `raise Exception(e)` or something else?
+            raise e
         bs_obj = BeautifulSoup(html, 'lxml')
         # Get the name of the artist
         artist_name = bs_obj.title.text.split(' Lyrics')[0]
@@ -139,25 +155,6 @@ class AZLyricsScraper(LyricsScraper):
         lyrics_url : str
             URL to the lyrics webpage that is being scraped.
 
-        Raises
-        ------
-        NonUniqueAlbumYearError
-            Raised if the album's year extraction doesn't result in a UNIQUE
-            number.
-            This is a custom exception.
-        NonUniqueLyricsError
-            Raised if the lyrics extraction scheme broke: no lyrics found or
-            more than one lyrics were found on the lyrics webpage.
-            This is a custom exception.
-        WebPageNotFoundError
-            Raised if the webpage HTML could not be retrieved for any reasons,
-            e.g. 404 error, or OSError.
-            This is a custom exception.
-        WrongAlbumYearError
-            Raised if the album's year is in the wrong century: only songs
-            published in the 20th and 21th centuries are supported.
-            This is a custom exception.
-
         See Also
         --------
         azlyrics_scraper._scrape_artist_page : Scrape an artist webpage
@@ -172,12 +169,8 @@ class AZLyricsScraper(LyricsScraper):
                 "Scraping the lyrics webpage {}".format(lyrics_url))
             # Load the webpage or save the webpage and retrieve its html
             html = None
-            try:
-                html, webpage_accessed = \
-                    self.saver.save_webpage(lyrics_filename, lyrics_url, False)
-            except connec_exc.WebPageNotFoundError as e:
-                self.logger.exception(e)
-                raise connec_exc.WebPageNotFoundError(e)
+            html, webpage_accessed = \
+                self.saver.save_webpage(lyrics_filename, lyrics_url, False)
             bs_obj = BeautifulSoup(html, 'lxml')
             # Get the following data from the lyrics webpage:
             # - the title of the song
@@ -231,12 +224,18 @@ class AZLyricsScraper(LyricsScraper):
                                        lyrics_url, album_title, song_year))
                     # Insert the relevant album's data into the db
                     self._insert_album((album_title, artist_name, song_year))
-        except (connec_exc.WebPageNotFoundError,
+        except OSError as e:
+            self.logger.exception(e)
+            self.logger.warning(
+                "Skipping the lyrics URL {}".format(lyrics_url))
+        except (connec_exc.HTTP404Error,
+                files_exc.OverwriteFileError,
                 music_exc.MultipleAlbumError,
                 music_exc.NonUniqueLyricsError,
                 music_exc.NonUniqueAlbumYearError,
                 music_exc.WrongAlbumYearError) as e:
-            self.logger.exception(e)
+            # TODO: `self.logger.exception(e)`? See also other places.
+            self.logger.error(e)
             self.logger.warning(
                 "Skipping the lyrics URL {}".format(lyrics_url))
         except (music_exc.MultipleLyricsURLError,

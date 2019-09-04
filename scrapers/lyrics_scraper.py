@@ -22,9 +22,11 @@ import urllib
 # Third-party modules
 import ipdb
 # Custom modules
+import utilities.exceptions.connection as connec_exc
+import utilities.exceptions.files as files_exc
+import utilities.exceptions.sql as sql_exc
 import scrapers.scraper_exceptions as scraper_exc
 from utilities.databases.dbutils import connect_db, sql_sanity_check
-import utilities.exceptions.sql as sql_exc
 from utilities.logging.logutils import get_logger
 from utilities.save_webpages import SaveWebpages
 
@@ -112,18 +114,23 @@ class LyricsScraper:
         for url in self.lyrics_urls:
             try:
                 self._process_url(url)
+            except OSError as e:
+                self.logger_p.exception(e)
+                self.logger_p.info("Skipping the URL {}".format(url))
             except urllib.error.URLError as e:
                 self.logger_p.exception(e)
                 self.logger_p.warning(
                     "The URL {} seems to be down!".format(url))
                 self.logger_p.info("Skipping the URL {}".format(url))
-            except (scraper_exc.InvalidURLDomainError,
+            except (connec_exc.HTTP404Error,
+                    files_exc.OverwriteFileError,
+                    scraper_exc.InvalidURLDomainError,
                     scraper_exc.InvalidURLCategoryError,
+                    scraper_exc.MultipleLyricsURLError,
                     sql_exc.SQLSanityCheckError) as e:
                 self.logger_p.error(e)
                 self.logger_p.info("Skipping the URL {}".format(url))
-            except (scraper_exc.MultipleLyricsURLError,
-                    scraper_exc.OverwriteSongError) as e:
+            except scraper_exc.OverwriteSongError as e:
                 self.logger_p.info(e)
                 self.logger_p.info("Skipping the URL {}".format(url))
 
@@ -231,6 +238,7 @@ class LyricsScraper:
         artist webpage, along with a lyrics webpage.
 
         """
+        # TODO: add error message like NotImplementedError("blabla")
         raise NotImplementedError
 
     def _scrape_lyrics_page(self, lyrics_filename, lyrics_url):
@@ -261,6 +269,7 @@ class LyricsScraper:
                                                method.
 
         """
+        # TODO: add error message like NotImplementedError("blabla")
         raise NotImplementedError
 
     def _process_url(self, url):
@@ -287,6 +296,7 @@ class LyricsScraper:
         azlyrics_scraper._process_url : an example of an implemented method.
 
         """
+        # TODO: add error message like NotImplementedError("blabla")
         raise NotImplementedError
 
     def _execute_sql(self, sql, values=None):
@@ -365,9 +375,10 @@ class LyricsScraper:
                 sql_sanity_check(sql, values)
                 cur.execute(sql, values)
             except sqlite3.IntegrityError as e:
+                # TODO: explain why this error is only logged as a debug
                 self.logger_p.debug(e)
                 return None
-            except (TypeError, AssertionError) as e:
+            except sql_exc.SQLSanityCheckError as e:
                 self.logger_p.error(e)
                 raise sql_exc.SQLSanityCheckError(e)
             else:

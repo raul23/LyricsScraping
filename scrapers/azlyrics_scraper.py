@@ -10,7 +10,8 @@ In order to reduce the number of HTTP requests to the lyrics website, the
 webpages are saved in cache.
 
 See the structure of the music database as defined in the
-`music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+`music.sql schema
+<https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
 """
 
@@ -26,7 +27,7 @@ import scrapers.scraper_exceptions as music_exc
 import utilities.exceptions.connection as connec_exc
 import utilities.exceptions.files as files_exc
 from scrapers.lyrics_scraper import LyricsScraper
-from utilities.genutils import add_plural, create_directory
+from utilities.genutils import add_plural_ending, create_directory
 from utilities.logging.logutils import get_logger
 
 
@@ -87,8 +88,8 @@ class AZLyricsScraper(LyricsScraper):
             Raised if an existing file is being overwritten and the flag to
             allow to overwrite is disabled.
         OSError
-            Raised if an error occurs while writing the webpage on disk, e.g.
-            the file doesn't exist.
+            Raised if an I/O related error occurs while writing the webpage on
+            disk, e.g. the file doesn't exist.
 
         See Also
         --------
@@ -201,7 +202,7 @@ class AZLyricsScraper(LyricsScraper):
                                    album_title, song_year))
             else:
                 self.logger.debug("{} album{} found".format(
-                    len(album_res), add_plural(len(album_res))))
+                    len(album_res), add_plural_ending(album_res)))
                 for album in album_res:
                     album_title = album.contents[1].text.strip('"')
                     year_res = re.findall(r'\d+', album.contents[2])
@@ -280,11 +281,21 @@ class AZLyricsScraper(LyricsScraper):
 
         References
         ----------
-        * `tldextract is a more efficient version of urlparse <https://stackoverflow.com/a/44022572>`_.
-        * `Use urlparse but it might have some problems with some URLs <https://stackoverflow.com/a/44021937>`_
-        * `Use urlparse and how to get the domain without the subdomain <https://stackoverflow.com/a/44113853>`_
-        * `tldextract also works with emails and you install it with 'pip install tldextract' <https://stackoverflow.com/a/45022556>`_
-        * `Use os.path.basename if you want to extract a filename from the URL but it has its own problems with URLS having a query string <https://stackoverflow.com/a/51726087>`_
+        * `tldextract is a more efficient version of urlparse
+        <https://stackoverflow.com/a/44022572>`_.
+
+        * `Use urlparse but it might have some problems with some URLs
+        <https://stackoverflow.com/a/44021937>`_
+
+        * `Use urlparse and how to get the domain without the subdomain
+        <https://stackoverflow.com/a/44113853>`_
+
+        * `tldextract also works with emails and you install it with
+        'pip install tldextract' <https://stackoverflow.com/a/45022556>`_
+
+        * `Use os.path.basename if you want to extract a filename from the URL
+        but it has its own problems with URLS having a query string
+        <https://stackoverflow.com/a/51726087>`_
 
         """
         self.logger.info("Processing the URL {}".format(url))
@@ -330,7 +341,7 @@ class AZLyricsScraper(LyricsScraper):
             # Create directory for caching the webpage
             try:
                 create_directory(dir_path)
-            except ResourceWarning as e:
+            except FileExistsError as e:
                 self.logger.warning(e)
 
         # Check if the azlyrics URL belongs to a lyrics or artist

@@ -8,7 +8,8 @@ database and thus accessing the database for data retrieval (SELECT) and
 updating (INSERT).
 
 See the structure of the music database as defined in the
-`music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+`music.sql schema
+<https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
 
 """
 
@@ -40,7 +41,7 @@ class LyricsScraper:
         Main configuration dictionary that defines among other important
         options, the list of URLs to be processed and the path to the cache
         directory. See the content of the config dict as defined in
-        `main_cfg.yaml <https://github.com/raul23/lyrics-scraper/blob/master/script/main_cfg.yaml/>`_.
+        `main_cfg.yaml <https://bit.ly/2m27NSI/>`_.
     logger : dict or LoggingWrapper
         If `logger` is a ``dict``, then a new logger will be setup for each
         module. If `logger` is a ``LoggingWrapper``, then the same logger will
@@ -140,8 +141,8 @@ class LyricsScraper:
         The SQLite music database is used for saving any relevant data from the
         scraped webpages.
 
-        See the structure of the music database as defined in the
-        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the structure of the music database as defined in the `music.sql
+        schema <https://bit.ly/2lGbeOw/>`_.
 
         Raises
         ------
@@ -308,8 +309,8 @@ class LyricsScraper:
         inserting data into the db, unlike a SELECT query which only retrieve
         data from the db.
 
-        See the structure of the music database as defined in the
-        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the structure of the music database as defined in the `music.sql
+        schema <https://bit.ly/2lGbeOw/>`_.
 
         Parameters
         ----------
@@ -361,7 +362,8 @@ class LyricsScraper:
 
         References
         ----------
-        .. [1] `A thorough guide to SQLite database operations in Python <https://sebastianraschka.com/Articles/2014_sqlite_in_python_tutorial.html/>`_.
+        .. [1] `A thorough guide to SQLite database operations in Python
+        <https://bit.ly/2xYreie/>`_.
 
         """
         cur = self.music_conn.cursor()
@@ -395,8 +397,8 @@ class LyricsScraper:
         Data about an album can consist in the album' title and the year the
         album was published.
 
-        See the `albums` table as defined in the
-        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `albums` table as defined in the `music.sql schema
+        <https://bit.ly/2lGbeOw/>`_.
 
         Parameters
         ----------
@@ -418,8 +420,8 @@ class LyricsScraper:
 
         An artist's name can refer to a group or an individual (solo).
 
-        See the `artists` table as defined in the
-        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `artists` table as defined in the `music.sql schema
+        <https://bit.ly/2lGbeOw/>`_.
 
         Parameters
         ----------
@@ -438,8 +440,8 @@ class LyricsScraper:
         The data about a song that will be added to the database can consist to
         the song title, artist name, and album title.
 
-        See the `songs` table as defined in the
-        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `songs` table as defined in the `music.sql schema
+        <https://bit.ly/2lGbeOw/>`_.
 
         Parameters
         ----------
@@ -462,8 +464,8 @@ class LyricsScraper:
         The lyrics URL is used as the WHERE condition to be used for retrieving
         the associated song from the database.
 
-        See the `songs` table as defined in the
-        `music.sql schema <https://github.com/raul23/lyrics-scraper/blob/master/database/music.sql/>`_.
+        See the `songs` table as defined in the `music.sql schema
+        <https://bit.ly/2lGbeOw/>`_.
 
         Parameters
         ----------

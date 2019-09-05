@@ -1,8 +1,8 @@
 #=============================
 #      DATABASE CONFIG
 #=============================
-music_schema_filepath: ~/PycharmProjects/lyrics-scraper/database/music.sql
-music_db_filepath: ~/data/lyrics-scraper/music.sqlite
+music_schema_filepath: ~/PycharmProjects/lyrics-scrapers/database/music.sql
+music_db_filepath: ~/data/lyrics-scrapers/music.sqlite
 autocommit: False
 overwrite_db: True
 overwrite_tables: False
@@ -19,7 +19,7 @@ lyrics_urls:
 #=============================
 #       SAVING CONFIG
 #=============================
-cache_filepath: ~/data/lyrics-scraper/cache
+cache_filepath: ~/data/lyrics-scrapers/cache
 overwrite_webpages: False
 #=============================
 #     HTTP REQUEST CONFIG

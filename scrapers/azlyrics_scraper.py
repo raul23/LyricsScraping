@@ -21,14 +21,13 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 # Third-party modules
 from bs4 import BeautifulSoup
-import ipdb
 # Custom modules
 import scrapers.scraper_exceptions as music_exc
-import utilities.exceptions.connection as connec_exc
-import utilities.exceptions.files as files_exc
+import utils.exceptions.connection as connec_exc
+import utils.exceptions.files as files_exc
 from scrapers.lyrics_scraper import LyricsScraper
-from utilities.genutils import add_plural_ending, create_directory
-from utilities.logging.logutils import get_logger
+from utils.genutils import add_plural_ending, create_directory
+from utils.logging.logutils import get_logger
 
 
 # Scrapes and saves webpages locally

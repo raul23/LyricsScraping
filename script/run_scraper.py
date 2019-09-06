@@ -19,15 +19,13 @@ import argparse
 import os
 import sqlite3
 import sys
-# Third-party modules
-import ipdb
 # Custom modules
 from scrapers.azlyrics_scraper import AZLyricsScraper
-from utilities.databases.dbutils import create_db
-from utilities.genutils import read_yaml
-from utilities.script_boilerplate import ScriptBoilerplate
-import utilities.exceptions.log as log_exc
-import utilities.exceptions.sql as sql_exc
+from utils.databases.dbutils import create_db
+from utils.genutils import read_yaml
+from utils.script_boilerplate import ScriptBoilerplate
+import utils.exceptions.log as log_exc
+import utils.exceptions.sql as sql_exc
 
 if __name__ == '__main__':
     sb = ScriptBoilerplate(

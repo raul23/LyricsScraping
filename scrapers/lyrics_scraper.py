@@ -20,16 +20,14 @@ import sqlite3
 # * For urllib with Python 2, it is
 # `from six.moves.urllib.parse import urlparse`
 import urllib
-# Third-party modules
-import ipdb
 # Custom modules
-import utilities.exceptions.connection as connec_exc
-import utilities.exceptions.files as files_exc
-import utilities.exceptions.sql as sql_exc
+import utils.exceptions.connection as connec_exc
+import utils.exceptions.files as files_exc
+import utils.exceptions.sql as sql_exc
 import scrapers.scraper_exceptions as scraper_exc
-from utilities.databases.dbutils import connect_db, sql_sanity_check
-from utilities.logging.logutils import get_logger
-from utilities.save_webpages import SaveWebpages
+from utils.databases.dbutils import connect_db, sql_sanity_check
+from utils.logging.logutils import get_logger
+from utils.save_webpages import SaveWebpages
 
 
 class LyricsScraper:

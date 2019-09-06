@@ -7,7 +7,7 @@ an API for easy retrieval of useful data about a song.
 * `database/` : SQL schema for creating the database that stores the relevant
 scraped data such as the artist's name, the song's title, and more importantly
 the song's lyrics.
-* `scrapers/` : where the scrapers for the different lyrics website are defined.
+* `scrapers/` : where the scrapers for the different lyrics websites are defined.
 * `script/` : the main script for starting the scraping of the lyrics websites.
 ## Dependencies
 * `Python 3.7`
@@ -15,7 +15,7 @@ the song's lyrics.
 * `requests` : for requesting the HTML content of a lyrics webpage
 * `yaml` : for reading configuration files (e.g. logging)
 ## Set environment variables
-Set paths to `utilities` and `lyrics-scrapers` projects in your environment 
+Add paths to `utilities` and `lyrics-scrapers` projects in your environment 
 variables:
 ```commandline
 export PYTHONPATH=~/path/to/utilities:$PYTHONPATH

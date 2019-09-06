@@ -14,7 +14,7 @@ the song's lyrics.
 ## Dependencies
 * `Python 3.7`
 * `BeautifulSoup` : for parsing the lyrics webpages
-* `requests` : for requesting the HTML content of a lyrics webpage
+* `requests` : for requesting the HTML content of lyrics webpages
 * `yaml` : for reading configuration files (e.g. logging)
 
 ## Set environment variables

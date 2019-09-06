@@ -111,3 +111,6 @@ venv.bak/
 
 # SQlite files
 *.sqlite
+
+# Testing files
+genius_scraper.py

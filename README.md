@@ -1,6 +1,8 @@
 # lyrics-scrapers
 ## Description
-Crawl and scrap lyrics websites.
+Crawl and scrap lyrics websites. For the moment, only [one site](https://bit.ly/2k5r0SX) 
+is supported. But I will eventually support another lyrics website that provides 
+an API for easy retrieval of useful data about a song.
 ## Folders description
 * `database/` : SQL schema for creating the database that stores the relevant
 scraped data such as the artist's name, the song's title, and more importantly
@@ -9,8 +11,9 @@ the song's lyrics.
 * `script/` : the main script for starting the scraping of the lyrics websites.
 ## Dependencies
 * `Python 3.7`
-* `BeautifulSoup` :
-* `yaml` : 
+* `BeautifulSoup` : for parsing the lyrics webpage
+* `requests` : for requesting the HTML content of a lyrics webpage
+* `yaml` : for reading configuration files (e.g. logging)
 ## Set environment variables
 Set paths to `utilities` and `lyrics-scrapers` projects in your environment 
 variables:

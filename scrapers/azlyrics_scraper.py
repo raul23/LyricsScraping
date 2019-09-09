@@ -30,7 +30,6 @@ from utils.genutils import add_plural_ending, create_directory
 from utils.logging.logutils import get_logger
 
 
-# Scrapes and saves webpages locally
 class AZLyricsScraper(LyricsScraper):
     """Derived class for scraping and saving webpages locally
 

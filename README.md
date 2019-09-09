@@ -13,8 +13,8 @@ the song's lyrics.
 
 ## Dependencies
 * `Python 3.7`
-* `BeautifulSoup` : for parsing the lyrics webpage
-* `requests` : for requesting the HTML content of a lyrics webpage
+* `BeautifulSoup` : for parsing the lyrics webpages
+* `requests` : for requesting the HTML content of lyrics webpages
 * `yaml` : for reading configuration files (e.g. logging)
 
 ## Set environment variables
@@ -35,6 +35,6 @@ Change directory to `script/` and run the script:
 
 **Notes:**
 * The option `-c` is for adding color to log messages. 
-* If you are working with the PyCharm terminal, user the option `-c p` which 
+* If you are working with the PyCharm terminal, use the option `-c p` which 
 will use colors suitable for this type of terminal which displays color 
 differently than a standard Unix terminal.

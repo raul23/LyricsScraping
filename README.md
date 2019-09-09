@@ -33,7 +33,7 @@ you will find code related to databases and logging.
 Change directory to `script/` and run the script:  
 `python run_scraper.py -c`
 
-Notes:
+**Notes:**
 * The option `-c` is for adding color to log messages. 
 * If you are working with the PyCharm terminal, user the option `-c p` which 
 will use colors suitable for this type of terminal which displays color 

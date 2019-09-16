@@ -1,15 +1,20 @@
+# See the LyricsScraper's class docstring @ https://bit.ly/2kK5bbP for a
+# detailed explanation of each of the following options
+#=============================
+#      LOGGING CONFIG
+#=============================
+use_logging: True
 #=============================
 #      DATABASE CONFIG
 #=============================
-music_schema_filepath: ~/PycharmProjects/lyrics-scrapers/database/music.sql
-music_db_filepath: ~/data/lyrics-scrapers/music.sqlite
+db_filepath: ~/data/lyrics-scrapers/music.sqlite
 autocommit: False
 overwrite_db: True
-overwrite_tables: False
+update_tables: False
 #=============================
 #       LYRICS URLS
 #=============================
-# Lyrics websites supported: azlyrics.com only for the moment
+# Lyrics websites supported: azlyrics.com
 lyrics_urls:
 #- https://www.dsadsawhateverdjkdsa.com/hello.html
 - https://www.azlyrics.com/d/depeche.html
@@ -19,13 +24,13 @@ lyrics_urls:
 #=============================
 #       SAVING CONFIG
 #=============================
-cache_filepath: ~/data/lyrics-scrapers/cache
+cache_dirpath: ~/data/lyrics-scrapers/cache
 overwrite_webpages: False
 #=============================
 #     HTTP REQUEST CONFIG
 #=============================
 # All in seconds
-http_get_timeout: 8
+http_get_timeout: 5
 delay_between_requests: 8
 headers:
   User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36c"

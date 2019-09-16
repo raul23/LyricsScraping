@@ -1,4 +1,5 @@
 version: 1
+add_datetime: True
 disable_existing_loggers: False
 formatters:
   console:
@@ -8,24 +9,37 @@ formatters:
   verbose:
     format: "%(asctime)s | %(name)-40s | %(levelname)-8s | %(message)s"
 handlers:
+  console:
+    level: INFO
+    class: logging.StreamHandler
+    formatter: console
   file:
     level: DEBUG
     class: logging.FileHandler
     filename: "debug.log"
     mode: a
     formatter: verbose
-  console:
-    level: INFO
-    class: logging.StreamHandler
-    formatter: console
+    delay: True
 loggers:
+  scrapers.azlyrics_scraper:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: False
+  scrapers.lyrics_scraper:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: False
   script.run_scraper:
     level: DEBUG
     handlers: [console, file]
     propagate: False
-  utilities.databases.dbutils:
+  utils.databases.dbutils:
     level: DEBUG
-    handlers: [console]
+    handlers: [console, file]
+    propagate: False
+  utils.save_webpages:
+    level: DEBUG
+    handlers: [console, file]
     propagate: False
 root:
   level: DEBUG

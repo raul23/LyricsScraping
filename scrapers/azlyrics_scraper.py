@@ -184,7 +184,7 @@ class AZLyricsScraper(LyricsScraper):
         anchors = bs_obj.find_all("a", href=re.compile("^../lyrics"))
         # Process each lyrics' url
         self.logger.info("There are {} lyrics URLs to process for the given"
-                        " artist".format(len(anchors)))
+                         " artist".format(len(anchors)))
         for i, a in enumerate(anchors):
             # Get URL from the anchor's href attribute
             lyrics_url = a.attrs['href']

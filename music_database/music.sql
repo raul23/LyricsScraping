@@ -21,7 +21,7 @@ create table songs (
 create table albums (
     album_title text not null,
     artist_name text not null, -- artist can also be a group
-    year text, -- year the album was published
+    year text, -- year the album was released
     foreign key(artist_name) references artists(name),
     primary key(album_title, artist_name)
 );

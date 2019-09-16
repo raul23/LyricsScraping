@@ -1,7 +1,4 @@
-"""Experimental script for scraping lyrics websites.
-
-IMPORTANT: this is an **experimental** script where I am testing with a new
-option for adding color to log messages through the ``LoggingWrapper`` class.
+"""Script for scraping lyrics websites.
 
 The script scrapes lyrics from webpages and saves them in a dictionary and a
 database (if one was initially configured).
@@ -11,12 +8,24 @@ the script such as the list of URLS to lyrics webpages, the path to the cache
 directory where all lyrics webpages are saved, and the path to the SQLite music
 database where all the scraped data are saved.
 
+Check the LyricsScraper's class docstring [1] for a detailed explanation of all
+the options in the `main_cfg.yaml` config file.
+
 IMPORTANT: Don't confuse the options `overwrite_db` and `update_tables` in
 `main_cfg.yaml`:
-* `overwrite_db` : this relates to the whole SQLite database file. Thus, if it
+- `overwrite_db` : this relates to the whole SQLite database file. Thus, if it
                    is True, then the database **file** can be overwritten.
-* `update_tables` : this relates to the tables in the database. Thus, if it is
+- `update_tables` : this relates to the tables in the database. Thus, if it is
                     True, then the **tables** can be updated.
+
+Notes
+-----
+In the logging setup, ignore the experimental option that adds color to log
+messages by reading the environmental variable `COLOR_LOGS`.
+
+References
+----------
+.. [1] `lyrics_scraper.py <https://bit.ly/2kK5bbP/>`_.
 
 """
 
@@ -27,6 +36,7 @@ import sqlite3
 import sys
 # Custom modules
 from scrapers.azlyrics_scraper import AZLyricsScraper
+import utils.exceptions.log as log_exc
 from utils.genutils import add_default_arguments, read_yaml
 from utils.logging.logging_wrapper import LoggingWrapper
 from utils.logging.logutils import setup_logging_from_cfg
@@ -39,33 +49,36 @@ if __name__ == '__main__':
         description="Scrape lyrics from webpages and save them locally in a "
                     "SQLite database or a dictionary.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    # Add some default arguments to the script:
+    # Add some default arguments to the script
     add_default_arguments(parser)
     args = parser.parse_args()
-    # Setup logging from the logging config file
-    setup_logging_from_cfg(args.logging_cfg, args.add_datetime)
-    logger = logging.getLogger('script.run_scraper')
-    # Experimental option: add color to log messages
-    os.environ['COLOR_LOGS'] = args.color_logs
-    if args.color_logs:
-        logger = LoggingWrapper(logger, args.color_logs)
-        # Setup logging also for the `db_utils` module
-        # TODO: explain why the logging setup should be done here [Hint: the
-        # module is only functions and we want to add color to log msgs]
-        from utils.databases import dbutils
-        dbutils.logger = LoggingWrapper(dbutils.logger, args.color_logs)
-        logger.debug("The log messages will be colored ('{}')".format(args.color_logs))
     status_code = 1
+    main_cfg = read_yaml(args.main_cfg)
+    if main_cfg['use_logging']:
+        # Setup logging from the logging config file: this will setup the
+        # logging to all custom modules, including the current script
+        setup_logging_from_cfg(args.logging_cfg)
+    logger = logging.getLogger('script.run_scraper')
     try:
-        logger.info("Loading the main config file '{}'".format(args.main_cfg))
-        main_cfg = read_yaml(args.main_cfg)
-        logger.info("Config file loaded!")
+        # Experimental option: add color to log messages
+        os.environ['COLOR_LOGS'] = args.color_logs
+        if args.color_logs:
+            logger = LoggingWrapper(logger, args.color_logs)
+            # We need to wrap the db_utils's logger with LoggingWrapper which
+            # will add color to log messages.
+            from utils.databases import dbutils
+            dbutils.logger = LoggingWrapper(dbutils.logger, args.color_logs)
+            logger.debug("The log messages will be colored"
+                         " ('{}')".format(args.color_logs))
+        logger.info("Main config file loaded")
+        logger.info("Logging is setup")
         # Start the scraping of lyrics webpages
         logger.info("Starting the web scraping")
         scraper = AZLyricsScraper(**main_cfg)
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
-            sqlite3.Error, sqlite3.OperationalError) as e:
+            sqlite3.Error, sqlite3.OperationalError,
+            log_exc.LoggingWrapperSanityCheckError) as e:
         logger.exception(e)
         logger.warning("Program will exit")
     else:

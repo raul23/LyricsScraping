@@ -1,10 +1,18 @@
 """Module that defines exceptions related to web scraping of lyrics websites.
 
 These are all the exceptions that are raised when running code from the
-``scrapers`` package which defines the classes responsible for scraping
-lyrics webpages.
+``scrapers`` package [1] which defines the classes responsible for scraping
+lyrics websites.
+
+References
+----------
+.. [1] `scrapers package @ GitHub <https://bit.ly/2kkPjMP/>`_.
 
 """
+
+
+class CurrentSessionDuplicateURLError(Exception):
+    """Raised if the URL was already processed during the current session."""
 
 
 class InvalidURLCategoryError(Exception):
@@ -17,8 +25,8 @@ class InvalidURLDomainError(Exception):
 
 
 class MultipleAlbumError(Exception):
-    """Raised if the album's info extraction scheme broke: more than one album
-    was found on the lyrics webpage."""
+    """Raised if the album extraction scheme broke: more than one album was
+    found on the lyrics webpage."""
 
 
 class MultipleLyricsURLError(Exception):
@@ -26,7 +34,8 @@ class MultipleLyricsURLError(Exception):
 
 
 class NonUniqueAlbumYearError(Exception):
-    """Raised if the album's year extraction doesn't result in a UNIQUE number."""
+    """Raised if the album's year extraction scheme broke: no year found or
+    more than one year were found on the lyrics webpage."""
 
 
 class NonUniqueLyricsError(Exception):
@@ -36,9 +45,9 @@ class NonUniqueLyricsError(Exception):
 
 class OverwriteSongError(Exception):
     """Raised if a song was already found in the db and the db can't be updated
-    because updating the db is disabled by the user."""
+    because it is disabled by the user."""
 
 
 class WrongAlbumYearError(Exception):
-    """Raised if the album's year is in the wrong century: only songs
-    published in the 20th and 21th centuries are supported."""
+    """Raised if the album's year extraction scheme broke: the album's year is
+    not a number with four digits."""

@@ -217,7 +217,6 @@ class LyricsScraper:
         # =============
         # Logging setup
         # =============
-        use_logging = True
         self.use_logging = use_logging
         self.logger_p = logging.getLogger(__name__)
         # Experimental option: add color to log messages
@@ -710,7 +709,7 @@ class LyricsScraper:
             The title of the album.
         artist_name : str
             The name of the artist.
-        song_year : str
+        year : str
             The year the album was published.
 
         Notes

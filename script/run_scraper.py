@@ -80,10 +80,11 @@ if __name__ == '__main__':
             sqlite3.Error, sqlite3.OperationalError,
             log_exc.LoggingWrapperSanityCheckError) as e:
         logger.exception(e)
-        logger.warning("Program will exit")
     else:
         status_code = 0
         logger.info("End of the web scraping")
     finally:
+        if status_code == 1:
+            logger.warning("Program will exit")
         # ipdb.set_trace()
         sys.exit(status_code)

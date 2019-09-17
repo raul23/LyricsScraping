@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """Script for scraping lyrics websites.
 
 The script scrapes lyrics from webpages and saves them in a dictionary and a

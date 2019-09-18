@@ -1,0 +1,4 @@
+include README.md
+include music_database/music.sql
+include script/logging_cfg.yaml
+include script/main_cfg.yaml

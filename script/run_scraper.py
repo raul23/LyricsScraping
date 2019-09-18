@@ -37,6 +37,7 @@ import sqlite3
 import sys
 # Custom modules
 from scrapers.azlyrics_scraper import AZLyricsScraper
+import script
 import utils.exceptions.log as log_exc
 from utils.genutils import add_default_arguments, read_yaml
 from utils.logging.logging_wrapper import LoggingWrapper
@@ -51,7 +52,11 @@ if __name__ == '__main__':
                     "SQLite database or a dictionary.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # Add some default arguments to the script
-    add_default_arguments(parser)
+    logging_path = os.path.join(script.__path__[0], 'logging_cfg.yaml')
+    main_path = os.path.join(script.__path__[0], 'main_cfg.yaml')
+    add_default_arguments(logging_cfg_path=logging_path,
+                          main_cfg_path=main_path,
+                          parser=parser)
     args = parser.parse_args()
     status_code = 1
     main_cfg = read_yaml(args.main_cfg)

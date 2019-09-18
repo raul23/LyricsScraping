@@ -1,4 +1,4 @@
-# lyrics-scrapers
+# lyrics-scrapers [Work-in-Progress]
 ## Description
 Crawl and scrap lyrics websites. For the moment, only [one site](https://bit.ly/2k5r0SX) 
 is supported. But I will eventually support another lyrics website that provides 

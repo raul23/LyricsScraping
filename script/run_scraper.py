@@ -40,8 +40,8 @@ from scrapers.azlyrics_scraper import AZLyricsScraper
 import script
 import utils.exceptions.log as log_exc
 from utils.genutils import add_default_arguments, read_yaml
-from utils.logging.logging_wrapper import LoggingWrapper
-from utils.logging.logutils import setup_logging_from_cfg
+from utils.log.logging_wrapper import LoggingWrapper
+from utils.log.logutils import setup_logging_from_cfg
 import ipdb
 
 

@@ -30,8 +30,8 @@ import utils.exceptions.connection as connec_exc
 import utils.exceptions.files as files_exc
 from scrapers.lyrics_scraper import LyricsScraper
 from utils.genutils import add_plural_ending
-from utils.logging.logging_wrapper import LoggingWrapper
-from utils.logging.logutils import get_error_msg
+from utils.log.logging_wrapper import LoggingWrapper
+from utils.log.logutils import get_error_msg
 
 
 logging.getLogger(__name__).addHandler(NullHandler())

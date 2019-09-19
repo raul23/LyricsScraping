@@ -44,7 +44,7 @@ import utils.exceptions.sql as sql_exc
 import scrapers.scraper_exceptions as scraper_exc
 from utils.databases.dbutils import connect_db, create_db, sql_sanity_check
 from utils.genutils import add_plural_ending, create_directory
-from utils.logging.logutils import get_error_msg, setup_logging_from_cfg
+from utils.log.logutils import get_error_msg, setup_logging_from_cfg
 from utils.save_webpages import SaveWebpages
 
 
@@ -221,12 +221,12 @@ class LyricsScraper:
         self.logger_p = logging.getLogger(__name__)
         # Experimental option: add color to log messages
         if os.environ.get('COLOR_LOGS'):
-            from utils.logging.logging_wrapper import LoggingWrapper
+            from utils.log.logging_wrapper import LoggingWrapper
             self.logger_p = LoggingWrapper(self.logger_p,
                                            os.environ.get('COLOR_LOGS'))
         if self.use_logging:
             # Before setting up logging from a logging config file, make sure
-            # that logging was not already setup previously be a script
+            # that logging was not already setup previously by a script
             # Get the all the logger's handlers
             handlers = self.logger_p.handlers
             # If there is only one handler and this handler is the NullHandler,

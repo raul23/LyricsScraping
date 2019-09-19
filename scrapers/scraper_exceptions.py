@@ -6,7 +6,8 @@ lyrics websites.
 
 References
 ----------
-.. [1] `scrapers package @ GitHub <https://bit.ly/2kkPjMP/>`_.
+.. [1] `scrapers package @ GitHub
+<https://github.com/raul23/lyrics_scraping/tree/master/scrapers/>`_.
 
 """
 

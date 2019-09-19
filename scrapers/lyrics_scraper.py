@@ -19,7 +19,7 @@ that adds color to log messages by reading the environmental variable
 References
 ----------
 .. [1] `See the structure of the music database as defined in the `music.sql
-schema <https://bit.ly/2lGbeOw/>`_.
+schema (GitHub) <https://bit.ly/2kHxqrO/>`_.
 
 """
 
@@ -101,12 +101,12 @@ class LyricsScraper:
         The information added to the HTTP GET request that a user's browser
         sends to a Web server containing the details of what the browser wants
         and will accept back from the server [1] (the default value is defined
-        in `save_webpages.py <https://bit.ly/2lUI5zf/>`_).
+        in `save_webpages.py (GitHub) <https://bit.ly/2mpQVpd/>`_).
     use_logging : bool, optional
         Whether to log messages on console and file. The logging is setup
-        according to the `default YAML logging file <https://bit.ly/2lNMx32/>`_
-        (the default value is False which implies that no logging will be used
-        and thus no messages will be printed on the console).
+        according to the `default YAML logging file (GitHub)
+        Mx32/>`_ (the default value is False which implies that no logging will
+        be used and thus no messages will be printed on the console).
     **kwargs : dict
         TODO
 
@@ -128,13 +128,13 @@ class LyricsScraper:
         SQLite database connection.
     saver : SaveWebpages
         For retrieving webpages and saving them in cache. See `save_webpages.py
-        <https://bit.ly/2lUI5zf/>`_.
+        (GitHub) <https://bit.ly/2lUI5zf/>`_.
     valid_domains : list
         Only URLs from these domains will be processed.
     scraped_data : dict
         The scraped data is saved as a dictionary. Check its structure below.
-        Its structure is based on the `music database's schema
-        <https://bit.ly/2lGbeOw/>`_.
+        Its structure is based on the `music database's schema (GitHub)
+        <https://bit.ly/2kHxqrO/>`_.
 
         Its keys and values are defined as follow:
         `"artists"`
@@ -148,7 +148,7 @@ class LyricsScraper:
                 given URL is added as a tuple to the list (list of tuple).
         The other keys ("albums" and "songs") follow the same description.
     schema_filepath : str
-         Path to the `schema file <https://bit.ly/2lGbeOw/>`_ for the music
+         Path to the `schema file <https://bit.ly/2kHxqrO/>`_ for the music
         database.
     logging_cf_filepath : str
         Path to the `YAML logging file <https://bit.ly/2lNMx32/>`_ which is used
@@ -173,7 +173,7 @@ class LyricsScraper:
     also be saved if a database is given via `db_filepath`.
 
     See the structure of the music database as defined in the `music.sql
-    schema <https://bit.ly/2lGbeOw/>`_
+    schema (GitHub) <https://bit.ly/2kHxqrO/>`_
 
     The scraped webpages can also be cached in order to reduce the number of
     HTTP requests to the server (see the variable `cache_dirpath`).
@@ -294,7 +294,7 @@ class LyricsScraper:
 
         Any exception that is not caught here is redirected to the main script
         calling this method. See for example the main script `run_scraper.py
-        <https://bit.ly/2kg6saf/>`_.
+        (GitHub) <https://bit.ly/2kg6saf/>`_.
 
         """
         # Process list of URLs to lyrics websites
@@ -500,7 +500,7 @@ class LyricsScraper:
         scraped webpages.
 
         See the structure of the music database as defined in the `music.sql
-        schema <https://bit.ly/2lGbeOw/>`_.
+        schema (GitHub) <https://bit.ly/2kHxqrO/>`_.
 
         Returns
         -------
@@ -859,7 +859,7 @@ class LyricsScraper:
         See Also
         --------
         See the structure of the music database as defined in the `music.sql
-        schema <https://bit.ly/2lGbeOw/>`_.
+        schema (GitHub) <https://bit.ly/2kHxqrO/>`_.
 
         Notes
         -----
@@ -910,8 +910,8 @@ class LyricsScraper:
         Data about an album can consist in the album' title and the year the
         album was published.
 
-        See the `albums` table as defined in the `music.sql schema
-        <https://bit.ly/2lGbeOw/>`_.
+        See the `albums` table as defined in the `music.sql schema (GitHub)
+        <https://bit.ly/2kHxqrO/>`_.
 
         Parameters
         ----------
@@ -930,8 +930,8 @@ class LyricsScraper:
 
         An artist's name can refer to a group or an individual (solo).
 
-        See the `artists` table as defined in the `music.sql schema
-        <https://bit.ly/2lGbeOw/>`_.
+        See the `artists` table as defined in the `music.sql schema (GitHub)
+        <https://bit.ly/2kHxqrO/>`_.
 
         Parameters
         ----------
@@ -949,8 +949,8 @@ class LyricsScraper:
         The data about a song that will be added to the database can consist to
         the song title, artist name, and album title.
 
-        See the `songs` table as defined in the `music.sql schema
-        <https://bit.ly/2lGbeOw/>`_.
+        See the `songs` table as defined in the `music.sql schema (GitHub)
+        <https://bit.ly/2kHxqrO/>`_.
 
         Parameters
         ----------
@@ -970,8 +970,8 @@ class LyricsScraper:
         The lyrics URL is used as the WHERE condition to be used for retrieving
         the associated song from the database.
 
-        See the `songs` table as defined in the `music.sql schema
-        <https://bit.ly/2lGbeOw/>`_.
+        See the `songs` table as defined in the `music.sql schema (GitHub)
+        <https://bit.ly/2kHxqrO/>`_.
 
         Parameters
         ----------

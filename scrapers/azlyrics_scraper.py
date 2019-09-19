@@ -12,7 +12,7 @@ base class ``LyricsScraper``.
 See Also
 --------
 See the structure of the music database as defined in the `music.sql schema
-<https://bit.ly/2lGbeOw/>`_.
+(GitHub) <https://bit.ly/2kHxqrO/>`_.
 
 """
 
@@ -63,7 +63,7 @@ class AZLyricsScraper(LyricsScraper):
     See Also
     --------
     See the structure of the music database as defined in the `music.sql schema
-    <https://bit.ly/2lGbeOw/>`_
+    (GitHub)  <https://bit.ly/2kHxqrO/>`_
 
     """
 

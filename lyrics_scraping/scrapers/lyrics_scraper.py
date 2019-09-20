@@ -38,14 +38,14 @@ import ipdb
 # Custom modules
 import music_database
 import script
-import utils.exceptions.connection as connec_exc
-import utils.exceptions.files as files_exc
-import utils.exceptions.sql as sql_exc
+import pyutils.exceptions.connection as connec_exc
+import pyutils.exceptions.files as files_exc
+import pyutils.exceptions.sql as sql_exc
 import scrapers.scraper_exceptions as scraper_exc
-from utils.databases.dbutils import connect_db, create_db, sql_sanity_check
-from utils.genutils import add_plural_ending, create_directory
-from utils.log.logutils import get_error_msg, setup_logging_from_cfg
-from utils.save_webpages import SaveWebpages
+from pyutils.databases.dbutils import connect_db, create_db, sql_sanity_check
+from pyutils.genutils import add_plural_ending, create_directory
+from pyutils.log.logutils import get_error_msg, setup_logging
+from pyutils.save_webpages import SaveWebpages
 
 
 logging.getLogger(__name__).addHandler(NullHandler())
@@ -203,7 +203,7 @@ class LyricsScraper:
                          'lyrics_url', 'lyrics', 'year',),
              'data': []}}
     schema_filepath = os.path.join(music_database.__path__[0], 'music.sql')
-    logging_cf_filepath = os.path.join(script.__path__[0], 'logging_cfg.yaml')
+    logging_filepath = os.path.join(script.__path__[0], 'logging_cfg.yaml')
 
     def __init__(self, lyrics_urls, db_filepath="", autocommit=False,
                  overwrite_db=False, update_tables=False, cache_dirpath="",
@@ -221,7 +221,7 @@ class LyricsScraper:
         self.logger_p = logging.getLogger(__name__)
         # Experimental option: add color to log messages
         if os.environ.get('COLOR_LOGS'):
-            from utils.log.logging_wrapper import LoggingWrapper
+            from pyutils.log.logging_wrapper import LoggingWrapper
             self.logger_p = LoggingWrapper(self.logger_p,
                                            os.environ.get('COLOR_LOGS'))
         if self.use_logging:
@@ -235,7 +235,7 @@ class LyricsScraper:
                     isinstance(handlers[0], NullHandler):
                 # Setup logging for all custom modules based on the default
                 # YAML logging config file
-                setup_logging_from_cfg(self.logging_cf_filepath)
+                setup_logging(self.logging_filepath)
                 self.logger_p.info("Logging is setup")
             else:
                 self.logger_p.warning("The logger was already setup for "
@@ -314,7 +314,7 @@ class LyricsScraper:
                 error = e
             except (connec_exc.HTTP404Error,
                     files_exc.OverwriteFileError,
-                    scraper_exc.CurrentSessionDuplicateURLError,
+                    scraper_exc.CurrentSessionURLError,
                     scraper_exc.InvalidURLDomainError,
                     scraper_exc.InvalidURLCategoryError,
                     scraper_exc.MultipleLyricsURLError,
@@ -381,11 +381,13 @@ class LyricsScraper:
         self.skipped_urls.setdefault(url, [])
         self.skipped_urls[url].append(str(error))
 
-    def _add_tuple_to_scraped_data(self, data_tuple, scraped_data):
-        """Add a tuple of data to the list of scraped data.
+    def _update_scraped_data(self, data_tuple, scraped_data):
+        """Update scraped data.
 
-        The tuple of data must be **unique** to be added to the list of scraped
-        data.
+        Update the liste of scraped with a tuple of data.
+
+        The tuple of data must be **unique** in order to be added to the list
+        of scraped data.
 
         Parameters
         ----------
@@ -425,13 +427,13 @@ class LyricsScraper:
 
         Raises
         ------
-        CurrentSessionDuplicateURLError
+        CurrentSessionURLError
             Raised if the URL was already processed during this session.
 
         """
         # First, check if URL already processed during current session
         if url in self.checked_urls:
-            raise scraper_exc.CurrentSessionDuplicateURLError(
+            raise scraper_exc.CurrentSessionURLError(
                 "The url {} was already processed during this"
                 " session".format(url))
         elif self.db_conn:
@@ -731,7 +733,7 @@ class LyricsScraper:
                 # Save data into db
                 self._insert_album(album_tuple)
             # Save data into dict
-            self._add_tuple_to_scraped_data(
+            self._update_scraped_data(
                 album_tuple, self.scraped_data['albums']['data'])
         else:
             self.logger_p.warning("Album couldn't be saved!")
@@ -761,7 +763,7 @@ class LyricsScraper:
                 # Save data into db
                 self._insert_artist(artist_tuple)
             # Save data into dict
-            self._add_tuple_to_scraped_data(
+            self._update_scraped_data(
                 artist_tuple, self.scraped_data['artists']['data'])
         else:
             self.logger_p.warning("Artist couldn't be saved!")
@@ -803,7 +805,7 @@ class LyricsScraper:
                 # Save data into db
                 self._insert_song(song_tuple)
             # Save data into dict
-            self._add_tuple_to_scraped_data(
+            self._update_scraped_data(
                 song_tuple, self.scraped_data['songs']['data'])
         else:
             self.logger_p.warning("Song couldn't be saved!")

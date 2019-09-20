@@ -1,30 +1,44 @@
+"""setup.py file for the package `lyrics_scraping`.
+
+The project name is LyricsScraping and the package name is `lyrics_scraping`.
+
+"""
+
+import os
 from setuptools import setup
 
-setup(name='lyrics_scraping',
-      version='0.1',
-      description='Crawl and scrap lyrics from webpages',
-      long_description='Crawl and scrap lyrics from webpages.',
+# The text of the README file
+with open(os.path.join(os.getcwd(), "README.md")) as f:
+    README = f.read()
+
+setup(name='LyricsScraping',
+      version='1.0',
+      description='Crawl and scrap lyrics from song webpages',
+      long_description=README,
+      long_description_content_type='text/markdown',
       classifiers=[
-        'Development Status :: 3 - Alpha',
-        'License :: OSI Approved :: MIT License',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Software Development :: Libraries'
       ],
-      keywords='web lyrics scraping python',
-      url='https://github.com/raul23/lyrics-scrapers',
+      keywords='lyrics web scraping python',
+      url='https://github.com/raul23/LyricsScraping',
       author='Raul C.',
       author_email='rchfe23@gmail.com',
       license='MIT',
-      packages=['music_database', 'scrapers', 'script'],
+      packages=['lyrics_scraping'],
       include_package_data=True,
       install_requires=[
           'beautifulsoup4',
           'lxml',
           'pyyaml',
-          'utilities @ https://github.com/raul23/utilities/tarball/master'
+          'py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master'
       ],
-      scripts=['script/run_scraper.py'],
+      entry_points={
+          'console_scripts': [
+              'lyricsgenius = lyricsgenius.__main__:main']
+      },
       zip_safe=False)

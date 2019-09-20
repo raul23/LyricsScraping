@@ -1,6 +1,6 @@
 # lyrics-scrapers [Work-in-Progress]
 ## Description
-Crawl and scrap lyrics from webpages. For the moment, only 
+Crawl and scrap lyrics from music webpages. For the moment, only 
 [one lyrics website](https://bit.ly/2k5r0SX) is supported. But I will 
 eventually support another lyrics website that provides an API for easy 
 retrieval of useful data about a song.

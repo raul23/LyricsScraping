@@ -38,10 +38,10 @@ import sys
 # Custom modules
 from scrapers.azlyrics_scraper import AZLyricsScraper
 import script
-import utils.exceptions.log as log_exc
-from utils.genutils import add_default_arguments, read_yaml
-from utils.log.logging_wrapper import LoggingWrapper
-from utils.log.logutils import setup_logging_from_cfg
+import pyutils.exceptions.log as log_exc
+from pyutils.genutils import add_default_arguments, read_yaml
+from pyutils.log.logging_wrapper import LoggingWrapper
+from pyutils.log.logutils import setup_logging
 import ipdb
 
 
@@ -63,7 +63,7 @@ if __name__ == '__main__':
     if main_cfg['use_logging']:
         # Setup logging from the logging config file: this will setup the
         # logging to all custom modules, including the current script
-        setup_logging_from_cfg(args.logging_cfg)
+        setup_logging(args.logging_cfg)
     logger = logging.getLogger('script.run_scraper')
     try:
         # Experimental option: add color to log messages
@@ -72,7 +72,7 @@ if __name__ == '__main__':
             logger = LoggingWrapper(logger, args.color_logs)
             # We need to wrap the db_utils's logger with LoggingWrapper which
             # will add color to log messages.
-            from utils.databases import dbutils
+            from pyutils.databases import dbutils
             dbutils.logger = LoggingWrapper(dbutils.logger, args.color_logs)
             logger.debug("The log messages will be colored"
                          " ('{}')".format(args.color_logs))
@@ -84,7 +84,7 @@ if __name__ == '__main__':
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
             sqlite3.Error, sqlite3.OperationalError,
-            log_exc.LoggingWrapperSanityCheckError) as e:
+            log_exc.LoggingSanityCheckError) as e:
         logger.exception(e)
     else:
         status_code = 0

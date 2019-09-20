@@ -12,7 +12,7 @@ References
 """
 
 
-class CurrentSessionDuplicateURLError(Exception):
+class CurrentSessionURLError(Exception):
     """Raised if the URL was already processed during the current session."""
 
 

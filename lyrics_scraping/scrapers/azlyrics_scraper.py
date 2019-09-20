@@ -26,12 +26,12 @@ from bs4 import BeautifulSoup
 import ipdb
 # Custom modules
 import scrapers.scraper_exceptions as scraper_exc
-import utils.exceptions.connection as connec_exc
-import utils.exceptions.files as files_exc
+import pyutils.exceptions.connection as connec_exc
+import pyutils.exceptions.files as files_exc
 from scrapers.lyrics_scraper import LyricsScraper
-from utils.genutils import add_plural_ending
-from utils.log.logging_wrapper import LoggingWrapper
-from utils.log.logutils import get_error_msg
+from pyutils.genutils import add_plural_ending
+from pyutils.log.logging_wrapper import LoggingWrapper
+from pyutils.log.logutils import get_error_msg
 
 
 logging.getLogger(__name__).addHandler(NullHandler())
@@ -216,7 +216,7 @@ class AZLyricsScraper(LyricsScraper):
                 error = e
             except (connec_exc.HTTP404Error,
                     files_exc.OverwriteFileError,
-                    scraper_exc.CurrentSessionDuplicateURLError,
+                    scraper_exc.CurrentSessionURLError,
                     scraper_exc.MultipleAlbumError,
                     scraper_exc.MultipleLyricsURLError,
                     scraper_exc.NonUniqueLyricsError,

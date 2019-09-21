@@ -1,5 +1,6 @@
 # See the lyrics_scraper's class docstring @ https://bit.ly/2lZWkDe for a
 # detailed explanation of each of the following options
+# TODO: change URL to point to a better doc than the actual code
 #=============================
 #      LOGGING CONFIG
 #=============================
@@ -7,7 +8,7 @@ use_logging: True
 #=============================
 #      DATABASE CONFIG
 #=============================
-db_filepath: ~/data/lyrics-scraping/music.sqlite
+db_filepath: ~/data/lyrics_scraping/music.sqlite
 autocommit: False
 overwrite_db: True
 update_tables: False
@@ -24,7 +25,7 @@ lyrics_urls:
 #=============================
 #       SAVING CONFIG
 #=============================
-cache_dirpath: ~/data/lyrics-scraping/cache
+cache_dirpath: ~/data/lyrics_scraping/cache
 overwrite_webpages: False
 #=============================
 #     HTTP REQUEST CONFIG

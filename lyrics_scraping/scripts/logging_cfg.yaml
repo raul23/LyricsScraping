@@ -33,11 +33,11 @@ loggers:
     level: DEBUG
     handlers: [console, file]
     propagate: False
-  pyutils.databases.dbutils:
+  pyutils.dbutils:
     level: DEBUG
     handlers: [console, file]
     propagate: False
-  pyutils.save_webpages:
+  pyutils.save_utils:
     level: DEBUG
     handlers: [console, file]
     propagate: False

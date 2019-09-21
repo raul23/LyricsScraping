@@ -37,7 +37,7 @@ from logging import NullHandler
 import ipdb
 # Custom modules
 import music_database
-import script
+import scripts
 import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
 import pyutils.exceptions.sql as sql_exc
@@ -203,7 +203,7 @@ class LyricsScraper:
                          'lyrics_url', 'lyrics', 'year',),
              'data': []}}
     schema_filepath = os.path.join(music_database.__path__[0], 'music.sql')
-    logging_filepath = os.path.join(script.__path__[0], 'logging_cfg.yaml')
+    logging_filepath = os.path.join(scripts.__path__[0], 'logging_cfg.yaml')
 
     def __init__(self, lyrics_urls, db_filepath="", autocommit=False,
                  overwrite_db=False, update_tables=False, cache_dirpath="",

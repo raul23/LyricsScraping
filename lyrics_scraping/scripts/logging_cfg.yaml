@@ -29,15 +29,15 @@ loggers:
     level: DEBUG
     handlers: [console, file]
     propagate: False
-  script.run_scraper:
+  scripts.run_scraper:
     level: DEBUG
     handlers: [console, file]
     propagate: False
-  utils.databases.dbutils:
+  pyutils.databases.dbutils:
     level: DEBUG
     handlers: [console, file]
     propagate: False
-  utils.save_webpages:
+  pyutils.save_webpages:
     level: DEBUG
     handlers: [console, file]
     propagate: False

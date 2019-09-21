@@ -37,7 +37,7 @@ import sqlite3
 import sys
 # Custom modules
 from scrapers.azlyrics_scraper import AZLyricsScraper
-import script
+import scripts
 import pyutils.exceptions.log as log_exc
 from pyutils.genutils import add_default_arguments, read_yaml
 from pyutils.log.logging_wrapper import LoggingWrapper
@@ -52,8 +52,8 @@ if __name__ == '__main__':
                     "SQLite database or a dictionary.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # Add some default arguments to the script
-    logging_path = os.path.join(script.__path__[0], 'logging_cfg.yaml')
-    main_path = os.path.join(script.__path__[0], 'main_cfg.yaml')
+    logging_path = os.path.join(scripts.__path__[0], 'logging_cfg.yaml')
+    main_path = os.path.join(scripts.__path__[0], 'main_cfg.yaml')
     add_default_arguments(logging_cfg_path=logging_path,
                           main_cfg_path=main_path,
                           parser=parser)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
         # Setup logging from the logging config file: this will setup the
         # logging to all custom modules, including the current script
         setup_logging(args.logging_cfg)
-    logger = logging.getLogger('script.run_scraper')
+    logger = logging.getLogger('scripts.run_scraper')
     try:
         # Experimental option: add color to log messages
         os.environ['COLOR_LOGS'] = args.color_logs

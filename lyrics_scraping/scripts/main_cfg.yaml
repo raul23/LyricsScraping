@@ -7,7 +7,7 @@ use_logging: True
 #=============================
 #      DATABASE CONFIG
 #=============================
-db_filepath: ~/data/lyrics-scrapers/music.sqlite
+db_filepath: ~/data/lyrics-scraping/music.sqlite
 autocommit: False
 overwrite_db: True
 update_tables: False
@@ -24,7 +24,7 @@ lyrics_urls:
 #=============================
 #       SAVING CONFIG
 #=============================
-cache_dirpath: ~/data/lyrics-scrapers/cache
+cache_dirpath: ~/data/lyrics-scraping/cache
 overwrite_webpages: False
 #=============================
 #     HTTP REQUEST CONFIG

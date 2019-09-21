@@ -36,14 +36,12 @@ import os
 import sqlite3
 import sys
 # Custom modules
-from scrapers.azlyrics_scraper import AZLyricsScraper
-import scripts
 import pyutils.exceptions.log as log_exc
+from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
+from lyrics_scraping import scripts
 from pyutils.genutils import add_default_arguments, read_yaml
 from pyutils.log.logging_wrapper import LoggingWrapper
-from pyutils.log.logutils import setup_logging
-import ipdb
-
+from pyutils.logutils import setup_logging
 
 if __name__ == '__main__':
     # Setup the parser
@@ -72,7 +70,8 @@ if __name__ == '__main__':
             logger = LoggingWrapper(logger, args.color_logs)
             # We need to wrap the db_utils's logger with LoggingWrapper which
             # will add color to log messages.
-            from pyutils.databases import dbutils
+            from pyutils import dbutils
+
             dbutils.logger = LoggingWrapper(dbutils.logger, args.color_logs)
             logger.debug("The log messages will be colored"
                          " ('{}')".format(args.color_logs))

@@ -34,7 +34,6 @@ import urllib
 from urllib.request import urlopen
 from urllib.parse import urlparse
 from logging import NullHandler
-import ipdb
 # Custom modules
 import music_database
 import scripts
@@ -42,10 +41,10 @@ import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
 import pyutils.exceptions.sql as sql_exc
 import scrapers.scraper_exceptions as scraper_exc
-from pyutils.databases.dbutils import connect_db, create_db, sql_sanity_check
+from pyutils.dbutils import connect_db, create_db, sql_sanity_check
 from pyutils.genutils import add_plural_ending, create_directory
-from pyutils.log.logutils import get_error_msg, setup_logging
-from pyutils.save_webpages import SaveWebpages
+from pyutils.logutils import get_error_msg, setup_logging
+from pyutils.saveutils import SaveWebpages
 
 
 logging.getLogger(__name__).addHandler(NullHandler())
@@ -101,7 +100,7 @@ class LyricsScraper:
         The information added to the HTTP GET request that a user's browser
         sends to a Web server containing the details of what the browser wants
         and will accept back from the server [1] (the default value is defined
-        in `save_webpages.py (GitHub) <https://bit.ly/2mpQVpd/>`_).
+        in `saveutils.py (GitHub) <https://bit.ly/2mpQVpd/>`_).
     use_logging : bool, optional
         Whether to log messages on console and file. The logging is setup
         according to the `default YAML logging file (GitHub)
@@ -127,7 +126,7 @@ class LyricsScraper:
     db_conn : sqlite3.Connection
         SQLite database connection.
     saver : SaveWebpages
-        For retrieving webpages and saving them in cache. See `save_webpages.py
+        For retrieving webpages and saving them in cache. See `saveutils.py
         (GitHub) <https://bit.ly/2lUI5zf/>`_.
     valid_domains : list
         Only URLs from these domains will be processed.

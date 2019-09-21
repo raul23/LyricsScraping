@@ -23,7 +23,6 @@ from logging import NullHandler
 from urllib.parse import urlparse
 # Third-party modules
 from bs4 import BeautifulSoup
-import ipdb
 # Custom modules
 import scrapers.scraper_exceptions as scraper_exc
 import pyutils.exceptions.connection as connec_exc
@@ -31,7 +30,7 @@ import pyutils.exceptions.files as files_exc
 from scrapers.lyrics_scraper import LyricsScraper
 from pyutils.genutils import add_plural_ending
 from pyutils.log.logging_wrapper import LoggingWrapper
-from pyutils.log.logutils import get_error_msg
+from pyutils.logutils import get_error_msg
 
 
 logging.getLogger(__name__).addHandler(NullHandler())

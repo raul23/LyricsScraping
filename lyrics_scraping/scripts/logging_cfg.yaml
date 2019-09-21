@@ -3,11 +3,11 @@ add_datetime: True
 disable_existing_loggers: False
 formatters:
   console:
-    format: "%(name)-30s: %(levelname)-8s %(message)s"
+    format: "%(name)-42s: %(levelname)-8s %(message)s"
   simple:
     format: "%(levelname)-8s %(message)s"
   verbose:
-    format: "%(asctime)s | %(name)-40s | %(levelname)-8s | %(message)s"
+    format: "%(asctime)s | %(name)-42s | %(levelname)-8s | %(message)s"
 handlers:
   console:
     level: INFO
@@ -21,11 +21,11 @@ handlers:
     formatter: verbose
     delay: True
 loggers:
-  scrapers.azlyrics_scraper:
+  lyrics_scraping.scrapers.azlyrics_scraper:
     level: DEBUG
     handlers: [console, file]
     propagate: False
-  scrapers.lyrics_scraper:
+  lyrics_scraping.scrapers.lyrics_scraper:
     level: DEBUG
     handlers: [console, file]
     propagate: False

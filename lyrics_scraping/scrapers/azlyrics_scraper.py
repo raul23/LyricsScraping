@@ -12,7 +12,7 @@ base class ``LyricsScraper``.
 See Also
 --------
 See the structure of the music database as defined in the `music.sql schema
-(GitHub) <https://bit.ly/2kHxqrO/>`_.
+(GitHub) <https://bit.ly/2kIMYvn/>`_.
 
 """
 
@@ -24,10 +24,10 @@ from urllib.parse import urlparse
 # Third-party modules
 from bs4 import BeautifulSoup
 # Custom modules
-import scrapers.scraper_exceptions as scraper_exc
+import lyrics_scraping.scrapers.scraper_exceptions as scraper_exc
 import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
-from scrapers.lyrics_scraper import LyricsScraper
+from lyrics_scraping.scrapers.lyrics_scraper import LyricsScraper
 from pyutils.genutils import add_plural_ending
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import get_error_msg
@@ -62,7 +62,7 @@ class AZLyricsScraper(LyricsScraper):
     See Also
     --------
     See the structure of the music database as defined in the `music.sql schema
-    (GitHub)  <https://bit.ly/2kHxqrO/>`_
+    (GitHub)  <https://bit.ly/2kIMYvn/>`_
 
     """
 

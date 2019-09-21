@@ -4,7 +4,7 @@
 The script scrapes lyrics from webpages and saves them in a dictionary and a
 database (if one was initially configured).
 
-`main_cfg.yaml <https://bit.ly/2klaf6m/>`_ is the config file for configuring
+`main_cfg.yaml <https://bit.ly/2m0Axv2/>`_ is the config file for configuring
 the script such as the list of URLS to lyrics webpages, the path to the cache
 directory where all lyrics webpages are saved, and the path to the SQLite music
 database where all the scraped data are saved.
@@ -23,10 +23,11 @@ Notes
 -----
 In the logging setup, ignore the experimental option that adds color to log
 messages by reading the environmental variable `COLOR_LOGS`.
+TODO: Move this experimental option to a dev branch
 
 References
 ----------
-.. [1] `lyrics_scraper.py <https://bit.ly/2kK5bbP/>`_.
+.. [1] `lyrics_scraper.py (GitHub) <https://bit.ly/2lZWkDe/>`_.
 
 """
 

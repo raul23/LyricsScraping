@@ -35,7 +35,7 @@ from urllib.request import urlopen
 from urllib.parse import urlparse
 from logging import NullHandler
 # Custom modules
-import music_database
+import data
 import scripts
 import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
@@ -201,7 +201,7 @@ class LyricsScraper:
             {'headers': ('song_title', 'artist_name', 'album_title',
                          'lyrics_url', 'lyrics', 'year',),
              'data': []}}
-    schema_filepath = os.path.join(music_database.__path__[0], 'music.sql')
+    schema_filepath = os.path.join(data.__path__[0], 'music.sql')
     logging_filepath = os.path.join(scripts.__path__[0], 'logging_cfg.yaml')
 
     def __init__(self, lyrics_urls, db_filepath="", autocommit=False,

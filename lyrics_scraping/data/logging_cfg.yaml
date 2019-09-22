@@ -21,15 +21,15 @@ handlers:
     formatter: verbose
     delay: True
 loggers:
+  bin.run_scraper:
+    level: DEBUG
+    handlers: [console, file]
+    propagate: False
   lyrics_scraping.scrapers.azlyrics_scraper:
     level: DEBUG
     handlers: [console, file]
     propagate: False
   lyrics_scraping.scrapers.lyrics_scraper:
-    level: DEBUG
-    handlers: [console, file]
-    propagate: False
-  scripts.run_scraper:
     level: DEBUG
     handlers: [console, file]
     propagate: False

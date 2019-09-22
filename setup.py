@@ -7,8 +7,12 @@ The project name is LyricsScraping and the package name is `lyrics_scraping`.
 import os
 from setuptools import setup
 
+
+# Directory of this file
+dirpath = os.path.abspath(os.path.dirname(__file__))
+
 # The text of the README file
-with open(os.path.join(os.getcwd(), "README.md")) as f:
+with open(os.path.join(dirpath, "README.md")) as f:
     README = f.read()
 
 setup(name='LyricsScraping',
@@ -20,7 +24,6 @@ setup(name='LyricsScraping',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Software Development :: Libraries'
       ],
@@ -28,7 +31,7 @@ setup(name='LyricsScraping',
       url='https://github.com/raul23/LyricsScraping',
       author='Raul C.',
       author_email='rchfe23@gmail.com',
-      license='MIT',
+      license='GPLv3',
       packages=['lyrics_scraping'],
       include_package_data=True,
       install_requires=[
@@ -38,7 +41,6 @@ setup(name='LyricsScraping',
           'py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master'
       ],
       entry_points={
-          'console_scripts': [
-              'lyricsgenius = lyricsgenius.__main__:main']
+          'console_scripts': ['run_scraper=bin.run_scraper:main']
       },
       zip_safe=False)

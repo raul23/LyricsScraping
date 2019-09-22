@@ -23,7 +23,6 @@ Notes
 -----
 In the logging setup, ignore the experimental option that adds color to log
 messages by reading the environmental variable `COLOR_LOGS`.
-TODO: Move this experimental option to a dev branch
 
 References
 ----------
@@ -31,6 +30,7 @@ References
 
 """
 
+# TODO: Move this experimental option to a dev branch
 import argparse
 import logging
 import os
@@ -38,21 +38,22 @@ import sqlite3
 import sys
 # Custom modules
 import pyutils.exceptions.log as log_exc
+from lyrics_scraping import data
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
-from lyrics_scraping import scripts
 from pyutils.genutils import add_default_arguments, read_yaml
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
 
-if __name__ == '__main__':
+
+def main():
     # Setup the parser
     parser = argparse.ArgumentParser(
         description="Scrape lyrics from webpages and save them locally in a "
                     "SQLite database or a dictionary.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     # Add some default arguments to the script
-    logging_path = os.path.join(scripts.__path__[0], 'logging_cfg.yaml')
-    main_path = os.path.join(scripts.__path__[0], 'main_cfg.yaml')
+    logging_path = os.path.join(data.__path__[0], 'logging_cfg.yaml')
+    main_path = os.path.join(data.__path__[0], 'main_cfg.yaml')
     add_default_arguments(logging_cfg_path=logging_path,
                           main_cfg_path=main_path,
                           parser=parser)
@@ -63,7 +64,7 @@ if __name__ == '__main__':
         # Setup logging from the logging config file: this will setup the
         # logging to all custom modules, including the current script
         setup_logging(args.logging_cfg)
-    logger = logging.getLogger('scripts.run_scraper')
+    logger = logging.getLogger('bin.run_scraper')
     try:
         # Experimental option: add color to log messages
         os.environ['COLOR_LOGS'] = args.color_logs
@@ -94,3 +95,7 @@ if __name__ == '__main__':
             logger.warning("Program will exit")
         # ipdb.set_trace()
         sys.exit(status_code)
+
+
+if __name__ == '__main__':
+    main()

@@ -15,7 +15,6 @@ Notes
 In the logging setup of the `__init__()` method, ignore the experimental option
 that adds color to log messages by reading the environmental variable
 `COLOR_LOGS`.
-TODO: Move this experimental option to a dev branch
 
 References
 ----------
@@ -24,6 +23,7 @@ schema (GitHub) <https://bit.ly/2kIMYvn/>`_.
 
 """
 
+# TODO: Move experimental option to a dev branch
 import logging
 import os
 import sqlite3
@@ -41,7 +41,6 @@ import pyutils.exceptions.files as files_exc
 import pyutils.exceptions.sql as sql_exc
 import lyrics_scraping.scrapers.scraper_exceptions as scraper_exc
 from lyrics_scraping import data
-from lyrics_scraping import scripts
 from pyutils.dbutils import connect_db, create_db, sql_sanity_check
 from pyutils.genutils import add_plural_ending, create_directory
 from pyutils.logutils import get_error_msg, setup_logging
@@ -203,7 +202,7 @@ class LyricsScraper:
                          'lyrics_url', 'lyrics', 'year',),
              'data': []}}
     schema_filepath = os.path.join(data.__path__[0], 'music.sql')
-    logging_filepath = os.path.join(scripts.__path__[0], 'logging_cfg.yaml')
+    logging_filepath = os.path.join(data.__path__[0], 'logging_cfg.yaml')
 
     def __init__(self, lyrics_urls, db_filepath="", autocommit=False,
                  overwrite_db=False, update_tables=False, cache_dirpath="",

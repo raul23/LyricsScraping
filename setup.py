@@ -5,7 +5,7 @@ The project name is LyricsScraping and the package name is `lyrics_scraping`.
 """
 
 import os
-from setuptools import setup
+from setuptools import find_packages, setup
 
 
 # Directory of this file
@@ -32,7 +32,7 @@ setup(name='LyricsScraping',
       author='Raul C.',
       author_email='rchfe23@gmail.com',
       license='GPLv3',
-      packages=['lyrics_scraping'],
+      packages=find_packages(exclude=['tests']),
       include_package_data=True,
       install_requires=[
           'beautifulsoup4',

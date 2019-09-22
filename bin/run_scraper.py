@@ -67,8 +67,8 @@ def main():
     logger = logging.getLogger('bin.run_scraper')
     try:
         # Experimental option: add color to log messages
-        os.environ['COLOR_LOGS'] = args.color_logs
-        if args.color_logs:
+        if args.color_logs is not None:
+            os.environ['COLOR_LOGS'] = args.color_logs
             logger = LoggingWrapper(logger, args.color_logs)
             # We need to wrap the db_utils's logger with LoggingWrapper which
             # will add color to log messages.

@@ -19,13 +19,7 @@ IMPORTANT: Don't confuse the options `overwrite_db` and `update_tables` in
 - `update_tables` : this relates to the tables in the database. Thus, if it is
                     True, then the **tables** can be updated.
 
-TODO: add usage
-
-Notes
------
-In the logging setup, ignore the experimental option that adds color to log
-messages by reading the environmental variable `COLOR_LOGS`.
-TODO: Move this experimental option to a dev branch
+TODO: add script usage
 
 References
 ----------
@@ -42,7 +36,7 @@ import sys
 import pyutils.exceptions.log as log_exc
 from lyrics_scraping import data
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
-from pyutils.genutils import add_cfg_arguments, read_yaml
+from pyutils.genutils import add_cfg_arguments, flatten_dict, read_yaml
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
 
@@ -62,7 +56,9 @@ def main():
                       add_exp_opt=True)
     args = parser.parse_args()
     status_code = 1
+    # Load the main config dict from the config file on disk
     main_cfg = read_yaml(args.main_cfg)
+    # Setup logging if required
     if main_cfg['use_logging']:
         # Setup logging from the logging config file: this will setup the
         # logging to all custom modules, including the current script
@@ -83,17 +79,19 @@ def main():
         logger.info("Logging is setup")
         # Start the scraping of lyrics webpages
         logger.info("Starting the web scraping")
-        scraper = AZLyricsScraper(**main_cfg)
+        scraper = AZLyricsScraper(**flatten_dict(main_cfg))
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
             sqlite3.Error, sqlite3.OperationalError,
             log_exc.LoggingSanityCheckError) as e:
         logger.exception(e)
     else:
+        # Success
         status_code = 0
         logger.info("End of the web scraping")
     finally:
         if status_code == 1:
+            # Error
             logger.warning("Program will exit")
         # ipdb.set_trace()
         sys.exit(status_code)

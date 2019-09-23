@@ -40,7 +40,7 @@ import sys
 import pyutils.exceptions.log as log_exc
 from lyrics_scraping import data
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
-from pyutils.genutils import add_default_arguments, read_yaml
+from pyutils.genutils import add_cfg_arguments, read_yaml
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
 
@@ -54,9 +54,10 @@ def main():
     # Add some default arguments to the script
     logging_path = os.path.join(data.__path__[0], 'logging_cfg.yaml')
     main_path = os.path.join(data.__path__[0], 'main_cfg.yaml')
-    add_default_arguments(logging_cfg_path=logging_path,
-                          main_cfg_path=main_path,
-                          parser=parser)
+    add_cfg_arguments(logging_cfg_path=logging_path,
+                      main_cfg_path=main_path,
+                      parser=parser,
+                      add_exp_opt=True)
     args = parser.parse_args()
     status_code = 1
     main_cfg = read_yaml(args.main_cfg)

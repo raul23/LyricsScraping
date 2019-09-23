@@ -42,6 +42,8 @@ setup(name='LyricsScraping',
           'py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master'
       ],
       entry_points={
-          'console_scripts': ['run_scraper=bin.run_scraper:main']
+          'console_scripts': ['edit_cfg=bin.edit_cfg:main',
+                              'reset_cfg=bin.reset_cfg:main',
+                              'run_scraper=bin.run_scraper:main']
       },
       zip_safe=False)

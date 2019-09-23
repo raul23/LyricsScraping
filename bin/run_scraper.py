@@ -74,7 +74,6 @@ def main():
             # We need to wrap the db_utils's logger with LoggingWrapper which
             # will add color to log messages.
             from pyutils import dbutils
-
             dbutils.logger = LoggingWrapper(dbutils.logger, args.color_logs)
             logger.debug("The log messages will be colored"
                          " ('{}')".format(args.color_logs))

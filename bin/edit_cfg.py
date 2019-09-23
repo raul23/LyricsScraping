@@ -14,7 +14,6 @@ import os
 import platform
 import shlex
 import subprocess
-import ipdb
 # Custom modules
 from lyrics_scraping import data
 

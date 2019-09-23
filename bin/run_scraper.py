@@ -19,10 +19,13 @@ IMPORTANT: Don't confuse the options `overwrite_db` and `update_tables` in
 - `update_tables` : this relates to the tables in the database. Thus, if it is
                     True, then the **tables** can be updated.
 
+TODO: add usage
+
 Notes
 -----
 In the logging setup, ignore the experimental option that adds color to log
 messages by reading the environmental variable `COLOR_LOGS`.
+TODO: Move this experimental option to a dev branch
 
 References
 ----------
@@ -30,7 +33,6 @@ References
 
 """
 
-# TODO: Move this experimental option to a dev branch
 import argparse
 import logging
 import os

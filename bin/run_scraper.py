@@ -36,7 +36,7 @@ import sys
 import pyutils.exceptions.log as log_exc
 from lyrics_scraping import data
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
-from pyutils.genutils import add_cfg_arguments, flatten_dict, read_yaml
+from pyutils.genutils import add_cfg_arguments, read_yaml
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
 
@@ -79,7 +79,7 @@ def main():
         logger.info("Logging is setup")
         # Start the scraping of lyrics webpages
         logger.info("Starting the web scraping")
-        scraper = AZLyricsScraper(**flatten_dict(main_cfg))
+        scraper = AZLyricsScraper(**main_cfg)
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
             sqlite3.Error, sqlite3.OperationalError,

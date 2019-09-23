@@ -6,32 +6,23 @@ The configuration file can either be:
 - the logging configuration file : used to set up the logging for all custom
                                    modules
 
-TODO: add usage
+TODO: add script usage
 
 """
+
 import argparse
-import os
 import platform
-import shlex
-import subprocess
+import sys
 # Custom modules
-from lyrics_scraping import data
-
-
-def run_cmd(cmd):
-    try:
-        retcode = subprocess.check_call(shlex.split(cmd))
-    except subprocess.CalledProcessError as e:
-        return e.returncode
-    else:
-        return retcode
+from lyrics_scraping.utils import get_config_filepath
+from pyutils.genutils import run_cmd
 
 
 def main():
     # Setup the parser
-    # TODO: add name of config file in description
     parser = argparse.ArgumentParser(
-        description="Edit the main configuration file.",
+        description="Edit a configuration file which can either be the "
+                    "logging or the main config file.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-a",
                         "--app_name",
@@ -51,10 +42,8 @@ def main():
                         help="Increase output verbosity")
     args = parser.parse_args()
     app = args.app
-    if args.cfg_file == "log":
-        filepath = os.path.join(data.__path__[0], 'logging_cfg.yaml')
-    else:
-        filepath = os.path.join(data.__path__[0], 'main_cfg.yaml')
+    filepath = get_config_filepath(args.cfg_file)
+    # TODO: add comments
     default_app_dict = {'Darwin': 'open {path}',
                         'Windows': 'cmd /c start "" "{path}"'}
     default_cmd = default_app_dict.get(platform.system(), 'xdg-open {path}')
@@ -69,7 +58,9 @@ def main():
         cmd += " " + filepath
         retcode = run_cmd(cmd)
     finally:
-        print(retcode)
+        if retcode:
+            print("Return code is ", retcode)
+        sys.exit(retcode)
 
 
 if __name__ == '__main__':

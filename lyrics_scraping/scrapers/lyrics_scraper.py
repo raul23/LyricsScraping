@@ -10,12 +10,6 @@ By default, the scraped data is saved in a dictionary (see the variable
 The scraped data can also be saved in a database [1] if a path to the SQLite
 database is given via the argument `db_filepath`.
 
-Notes
------
-In the logging setup of the `__init__()` method, ignore the experimental option
-that adds color to log messages by reading the environmental variable
-`COLOR_LOGS`.
-
 References
 ----------
 .. [1] `See the structure of the music database as defined in the `music.sql
@@ -23,7 +17,6 @@ schema (GitHub) <https://bit.ly/2kIMYvn/>`_.
 
 """
 
-# TODO: Move experimental option to a dev branch
 import logging
 import os
 import sqlite3

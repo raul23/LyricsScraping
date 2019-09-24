@@ -38,8 +38,6 @@ def main():
         choices=["log", "main"],
         help="What config file to edit: 'log' for the logging config file and "
              "'main' for the main config file.")
-    parser.add_argument("-v", "--verbose", action="store_true",
-                        help="Increase output verbosity")
     args = parser.parse_args()
     app = args.app
     filepath = get_config_filepath(args.cfg_file)

@@ -8,7 +8,9 @@ The configuration file can either be:
 
 Once the config file is reset, it will be updated with all the default values.
 
-TODO: add script usage
+Usage
+-----
+
 
 """
 

@@ -6,6 +6,10 @@ The configuration file can either be:
 - the logging configuration file : used to set up the logging for all custom
                                    modules
 
+The configuration file can either be edited by a specific application (e.g.
+atom) or if no application is provided, by a default application associated
+with this type of file.
+
 Usage
 -----
     $ edit_cfg.py [-h] [-a APP] -f {log,main}
@@ -61,11 +65,13 @@ def main():
     args = parser.parse_args()
     app = args.app
     filepath = get_config_filepath(args.cfg_file)
-    # TODO: add comments
+    # Command to open file with default application on the specific OS
+    # e.g. `open file_path` in macOS
     default_app_dict = {'Darwin': 'open {path}',
                         'Windows': 'cmd /c start "" "{path}"'}
     default_cmd = default_app_dict.get(platform.system(), 'xdg-open {path}')
     cmd = default_cmd if app is None else app + " " + filepath
+    # TODO: add comments
     retcode = None
     try:
         retcode = run_cmd(cmd.format(path=filepath))
@@ -77,6 +83,7 @@ def main():
         retcode = run_cmd(cmd)
     finally:
         if retcode:
+            # Error
             print("Return code is ", retcode)
         sys.exit(retcode)
 

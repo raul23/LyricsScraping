@@ -40,6 +40,7 @@ setup(name='LyricsScraping',
           'beautifulsoup4',
           'lxml',
           'pyyaml',
+          'python',
           'requests',
           'py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master'
       ],

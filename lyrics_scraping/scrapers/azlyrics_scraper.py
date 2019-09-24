@@ -105,8 +105,8 @@ class AZLyricsScraper(LyricsScraper):
         # and start the scraping of the actual webpage with BeautifulSoup
         if urlparse(url).path.startswith('/lyrics/'):
             # Lyrics URL
-            self.logger.debug("The URL {} refers to a lyrics"
-                              " webpage".format(url))
+            self.logger.debug("The URL {} refers to a lyrics "
+                              "webpage".format(url))
             self._scrape_lyrics_page(webpage_filepath, url)
         elif urlparse(url).path.startswith('/19/') or \
                 urlparse(url).path[1].isalpha():
@@ -114,14 +114,14 @@ class AZLyricsScraper(LyricsScraper):
             # NOTE: artists' names that start with a number have their webpages
             # placed within the directory /19/
             # e.g. https://www.azlyrics.com/19/50cent.html
-            self.logger.debug("The URL {} refers to an artist's"
-                              " webpage".format(url))
+            self.logger.debug("The URL {} refers to an artist's "
+                              "webpage".format(url))
             self._scrape_artist_page(webpage_filepath, url)
         else:
             # Bad URL
             raise scraper_exc.InvalidURLCategoryError(
-                "The URL {} is not recognized as referring to neither"
-                " an artist's nor a lyrics webpage".format(url))
+                "The URL {} is not recognized as referring to neither "
+                "an artist's nor a lyrics webpage".format(url))
 
     def _scrape_artist_page(self, artist_filepath, artist_url):
         """Scrape the artist webpage.
@@ -182,17 +182,17 @@ class AZLyricsScraper(LyricsScraper):
         # e.g. <a href="../lyrics/artist_name/song_title.html" ... >
         anchors = bs_obj.find_all("a", href=re.compile("^../lyrics"))
         # Process each lyrics' url
-        self.logger.info("There are {} lyrics URLs to process for the given"
-                         " artist".format(len(anchors)))
+        self.logger.info("There are {} lyrics URLs to process for the given "
+                         "artist".format(len(anchors)))
         for i, a in enumerate(anchors):
             # Get URL from the anchor's href attribute
             lyrics_url = a.attrs['href']
-            self.logger.info("#{} Processing the lyrics URL"
-                             " {}".format(i+1, lyrics_url))
+            self.logger.info("#{} Processing the lyrics URL "
+                             "{}".format(i+1, lyrics_url))
             self.logger.debug("Processing the anchor '{}'".format(a))
             # Check if the lyrics' URL is relative to the current artist's URL
-            self.logger.debug("Checking if the URL {} is"
-                              " relative".format(lyrics_url))
+            self.logger.debug("Checking if the URL {} is "
+                              "relative".format(lyrics_url))
             if lyrics_url.startswith('../'):
                 self.logger.debug("The URL {} is relative".format(lyrics_url))
                 # Complete the relative URL by adding the scheme and hostname
@@ -230,8 +230,8 @@ class AZLyricsScraper(LyricsScraper):
                 if skip_url:
                     self._add_skipped_url(lyrics_url, get_error_msg(error))
                 else:
-                    self.logger.debug("Lyrics URL successfully processed:"
-                                      " {}".format(lyrics_url))
+                    self.logger.debug("Lyrics URL successfully processed: "
+                                      "{}".format(lyrics_url))
                     self.good_urls.add(lyrics_url)
 
     def _scrape_lyrics_page(self, lyrics_filepath, lyrics_url):
@@ -288,8 +288,8 @@ class AZLyricsScraper(LyricsScraper):
         # without class and id
         if len(lyrics_result) != 1:
             raise scraper_exc.NonUniqueLyricsError(
-                "Lyrics extraction scheme broke: no lyrics found or more"
-                " than one lyrics were found")
+                "Lyrics extraction scheme broke: no lyrics found or more "
+                "than one lyrics were found")
         lyrics_text = lyrics_result[0].text.strip()
         album_result = bs_obj.find_all("div",
                                        class_="panel songlist-panel noprint")
@@ -297,8 +297,8 @@ class AZLyricsScraper(LyricsScraper):
             len(album_result), add_plural_ending(album_result)))
         if len(album_result) == 0:
             # No album found
-            self.logger.debug("No album found in the lyrics webpage"
-                              " {}".format(lyrics_url))
+            self.logger.debug("No album found in the lyrics webpage "
+                              "{}".format(lyrics_url))
             # Add empty string to the album result to notify that no album
             # was found when processing each album in the result
             album_result.append("")
@@ -325,14 +325,14 @@ class AZLyricsScraper(LyricsScraper):
                 if len(year_result) != 1:
                     # 0 or more than 1 album's year found
                     raise scraper_exc.NonUniqueAlbumYearError(
-                        "The album's year extraction doesn't result in a"
-                        " UNIQUE number")
+                        "The album's year extraction doesn't result in a "
+                        "UNIQUE number")
                 # Sanity check on the album's year: the year should be a number
                 # with four digits
                 if not (len(year_result[0]) and year_result[0].isdecimal()):
                     raise scraper_exc.WrongAlbumYearError(
-                        "The Album's year extraction scheme broke: the year"
-                        " '{}' is not a number with four digits".format(
+                        "The Album's year extraction scheme broke: the year "
+                        "'{}' is not a number with four digits".format(
                             year_result[0]))
                 song_year = year_result[0]
             else:

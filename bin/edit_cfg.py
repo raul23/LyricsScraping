@@ -6,7 +6,27 @@ The configuration file can either be:
 - the logging configuration file : used to set up the logging for all custom
                                    modules
 
-TODO: add script usage
+Usage
+-----
+    $ edit_cfg.py [-h] [-a APP] -f {log,main}
+
+Edit the main config file with TextEdit (macOS):
+    $ edit_cfg.py -a TextEdit -f main
+
+Edit the logging config file with default application (e.g. atom):
+    $ edit_cfg.py -f log
+
+Available options:
+    -h, --help            show this help message and exit
+    -a APP, --app_name APP
+                        Name of the application to use for editing the file.
+                        If no name is given, then the default application for
+                        opening this type of file will be used. (default:
+                        None)
+    -f {log,main}, --cfg_file {log,main}
+                        What config file to edit: 'log' for the logging config
+                        file and 'main' for the main config file. (default:
+                        None)
 
 """
 

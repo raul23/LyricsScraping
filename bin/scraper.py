@@ -241,7 +241,8 @@ def main():
     elif args.start_scraping:
         start_scraper(args)
     else:
-        pass
+        print("No action selected: edit (-e), reset (-r) or start the scraper "
+              "(-s)")
 
 
 if __name__ == '__main__':

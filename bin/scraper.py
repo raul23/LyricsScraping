@@ -145,7 +145,7 @@ def reset_config(cfg_type):
     -------
     retcode: int
         If there is an I/O related error, the return code is 1. Otherwise, it
-        is 0 if the config could be reset successfully.
+        is 0 if the config was reset successfully.
 
     """
     # Get the paths to the default and user config files

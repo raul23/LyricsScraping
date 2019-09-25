@@ -41,6 +41,7 @@ setup(name='LyricsScraping',
           'lxml',
           'm2r',
           'pyyaml',
+          'recommonmark',
           'requests',
           'sphinx_rtd_theme',
           'py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master'

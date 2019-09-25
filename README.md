@@ -1,4 +1,4 @@
-# LyricsScraping [Work-in-Progress]
+# README [Work-in-Progress]
 ## Description
 Crawl and scrap lyrics from music webpages. For the moment, only
 [one lyrics website](https://bit.ly/2k5r0SX) is supported. But I will

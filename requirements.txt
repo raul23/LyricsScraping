@@ -1,5 +1,6 @@
 beautifulsoup4>=4.6.0
 m2r>=0.2.1
 pyyaml>=5.1.1
+recommonmark>=0.6.0
 requests>=2.20.0
 sphinx_rtd_theme>=0.4.3

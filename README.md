@@ -11,27 +11,15 @@ retrieval of useful data.
 * `BeautifulSoup` : used for parsing the lyrics webpages
 * `requests` : used for requesting the HTML content of lyrics webpages
 * `yaml` : used for reading configuration files (e.g. logging)
-* `py-common-utils` : custom library that ...
+* `py-common-utils` : is a Python toolbox with useful functions and
+  modules ready to be used in different projects. For instance, you will
+  find code related to databases and logging.
+
 
 ## Installation instructions
 1. Download the [lyrics-scrapers](https://github.com/raul23/lyrics-scrapers) 
 and [utilities](https://github.com/raul23/utilities) libraries
-1. Set environment variables
-1. Test
-
-### Set environment variables
-Add paths to the
-[lyrics-scrapers](https://github.com/raul23/lyrics-scrapers) and
-[utilities](https://github.com/raul23/utilities) libraries in your 
-environment variables:
-```commandline
-export PYTHONPATH=~/path/to/lyrics-scrapers:$PYTHONPATH
-export PYTHONPATH=~/path/to/utilities:$PYTHONPATH
-``` 
-* [utilities](https://github.com/raul23/utilities) is a Python toolbox 
-  with useful functions and modules ready to be used in different
-  projects. For instance, you will find code related to databases and
-  logging.
+2. ...
 
 ## Usage
 These are the two ways to use the `lyrics-scrapers` library:

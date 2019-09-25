@@ -44,10 +44,11 @@ import logging
 import os
 import platform
 import sqlite3
+import traceback
 # Custom modules
 import pyutils.exceptions.log as log_exc
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
-from lyrics_scraping.utils import get_config_filepath
+from lyrics_scraping.utils import get_data_filepath
 from pyutils.genutils import copy_file, read_yaml, run_cmd
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
@@ -88,7 +89,7 @@ def edit_config(cfg_type, app=None):
         of the application doesn't refer to an executable.
 
     """
-    filepath = get_config_filepath(cfg_type)
+    filepath = get_data_filepath(cfg_type)
     # Command to open the config file with the default application on the
     # specific OS or by the user-specified app, e.g. `open file_path` in macOS
     # opens the file with the default app (e.g. atom)
@@ -122,10 +123,9 @@ def edit_config(cfg_type, app=None):
             retcode = run_cmd(cmd)
         else:
             raise FileNotFoundError(e)
-    finally:
-        if retcode == 0:
-            print("Opening the {} configuration file ...".format(cfg_type))
-        return retcode
+    if retcode == 0:
+        print("Opening the {} configuration file ...".format(cfg_type))
+    return retcode
 
 
 def reset_config(cfg_type):
@@ -149,8 +149,8 @@ def reset_config(cfg_type):
 
     """
     # Get the paths to the default and user config files
-    default_cfg_filepath = get_config_filepath(cfg_type=cfg_type, default=True)
-    user_cfg_filepath = get_config_filepath(cfg_type=cfg_type, default=False)
+    default_cfg_filepath = get_data_filepath(file_type=cfg_type, default=True)
+    user_cfg_filepath = get_data_filepath(file_type=cfg_type, default=False)
     try:
         copy_file(source_filepath=default_cfg_filepath,
                   dest_filepath=user_cfg_filepath)
@@ -181,8 +181,8 @@ def start_scraper(color_logs=None):
     """
     status_code = 1
     # Get the filepaths to the main and logging config files
-    main_cfg_filepath = get_config_filepath(cfg_type='main', default=False)
-    log_cfg_filepath = get_config_filepath(cfg_type='log', default=False)
+    main_cfg_filepath = get_data_filepath(file_type='main', default=False)
+    log_cfg_filepath = get_data_filepath(file_type='log', default=False)
     # Load the main config dict from the config file on disk
     main_cfg = read_yaml(main_cfg_filepath)
     # Setup logging if required
@@ -295,15 +295,18 @@ def main():
 
     """
     args = setup_arg_parser()
-    if args.edit:
-        edit_config(args.edit, args.app)
-    elif args.reset:
-        reset_config(args.reset)
-    elif args.start_scraping:
-        start_scraper(args.color_logs)
-    else:
-        print("No action selected: edit (-e), reset (-r) or start the scraper "
-              "(-s)")
+    try:
+        if args.edit:
+            edit_config(args.edit, args.app)
+        elif args.reset:
+            reset_config(args.reset)
+        elif args.start_scraping:
+            start_scraper(args.color_logs)
+        else:
+            print("No action selected: edit (-e), reset (-r) or start the scraper "
+                  "(-s)")
+    except (AssertionError, FileNotFoundError):
+        traceback.print_exc()
 
 
 if __name__ == '__main__':

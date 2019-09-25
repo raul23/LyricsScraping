@@ -33,7 +33,7 @@ master_doc = 'index'
 # ones.
 extensions = [
     # 'm2r',
-    'recommonmark',
+    # 'recommonmark',
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',

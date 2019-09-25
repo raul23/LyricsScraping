@@ -1,6 +1,3 @@
-# See the lyrics_scraper's class docstring @ https://bit.ly/2lZWkDe for a
-# detailed explanation of each of the following options
-# TODO: change URL to point to a better doc than the actual code
 #=============================
 #      LOGGING CONFIG
 #=============================
@@ -18,10 +15,6 @@ update_tables: False
 # Lyrics websites supported: azlyrics.com
 lyrics_urls:
 - https://www.azlyrics.com/d/depeche.html
-#- https://www.dsadsawhateverdjkdsa.com/hello.html
-#- https://www.azlyrics.com/b/bowie.html
-#- https://www.azlyrics.com/lyrics/davidbowie/spaceoddity.html
-#- https://www.azlyrics.com/19/50cent.html
 #=============================
 #       SAVING CONFIG
 #=============================

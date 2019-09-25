@@ -84,7 +84,8 @@ def edit_config(cfg_type, app=None):
     Raises
     ------
     FileNotFoundError
-        Raised if the command to open the external program
+        Raised if the command to open the external program fails, e.g. the name
+        of the application doesn't refer to an executable.
 
     """
     filepath = get_config_filepath(cfg_type)

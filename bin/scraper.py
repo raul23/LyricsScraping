@@ -16,7 +16,7 @@ with this type of file.
 The configuration file can also be reset with default values.
 
 Usage
------
+=====
     $ scraper [-h] [-s] [-c [{u,p}]] [-e {log,main}] [-a APP] [-r {log,main}]
 
 Start the lyrics scraper:
@@ -51,77 +51,128 @@ from lyrics_scraping.utils import get_config_filepath
 from pyutils.genutils import copy_file, read_yaml, run_cmd
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
+import ipdb
 
 
-def edit_config(args):
-    """
+def edit_config(cfg_type, app=None):
+    """Edit a configuration file.
+
+    The user chooses what type of config file (`cfg_type`) to edit: 'log' for
+    the logging file and 'main' for the main config file.
+
+    The configuration file can be opened by a user-specified application (`app`)
+    or a default program associated with this type of file (when `app` is None).
 
     Parameters
     ----------
-    args
+    cfg_type : str, {'log', 'main'}
+        The type of configuration file we want to edit. 'log' refers to the
+        logging config file, and 'main' to the main config file used to setup a
+        lyrics scraper.
+    app : str, optional
+        Name of the application to use to open the config file, e.g. TextEdit
+        (the default value is None which implies that the default application
+        will be used to open the config file).
 
     Returns
     -------
+    retcode : int
+        If there is a subprocess-related error, the return code is greater than
+        0. Otherwise, it is 0 if the file could be opened with the external
+        program.
+
+    Raises
+    ------
+    FileNotFoundError
+        Raised if the command to open the external program
 
     """
-    app = args.app
-    filepath = get_config_filepath(args.edit)
-    # Command to open file with default application on the specific OS
-    # e.g. `open file_path` in macOS
+    filepath = get_config_filepath(cfg_type)
+    # Command to open the config file with the default application on the
+    # specific OS or by the user-specified app, e.g. `open file_path` in macOS
+    # opens the file with the default app (e.g. atom)
     default_app_dict = {'Darwin': 'open {path}',
                         'Windows': 'cmd /c start "" "{path}"'}
     default_cmd = default_app_dict.get(platform.system(), 'xdg-open {path}')
+    # NOTES:
+    # - `app is None` implies that the default app will be used
+    # - Otherwise, the user-specified app will be used
     cmd = default_cmd if app is None else app + " " + filepath
-    # TODO: add comments
     retcode = None
     try:
+        # IMPORTANT: if the user provided the name of an app, it will be used as
+        # a command along with the file path, e.g. `$ atom {filepath}`. However,
+        # this case might not work if the user provided an app name that doesn't
+        # refer to an executable, e.g. `$ TextEdit {filepath}` won't work. The
+        # failed case is further processed in the `except FileNotFoundError`.
         retcode = run_cmd(cmd.format(path=filepath))
     except FileNotFoundError as e:
-        # e.g. the app name is not found
-        specific_app_dict = {'Darwin': 'open -a {app}'.format(app=app)}
-        cmd = specific_app_dict.get(platform.system(), app)
-        cmd += " " + filepath
-        retcode = run_cmd(cmd)
-    finally:
-        if retcode:
-            # Error
-            print("Return code is ", retcode)
+        # This happens if the name of the app can't be called as an executable
+        # on the terminal
+        # e.g. TextEdit can't be run on the terminal but atom can since it
+        # refers to an executable (bin/atom).
+        # To open TextEdit from the terminal, the command `open -a {app_name}`
+        # must be used on macOS.
+        if platform.system() == 'Darwin':
+            # Get the command to open the file with the user-specified app
+            # TODO: add the open commands for the other OSes
+            specific_app_dict = {'Darwin': 'open -a {app}'.format(app=app)}
+            cmd = specific_app_dict.get(platform.system(), app) + " " + filepath
+            retcode = run_cmd(cmd)
         else:
-            print("Opening the {} configuration file ...".format(args.edit))
+            raise FileNotFoundError(e)
+    finally:
+        if retcode == 0:
+            print("Opening the {} configuration file ...".format(cfg_type))
         return retcode
 
 
-def reset_config(args):
-    """
+def reset_config(cfg_type):
+    """Reset a configuration file to its default values.
+
+    The user chooses what type of config file (`cfg_type`) to reset: 'log' for
+    the logging file and 'main' for the main config file.
 
     Parameters
     ----------
-    args
+    cfg_type : str, {'log', 'main'}
+        The type of configuration file we want to reset. 'log' refers to the
+        logging config file, and 'main' to the main config file used to setup a
+        lyrics scraper.
 
     Returns
     -------
+    retcode: int
+        If there is an I/O related error, the return code is 1. Otherwise, it
+        is 0 if the config could be reset successfully.
 
     """
-    # Add comments
-    orig_cfg_filepath = get_config_filepath(cfg_type=args.reset, orig=True)
-    user_cfg_filepath = get_config_filepath(cfg_type=args.reset, orig=False)
+    # Get the paths to the default and user config files
+    default_cfg_filepath = get_config_filepath(cfg_type=cfg_type, default=True)
+    user_cfg_filepath = get_config_filepath(cfg_type=cfg_type, default=False)
     try:
-        copy_file(source_filepath=orig_cfg_filepath,
+        copy_file(source_filepath=default_cfg_filepath,
                   dest_filepath=user_cfg_filepath)
     except OSError as e:
         print(e)
         return 1
     else:
-        print("The {} configuration file is reset".format(args.reset))
+        print("The {} configuration file is reset".format(cfg_type))
         return 0
 
 
-def start_scraper(args):
-    """
+def start_scraper(color_logs=None):
+    """Start the lyrics scraper.
+
+    The lyrics scraper is setup based on the main configuration file
+    `main_cfg.yaml` which can be edited with the command:
+        `scraper -e {log,main}`
 
     Parameters
     ----------
-    args
+    color_logs : None, optional
+        Whether to add color to logs (the default value is False which implies
+        that no color will be added to log messages).
 
     Returns
     -------
@@ -129,8 +180,8 @@ def start_scraper(args):
     """
     status_code = 1
     # Get the filepaths to the main and logging config files
-    main_cfg_filepath = get_config_filepath(cfg_type='main', orig=False)
-    log_cfg_filepath = get_config_filepath(cfg_type='log', orig=False)
+    main_cfg_filepath = get_config_filepath(cfg_type='main', default=False)
+    log_cfg_filepath = get_config_filepath(cfg_type='log', default=False)
     # Load the main config dict from the config file on disk
     main_cfg = read_yaml(main_cfg_filepath)
     # Setup logging if required
@@ -141,15 +192,15 @@ def start_scraper(args):
     logger = logging.getLogger('bin.scraper')
     try:
         # Experimental option: add color to log messages
-        if args.color_logs is not None:
-            os.environ['COLOR_LOGS'] = args.color_logs
-            logger = LoggingWrapper(logger, args.color_logs)
+        if color_logs is not None:
+            os.environ['COLOR_LOGS'] = color_logs
+            logger = LoggingWrapper(logger, color_logs)
             # We need to wrap the db_utils's logger with LoggingWrapper which
             # will add color to log messages.
             from pyutils import dbutils
-            dbutils.logger = LoggingWrapper(dbutils.logger, args.color_logs)
+            dbutils.logger = LoggingWrapper(dbutils.logger, color_logs)
             logger.debug("The log messages will be colored"
-                         " ('{}')".format(args.color_logs))
+                         " ('{}')".format(color_logs))
         logger.info("Main config file loaded")
         logger.info("Logging is setup")
         # Start the scraping of lyrics webpages
@@ -173,7 +224,13 @@ def start_scraper(args):
 
 
 def setup_arg_parser():
-    """
+    """Setup the argument parser for the command-line script.
+
+    Related arguments are grouped according to the three types of actions that
+    can be performed with the script:
+    - start the lyrics scraper,
+    - edit a configuration file or
+    - reset a configuration file.
 
     Returns
     -------
@@ -185,6 +242,7 @@ def setup_arg_parser():
                     "SQLite database or a dictionary. Also, you can edit or "
                     "reset a configuration file which can either be the "
                     "logging or the main config file.")
+    # Group arguments that are closely related
     start_group = parser.add_argument_group('Start the lyrics scraping')
     start_group.add_argument(
         "-s", "--start_scraping",
@@ -227,19 +285,21 @@ def setup_arg_parser():
 
 
 def main():
-    """
+    """Main entry-point to the script.
 
-    Returns
-    -------
+    According to the user's choice of action, the script might:
+    - start the scraper,
+    - edit a configuration file, or
+    - reset a configuration file.
 
     """
     args = setup_arg_parser()
     if args.edit:
-        edit_config(args)
+        edit_config(args.edit, args.app)
     elif args.reset:
-        reset_config(args)
+        reset_config(args.reset)
     elif args.start_scraping:
-        start_scraper(args)
+        start_scraper(args.color_logs)
     else:
         print("No action selected: edit (-e), reset (-r) or start the scraper "
               "(-s)")

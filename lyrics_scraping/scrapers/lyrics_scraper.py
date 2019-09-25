@@ -33,7 +33,7 @@ import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
 import pyutils.exceptions.sql as sql_exc
 import lyrics_scraping.scrapers.scraper_exceptions as scraper_exc
-from lyrics_scraping import data
+from lyrics_scraping.utils import get_data_filepath
 from pyutils.dbutils import connect_db, create_db, sql_sanity_check
 from pyutils.genutils import add_plural_ending, create_directory
 from pyutils.logutils import get_error_msg, setup_logging
@@ -194,8 +194,8 @@ class LyricsScraper:
             {'headers': ('song_title', 'artist_name', 'album_title',
                          'lyrics_url', 'lyrics', 'year',),
              'data': []}}
-    schema_filepath = os.path.join(data.__path__[0], 'music.sql')
-    logging_filepath = os.path.join(data.__path__[0], 'logging_cfg.yaml')
+    schema_filepath = get_data_filepath(file_type='schema')
+    logging_filepath = get_data_filepath(file_type='log')
 
     def __init__(self, lyrics_urls, db_filepath="", autocommit=False,
                  overwrite_db=False, update_tables=False, cache_dirpath="",

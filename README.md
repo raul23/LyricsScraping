@@ -35,4 +35,4 @@ Change directory to `script/` and run the script:
 **Notes:**
 * The option `-c` is for adding color to log messages. 
 
-### Use the library as API in your own code
+### Use the library in your own code

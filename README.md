@@ -17,8 +17,10 @@ retrieval of useful data.
 
 
 ## Installation instructions
-1. Download the [lyrics-scrapers](https://github.com/raul23/lyrics-scrapers) 
-and [utilities](https://github.com/raul23/utilities) libraries
+1. Download the
+   [LyicsScraping](https://github.com/raul23/LyricsScraping) and
+   [py-common-utilities](https://github.com/raul23/py-common-utils)
+   libraries
 2. ...
 
 ## Usage

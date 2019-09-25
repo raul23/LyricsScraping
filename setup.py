@@ -42,6 +42,7 @@ setup(name='LyricsScraping',
           'm2r',
           'pyyaml',
           'requests',
+          'sphinx_rtd_theme',
           'py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master'
       ],
       entry_points={

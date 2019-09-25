@@ -1,4 +1,4 @@
-# lyrics-scrapers [Work-in-Progress]
+# LyricsScraping [Work-in-Progress]
 ## Description
 Crawl and scrap lyrics from music webpages. For the moment, only
 [one lyrics website](https://bit.ly/2k5r0SX) is supported. But I will
@@ -6,8 +6,8 @@ eventually support another lyrics website that provides an API for easy
 retrieval of useful data.
 
 ## Dependencies
-* `Python`: 3.5, 3.6, 3.7
 * **Platforms:** macOS, Linux, Windows
+* `Python`: 3.5, 3.6, 3.7
 * `BeautifulSoup` : used for parsing the lyrics webpages
 * `requests` : used for requesting the HTML content of lyrics webpages
 * `yaml` : used for reading configuration files (e.g. logging)

@@ -12,7 +12,7 @@ Welcome to LyricsScraping's documentation!
 
    README
    examples
-   api_reference
+   api_reference.rst
 
 Indices and tables
 ==================

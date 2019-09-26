@@ -6,5 +6,6 @@ LyricsScraping API reference
    :maxdepth: 2
    :caption: Table of Contents
 
-    lyrics_scraping
+   api_reference/lyrics_scraping.rst
+
 

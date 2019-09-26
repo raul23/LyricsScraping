@@ -5,6 +5,7 @@
    :maxdepth: 2
    :caption: Table of Contents
 
-    data
-    examples
-    scrapers
+   lyrics_scraping/data_dir
+   lyrics_scraping/examples_dir
+   lyrics_scraping/utils
+   lyrics_scraping/scrapers

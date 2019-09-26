@@ -1,4 +1,4 @@
-include README.md
+include README.rst
 include LICENSE
 include lyrics_scraping/data/*.sql
 include lyrics_scraping/data/*.yaml

@@ -3,7 +3,7 @@ README
 ======
 .. raw:: html
 
-   <center><img src="docs/source/_static/LyricsScraping_logo.png"</center>
+   <center><img src="docs/source/_static/LyricsScraping_logo.png"></center>
 
 .. image:: https://readthedocs.org/projects/lyricsscraping/badge/?version=latest
    :target: https://lyricsscraping.readthedocs.io/en/latest/?badge=latest

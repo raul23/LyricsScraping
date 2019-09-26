@@ -1,7 +1,7 @@
 ======
 README
 ======
-.. image:: _static/LyricsScraping_logo.png
+.. image:: docs/source/_static/LyricsScraping_logo.png
    :alt: LyricsScraping logo
    :align: center
 

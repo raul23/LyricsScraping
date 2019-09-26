@@ -11,6 +11,8 @@ Welcome to LyricsScraping's documentation!
    :caption: Table of Contents
 
    README
+   examples
+   api_reference
    test
    test2
 

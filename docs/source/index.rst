@@ -7,7 +7,7 @@ Welcome to LyricsScraping's documentation!
 ==========================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Table of Contents
 
    README

@@ -1,6 +1,6 @@
-=======================
-LyricsScraping's README
-=======================
+======
+README
+======
 .. image:: https://readthedocs.org/projects/lyricsscraping/badge/?version=latest
    :target: https://lyricsscraping.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status

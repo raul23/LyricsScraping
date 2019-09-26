@@ -12,14 +12,14 @@ from setuptools import find_packages, setup
 dirpath = os.path.abspath(os.path.dirname(__file__))
 
 # The text of the README file
-with open(os.path.join(dirpath, "README.md")) as f:
+with open(os.path.join(dirpath, "README.rst")) as f:
     README = f.read()
 
 setup(name='LyricsScraping',
       version='1.0',
       description='Crawl and scrap lyrics from song webpages',
       long_description=README,
-      long_description_content_type='text/markdown',
+      long_description_content_type='text/x-rst',
       classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Operating System :: OS Independent',

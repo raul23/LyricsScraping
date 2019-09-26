@@ -1,6 +1,6 @@
-============================
-LyricsScraping API reference
-============================
+==============================
+LyricsScraping's API reference
+==============================
 
 .. toctree::
    :maxdepth: 2

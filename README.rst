@@ -1,9 +1,9 @@
 ======
 README
 ======
-.. image:: docs/source/_static/LyricsScraping_logo.png
-   :alt: LyricsScraping logo
-   :align: center
+.. raw:: html
+
+   <p align="center"><img src="https://github.com/raul23/images/blob/master/LyricsScraping/LyricsScraping_logo.png"></p>
 
 .. image:: https://readthedocs.org/projects/lyricsscraping/badge/?version=latest
    :target: https://lyricsscraping.readthedocs.io/en/latest/?badge=latest

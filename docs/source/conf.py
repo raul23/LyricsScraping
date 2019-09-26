@@ -39,8 +39,6 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx_rtd_theme'
 ]
-# The following three options I got from
-# https://samnicholls.net/2016/06/15/how-to-sphinx-readthedocs/
 napoleon_google_docstring = False
 napoleon_use_param = False
 napoleon_use_ivar = True

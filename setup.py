@@ -39,9 +39,7 @@ setup(name='LyricsScraping',
       install_requires=[
           'beautifulsoup4',
           'lxml',
-          'm2r',
           'pyyaml',
-          'recommonmark',
           'requests',
           'sphinx_rtd_theme',
           'py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master'

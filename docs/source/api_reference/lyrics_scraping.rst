@@ -1,6 +1,6 @@
-=======================
-lyrics_scraping package
-=======================
+===========================
+``lyrics_scraping`` package
+===========================
 .. toctree::
    :maxdepth: 2
    :caption: Table of Contents

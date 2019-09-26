@@ -13,8 +13,6 @@ Welcome to LyricsScraping's documentation!
    README
    examples
    api_reference
-   test
-   test2
 
 Indices and tables
 ==================

@@ -5,9 +5,10 @@ The script scrapes lyrics from webpages and saves them in a dictionary and a
 database (if one was initially configured).
 
 The configuration file can either be:
-- the main configuration file : used for configuring a lyrics scraper
-- the logging configuration file : used to set up the logging for all custom
-                                   modules
+
+- the main configuration file: used for configuring a lyrics scraper
+- the logging configuration file: used to set up the logging for all custom \
+modules
 
 The configuration file can either be edited by a specific application (e.g.
 atom) or if no application is provided, by a default application associated
@@ -16,24 +17,29 @@ with this type of file.
 The configuration file can also be reset with default values.
 
 Usage
-=====
-    $ scraper [-h] [-s] [-c [{u,p}]] [-e {log,main}] [-a APP] [-r {log,main}]
+-----
+    ``$ scraper [-h] [-s] [-c [{u,p}]] [-e {log,main}] [-a APP] [-r {log,main}]``
 
-Start the lyrics scraper:
+Start the lyrics scraper::
+
     $ scraper -s
 
-Edit the main config file with TextEdit (macOS):
+Edit the main config file with TextEdit (macOS)::
+
     $ scraper -e main -a TextEdit
 
-Edit the logging config file with the default application (e.g. atom):
+Edit the logging config file with the default application (e.g. atom)::
+
     $ scraper -e log
 
-Reset the main config file to default values:
+Reset the main config file to default values::
+
     $ scraper -r main
 
 Notes
 -----
 More information is available at:
+
 - TODO: add PyPi URL
 - https://github.com/raul23/LyricsScraping
 
@@ -167,7 +173,7 @@ def start_scraper(color_logs=None):
 
     The lyrics scraper is setup based on the main configuration file
     `main_cfg.yaml` which can be edited with the command:
-        `scraper -e {log,main}`
+    `scraper -e {log,main}`
 
     Parameters
     ----------
@@ -303,6 +309,7 @@ def main():
         elif args.start_scraping:
             start_scraper(args.color_logs)
         else:
+            # TODO: default when no action given is to start scraping?
             print("No action selected: edit (-e), reset (-r) or start the scraper "
                   "(-s)")
     except (AssertionError, FileNotFoundError):

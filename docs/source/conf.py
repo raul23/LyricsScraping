@@ -78,7 +78,6 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 
-import ipdb
 def post_process(app, what, name, obj, options, lines):
     first_lines = ["Description", "-----------"]
     if name == "scrapers.scraper_exceptions":
@@ -88,7 +87,6 @@ def post_process(app, what, name, obj, options, lines):
         new_lines = first_lines + lines + ["Functions", "---------"]
         lines[:] = new_lines
     elif what == 'module':
-        ipdb.set_trace()
         last_lines = ["Classes and methods", "-------------------"]
         new_lines = first_lines + lines + last_lines
         lines[:] = new_lines

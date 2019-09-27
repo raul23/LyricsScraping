@@ -76,3 +76,29 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+import ipdb
+def post_process(app, what, name, obj, options, lines):
+    first_lines = ["Description", "-----------"]
+    if name == "scrapers.scraper_exceptions":
+        new_lines = first_lines + lines + ["Classes", "-------"]
+        lines[:] = new_lines
+    elif name == "scripts.scraper":
+        new_lines = first_lines + lines + ["Functions", "---------"]
+        lines[:] = new_lines
+    elif what == 'module':
+        ipdb.set_trace()
+        last_lines = ["Classes and methods", "-------------------"]
+        new_lines = first_lines + lines + last_lines
+        lines[:] = new_lines
+    # Complaints that Functions is an invalid section title
+    """
+    elif name == "scripts.scraper.edit_config":
+        new_lines = ["Functions", "---------"] + lines
+        lines[:] = new_lines
+    """
+
+
+def setup(app):
+    app.connect('autodoc-process-docstring', post_process)

@@ -2,7 +2,8 @@
 API reference
 =============
 
-.. contents:: Table of Contents
+.. contents::
+   :local:
 
 .. include:: scripts.scraper.txt
 

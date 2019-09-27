@@ -11,6 +11,9 @@ README [Work-in-Progress]
 
 **LyricsScraping** crawls and scraps lyrics from AZLyrics.
 
+.. contents::
+   :local:
+
 Dependencies
 ============
 * **Platforms:** macOS, Linux, Windows

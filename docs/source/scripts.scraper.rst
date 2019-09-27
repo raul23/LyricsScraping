@@ -4,6 +4,3 @@ scripts.scraper module
    :members:
    :undoc-members:
    :show-inheritance:
-
-   Functions
-   ---------

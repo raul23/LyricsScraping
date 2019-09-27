@@ -1,13 +1,11 @@
 """Module that defines exceptions related to web scraping of lyrics websites.
 
 These are all the exceptions that are raised when running code from the
-``scrapers`` package [1] which defines the classes responsible for scraping
+`scrapers`_ package which defines the classes responsible for scraping
 lyrics websites.
 
-References
-----------
-.. [1] `scrapers package @ GitHub
-<https://github.com/raul23/lyrics_scraping/tree/master/scrapers/>`_.
+.. _scrapers:
+   https://github.com/raul23/LyricsScraping/tree/master/lyrics_scraping/scrapers
 
 """
 

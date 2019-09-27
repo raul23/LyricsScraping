@@ -2,9 +2,9 @@
 API reference
 =============
 
-.. contents::
-   :local:
+.. toctree::
+   :maxdepth: 3
+   :caption: Table of Contents
 
-.. include:: scripts.scraper.txt
-
-
+   scrapers.scraper_exceptions
+   scripts.scraper

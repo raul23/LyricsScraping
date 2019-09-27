@@ -38,16 +38,22 @@ extensions = [
     # 'recommonmark',
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme'
 ]
 autodoc_mock_imports = ['bs4', 'pyutils', 'requests', 'yaml']
 napoleon_google_docstring = False
-napoleon_use_param = False
+# If False, no cross-referencing with Python types
+napoleon_use_param = True
 napoleon_use_ivar = True
-# source_suffix = '.rst'
+
+source_suffix = '.rst'
 # source_suffix = ['.rst', '.md']
+
+# Example configuration for intersphinx: refer to the Python standard library.
+intersphinx_mapping = {'python': ('http://docs.python.org/3', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -78,7 +78,7 @@ def edit_config(cfg_type, app=None):
         The type of configuration file we want to edit. 'log' refers to the
         logging config file, and 'main' to the main config file used to setup a
         lyrics scraper.
-    app : str, optional
+    app : str
         Name of the application to use to open the config file, e.g. TextEdit
         (the default value is None which implies that the default application
         will be used to open the config file).

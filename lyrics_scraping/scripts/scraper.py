@@ -61,6 +61,7 @@ from lyrics_scraping.utils import get_data_filepath
 from pyutils.genutils import copy_file, read_yaml, run_cmd
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
+import ipdb
 
 
 def edit_config(cfg_type, app=None):
@@ -86,9 +87,10 @@ def edit_config(cfg_type, app=None):
     Returns
     -------
     retcode : int
-        If there is a subprocess-related error, the return code is greater than
-        0. Otherwise, it is 0 if the file could be opened with the external
-        program.
+        If there is a `subprocess
+        <https://docs.python.org/3/library/subprocess.html#subprocess.CalledProcessError>`_
+        -related error, the return code is non-zero. Otherwise, it is 0 if the
+        file could be successfully opened with an external program.
 
     Raises
     ------
@@ -174,8 +176,9 @@ def start_scraper(color_logs=None):
     """Start the lyrics scraper.
 
     The lyrics scraper is setup based on the main configuration file
-    `main_cfg.yaml` which can be edited with the command:
-    `scraper -e {log,main}`
+    *main_cfg.yaml* which can be edited with the command::
+
+        $ scraper -e {log,main}
 
     Parameters
     ----------
@@ -237,12 +240,21 @@ def setup_arg_parser():
 
     Related arguments are grouped according to the three types of actions that
     can be performed with the script:
+
     - start the lyrics scraper,
     - edit a configuration file or
     - reset a configuration file.
 
     Returns
     -------
+    args : argparse.Namespace
+        Simple class used by default by `parse_args()` to create an object
+        holding attributes and return it [1]_.
+
+    References
+    ----------
+    .. [1] `argparse.Namespace
+       <https://docs.python.org/3.7/library/argparse.html#argparse.Namespace>`_.
 
     """
     # Setup the parser
@@ -297,12 +309,14 @@ def main():
     """Main entry-point to the script.
 
     According to the user's choice of action, the script might:
+
     - start the scraper,
     - edit a configuration file, or
     - reset a configuration file.
 
     """
     args = setup_arg_parser()
+    ipdb.set_trace()
     try:
         if args.edit:
             edit_config(args.edit, args.app)

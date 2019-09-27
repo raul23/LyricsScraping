@@ -10,7 +10,7 @@ Welcome to LyricsScraping's documentation!
    :maxdepth: 3
    :caption: Table of Contents
 
-   README.rst
+   README
    api_reference
 
 Indices and tables

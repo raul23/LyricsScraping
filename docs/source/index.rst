@@ -11,8 +11,7 @@ Welcome to LyricsScraping's documentation!
    :caption: Table of Contents
 
    README
-   examples
-   api_reference.rst
+   scripts
 
 Indices and tables
 ==================

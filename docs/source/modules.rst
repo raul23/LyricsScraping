@@ -1,7 +1,7 @@
-bin
-===
+scripts
+=======
 
 .. toctree::
    :maxdepth: 4
 
-   bin
+   scripts

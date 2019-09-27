@@ -1,9 +1,5 @@
-#!/usr/bin/env python
-"""
-scraper script
-==============
-
-Script to scrape lyrics websites, edit and reset a configuration file.
+#!/usr/script/env python
+"""Script to scrape lyrics websites, edit and reset a configuration file.
 
 The script scrapes lyrics from webpages and saves them in a dictionary and a
 database (if one was initially configured).
@@ -121,7 +117,7 @@ def edit_config(cfg_type, app=None):
         # This happens if the name of the app can't be called as an executable
         # on the terminal
         # e.g. TextEdit can't be run on the terminal but atom can since it
-        # refers to an executable (bin/atom).
+        # refers to an executable (script/atom).
         # To open TextEdit from the terminal, the command `open -a {app_name}`
         # must be used on macOS.
         if platform.system() == 'Darwin':
@@ -199,7 +195,7 @@ def start_scraper(color_logs=None):
         # Setup logging from the logging config file: this will setup the
         # logging to all custom modules, including the current script
         setup_logging(log_cfg_filepath)
-    logger = logging.getLogger('bin.scraper')
+    logger = logging.getLogger('scripts.scraper')
     try:
         # Experimental option: add color to log messages
         if color_logs is not None:

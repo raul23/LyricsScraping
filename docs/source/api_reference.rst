@@ -6,6 +6,6 @@ API reference
    :maxdepth: 2
    :caption: Table of Contents
 
-   bin
+   scripts
 
 

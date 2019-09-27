@@ -61,7 +61,6 @@ from lyrics_scraping.utils import get_data_filepath
 from pyutils.genutils import copy_file, read_yaml, run_cmd
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
-import ipdb
 
 
 def edit_config(cfg_type, app=None):
@@ -316,7 +315,6 @@ def main():
 
     """
     args = setup_arg_parser()
-    ipdb.set_trace()
     try:
         if args.edit:
             edit_config(args.edit, args.app)

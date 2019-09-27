@@ -2,10 +2,8 @@
 API reference
 =============
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Table of Contents
+.. contents:: Table of Contents
 
-   scripts
+.. include:: scripts.scraper.txt
 
 

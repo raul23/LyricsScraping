@@ -15,7 +15,7 @@
 {%- if is_namespace %}
 {{- [pkgname, "namespace"] | join(" ") | e | heading }}
 {% else %}
-{{- pkgname | e | heading }}
+{{- [pkgname, "package"] | join(" ") | e | heading }}
 {% endif %}
 
 {%- if modulefirst and not is_namespace %}
@@ -30,12 +30,14 @@ Subpackages
 {% endif %}
 
 {%- if submodules %}
+Submodules
+----------
 {% if separatemodules %}
 {{ toctree(submodules) }}
 {%- else %}
 {%- for submodule in submodules %}
 {% if show_headings %}
-{{- submodule | e | heading }}
+{{- [submodule, "module"] | join(" ") | e | heading(2) }}
 {% endif %}
 {{ automodule(submodule, automodule_options) }}
 {% endfor %}

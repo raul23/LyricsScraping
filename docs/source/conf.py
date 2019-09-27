@@ -38,6 +38,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
     'sphinx.ext.napoleon',
+    'sphinx.ext.viewcode',
     'sphinx_rtd_theme'
 ]
 autodoc_mock_imports = ['bs4', 'pyutils', 'requests', 'yaml']

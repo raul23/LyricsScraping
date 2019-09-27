@@ -43,6 +43,9 @@ More information is available at:
 - TODO: add PyPi URL
 - https://github.com/raul23/LyricsScraping
 
+Functions
+---------
+
 """
 
 import argparse

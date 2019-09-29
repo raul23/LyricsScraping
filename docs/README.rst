@@ -21,7 +21,7 @@ Dependencies
 * ``BeautifulSoup`` : used for crawling and parsing the lyrics webpages
 * ``requests`` : used for requesting the HTML content of lyrics webpages
 * ``yaml`` : used for reading configuration files (e.g. logging)
-* ``py-common-utils`` : is a Python toolbox with useful functions and modules
+* ``py-common-utils`` : is a Python collection of utilities with useful functions and modules
   ready to be used in different projects. For instance, you will find code
   related to databases and logging.
 

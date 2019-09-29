@@ -72,7 +72,7 @@ exclude_patterns = [
 # directives automatically.
 # Ref.: https://bit.ly/2mt4jsP
 autodoc_default_options = {
-    'private-members': True
+    # 'private-members': True
 }
 
 

@@ -135,14 +135,14 @@ class LyricsScraper:
         TODO: add link to SaveWebpages type
     valid_domains : list
         Only URLs from these domains will be processed.
-    scraped_data : dict
-        The scraped data is saved as a dictionary. Its structure is based on
-        the database's `music.sql schema`_.
-    schema_filepath : str
-        Path to `music.sql schema`_ for the music database.
     logging_filepath : str
         Path to the `YAML logging file`_ which is used to setup logging for all
         custom modules.
+    schema_filepath : str
+        Path to `music.sql schema`_ for the music database.
+    scraped_data : dict
+        The scraped data is saved as a dictionary. Its structure is based on
+        the database's `music.sql schema`_.
 
     Methods
     -------
@@ -178,6 +178,8 @@ class LyricsScraper:
     """
 
     valid_domains = ["www.azlyrics.com"]
+    logging_filepath = get_data_filepath(file_type='log')
+    schema_filepath = get_data_filepath(file_type='schema')
     scraped_data = {
         'albums':
             {'headers': ('album_title', 'artist_name', 'year',),
@@ -189,7 +191,8 @@ class LyricsScraper:
             {'headers': ('song_title', 'artist_name', 'album_title',
                          'lyrics_url', 'lyrics', 'year',),
              'data': []}}
-    """
+    """The scraped data is saved as a dictionary.
+
     .. _scraped-data-Label:
 
     Its keys and values are defined as follow:
@@ -213,12 +216,10 @@ class LyricsScraper:
             }
 
     .. note:: The 'data' key points to a list of tuple that eventually will 
-       store the scraped data from different URLs. Each scraped data from a 
-       given URL is added as a tuple to the list.
+       store the scraped data from different URLs, i.e. each scraped data from  
+       a given URL is added as a tuple to the list.
     """
     # TODO: add example of data.
-    schema_filepath = get_data_filepath(file_type='schema')
-    logging_filepath = get_data_filepath(file_type='log')
 
     def __init__(self, lyrics_urls, db_filepath="", autocommit=False,
                  overwrite_db=False, update_tables=False, cache_dirpath="",

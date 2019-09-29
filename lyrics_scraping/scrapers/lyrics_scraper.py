@@ -5,15 +5,21 @@ More specifically, the derived classes (e.g. ``AZLyricsScraper``) are the ones
 that do the actual scraping of the lyrics webpages.
 
 By default, the scraped data is saved in a dictionary (see the variable
-`scraped_data` in the ``LyricsScraper`` class's docstring).
+:data:`~LyricsScraper.scraped_data`).
 
-The scraped data can also be saved in a database [1] if a path to the SQLite
-database is given via the argument `db_filepath`.
+The scraped data can also be saved in a database if a path to the SQLite
+database is given via the argument :ref:`db_filepath
+<LyricsScraperParametersLabel>`.
 
-References
-----------
-.. [1] `See the structure of the music database as defined in the `music.sql
-schema (GitHub) <https://bit.ly/2kIMYvn/>`_.
+See the structure of the music database as defined in the `music.sql schema`_.
+
+.. _guide: <https://bit.ly/2xYreie/>`_.
+.. _HTTP GET request: https://www.webopedia.com/TERM/H/HTTP_request_header.html
+.. _music.sql schema: https://bit.ly/2kIMYvn
+.. _saveutils.py: https://bit.ly/2m5z46A
+.. _scraper.py: https://bit.ly/2msZDTC
+.. _use a specialized library: https://stackoverflow.com/a/56476496
+.. _YAML logging file: https://bit.ly/2m5wjSM
 
 """
 
@@ -53,20 +59,24 @@ class LyricsScraper:
     (e.g. ``AzlyricsScraper``) since each lyrics websites have their own way
     of being crawled (they are all designed differently). However, the base
     class is responsible for saving the scraped data in a dictionary (
-    `scraped_data`) and in a database (if it was initially configured).
+    :data:`~LyricsScraper.scraped_data`) and in a database (if it was initially
+    configured).
+
+    .. _LyricsScraperParametersLabel:
 
     Parameters
     ----------
-    lyrics_urls : list of str
+    lyrics_urls : list [str]
         List of URLs to lyrics webpages which will be scraped.
     db_filepath : str, optional
         File path to the SQLite music database (the default value is an empty
         string which implies that no database will be used. The scraped data
-        will be saved only in the `scraped_data` dictionary).
+        will be saved only in the :data:`~LyricsScraper.scraped_data`
+        dictionary).
     autocommit : bool, optional
-        Whether the changes to the database are committed right away (the 
-        default is False which implies that the changes won't take effect 
-        immediately). 
+        Whether the changes to the database are committed right away (the
+        default is False which implies that the changes won't take effect
+        immediately).
     overwrite_db : bool, optional
         Whether the database will be overwritten. The user is given some time
         to stop the script before the database is overwritten (the default
@@ -74,12 +84,12 @@ class LyricsScraper:
     update_tables : bool, optional
         Whether the tables in the database can be updated (the default value is
         False).
-    cache_dirpath : str
+    cache_dirpath : str, optional
         Path to the cache directory where webpages are saved (the default value
         is the empty string which implies that the cache will not be used).
     overwrite_webpages : bool, optional
-        Whether the webpages saved in cache can be overwritten (the default
-        value is False).
+        Whether the webpages saved in cache can be overwritten (the default value
+        is False).
     http_get_timeout : int, optional
         Timeout when a GET request doesn't receive any response from the server.
         After the timeout expires, the GET request is dropped (the default
@@ -90,15 +100,15 @@ class LyricsScraper:
         that there will be a delay of 8 seconds between successive HTTP
         requests).
     headers : dict, optional
-        The information added to the HTTP GET request that a user's browser
+        The information added to the `HTTP GET request`_ that a user's browser
         sends to a Web server containing the details of what the browser wants
-        and will accept back from the server [1] (the default value is defined
-        in `saveutils.py (GitHub) <https://bit.ly/2m5z46A/>`_).
+        and will accept back from the server. (the default value is defined
+        in `saveutils.py`_).
     use_logging : bool, optional
         Whether to log messages on console and file. The logging is setup
-        according to the `default YAML logging file (GitHub)
-        Mx32/>`_ (the default value is False which implies that no logging will
-        be used and thus no messages will be printed on the console).
+        according to the `YAML logging file`_ (the default value is False which
+        implies that no logging will be used and thus no messages will be
+        printed on the console).
     **kwargs : dict
         TODO
 
@@ -106,8 +116,10 @@ class LyricsScraper:
     ----------
     skipped_urls : dict [str, str]
         Stores the URLs that were skipped because of an error such as
-        ``OSError`` or ``HTTP404Error``, along with the error message. The keys
-        are the URLs and the values are the associated error messages.
+        :exc:`OSError` or :exc:`~pyutils.exceptions.connection.HTTP404Error`,
+        along with the error message. The keys are the URLs and the values are
+        the associated error messages.
+        TODO: add link to HTTP404Error custom exception
     good_urls : set
         Stores the unique URLs that were successfully processed and saved.
     checked_urls : set
@@ -119,32 +131,18 @@ class LyricsScraper:
     db_conn : sqlite3.Connection
         SQLite database connection.
     saver : SaveWebpages
-        For retrieving webpages and saving them in cache. See `saveutils.py
-        (GitHub) <https://bit.ly/2m5z46A/>`_.
+        For retrieving webpages and saving them in cache. See `saveutils.py`_.
+        TODO: add link to SaveWebpages type
     valid_domains : list
         Only URLs from these domains will be processed.
     scraped_data : dict
-        The scraped data is saved as a dictionary. Check its structure below.
-        Its structure is based on the `music database's schema (GitHub)
-        <https://bit.ly/2kIMYvn/>`_.
-
-        Its keys and values are defined as follow:
-        `"artists"`
-            Contain the headers and scraped data for artists (``dict``).
-            The dictionary's keys and values are defined as follow:
-            `"headers"`
-                The column headers for each field from the scraped data (tuple
-                of ``str``).
-            `"data"`
-                The scraped data from different URLs. Each scraped data from a
-                given URL is added as a tuple to the list (list of tuple).
-        The other keys ("albums" and "songs") follow the same description.
+        The scraped data is saved as a dictionary. Its structure is based on
+        the database's `music.sql schema`_.
     schema_filepath : str
-         Path to the `schema file <https://bit.ly/2kIMYvn/>`_ for the music
-        database.
-    logging_cf_filepath : str
-        Path to the `YAML logging file <https://bit.ly/2m5wjSM/>`_ which is used
-        setup logging for all custom modules.
+        Path to `music.sql schema`_ for the music database.
+    logging_filepath : str
+        Path to the `YAML logging file`_ which is used to setup logging for all
+        custom modules.
 
     Methods
     -------
@@ -152,48 +150,73 @@ class LyricsScraper:
         Starts the web scraping of lyrics webpages.
     get_scraped_data()
         Returns the scraped data as a dictionary whose structure is explained
-        in this class docstring (search for `scraped_data` in the `Attributes`
-        section).
+        in this class docstring (See :data:`~LyricsScraper.scraped_data`).
 
     Notes
     -----
     If the corresponding flags are activated, logging and database are setup in
-    `__init__()`.
+    :meth:`__init__`.
 
     By default, the scraped data is saved in a dictionary whose structure is
-    described below (see the variable `scraped_data`). The scraped data will
-    also be saved if a database is given via `db_filepath`.
+    described below (see :data:`~LyricsScraper.scraped_data`). The scraped data
+    will also be saved if a database is given via `db_filepath`.
 
     See the structure of the music database as defined in the `music.sql
-    schema (GitHub) <https://bit.ly/2kIMYvn/>`_
+    schema`_.
 
     The scraped webpages can also be cached in order to reduce the number of
-    HTTP requests to the server (see the variable `cache_dirpath`).
+    HTTP requests to the server (See :ref:`db_filepath
+    <LyricsScraperParametersLabel>`).
 
     `logger_p` is a logger that is associated with the base class
-    ``LyricsScraper``. The derive classes, such as ``AzlyricsScraper``, have
-    their own logger. Hence, we can differentiate whose logs belong to what
-    module, when reading the log file.
+    :class:`LyricsScraper`. The derive classes, such as
+    :class:`AZLyricsScraper`, have their own logger. Hence, we can
+    differentiate whose logs belong to what module, when reading the log file.
 
-    References
-    ----------
-    .. [1] `HTTP request header
-    <https://www.webopedia.com/TERM/H/HTTP_request_header.html/>`_.
+    TODO: check links to AZLyricsScraper class
 
     """
 
     valid_domains = ["www.azlyrics.com"]
     scraped_data = {
-        'artists':
-            {'headers': ('artist_name',),
-             'data': []},
         'albums':
             {'headers': ('album_title', 'artist_name', 'year',),
+             'data': []},
+        'artists':
+            {'headers': ('artist_name',),
              'data': []},
         'songs':
             {'headers': ('song_title', 'artist_name', 'album_title',
                          'lyrics_url', 'lyrics', 'year',),
              'data': []}}
+    """
+    .. _scraped-data-Label:
+
+    Its keys and values are defined as follow:
+
+        .. code:: python
+
+            scraped_data = {
+                'albums': {
+                    'headers': ('album_title', 'artist_name', 'year',),
+                    'data': []
+                },
+                'artists': {
+                    'headers': ('artist_name',),
+                    'data': []
+                },
+                'songs': {
+                    'headers': ('song_title', 'artist_name', 'album_title',
+                                'lyrics_url', 'lyrics', 'year',),
+                    'data': []
+                }
+            }
+
+    .. note:: The 'data' key points to a list of tuple that eventually will 
+       store the scraped data from different URLs. Each scraped data from a 
+       given URL is added as a tuple to the list.
+    """
+    # TODO: add example of data.
     schema_filepath = get_data_filepath(file_type='schema')
     logging_filepath = get_data_filepath(file_type='log')
 
@@ -276,7 +299,7 @@ class LyricsScraper:
 
         This method iterates through each lyrics URL from the main config file
         and delegates the important tasks (URL processing and scraping) to
-        separate methods (`_process_url` and `_scrape_webpage`).
+        separate methods (`_process_url()` and `_scrape_webpage()`).
 
         Notes
         -----
@@ -285,8 +308,8 @@ class LyricsScraper:
         is not from a valid domain.
 
         Any exception that is not caught here is redirected to the main script
-        calling this method. See for example the main script `run_scraper.py
-        (GitHub) <https://bit.ly/2msZDTC/>`_.
+        calling this method. See for example the main script
+        :mod:`scripts.scraper`.
 
         """
         # Process list of URLs to lyrics websites
@@ -332,17 +355,17 @@ class LyricsScraper:
 
         This method returns all the data that was scraped from the lyrics
         webpages. If a database was used, the scraped data is also saved in the
-        SQLite database file found at `db_filepath`.
+        SQLite database file found at :ref:`db_filepath
+        <LyricsScraperParametersLabel>`
 
-        See the description of `scraped_data` in the docstring for the
-        ``LyricsScraper`` class for a detailed explanation of the structure of
+        See :ref:`scraped_data <scraped-data-Label>` for a detailed structure of
         the returned dictionary.
 
         Returns
         -------
         scraped_data : dict
-            The scraped data whose content is described in the docstring for the
-            ``LyricsScraper`` class (see `scraped_data`).
+            The scraped data whose content is described in
+            :data:`~LyricsScraper.scraped_data`.
 
         """
         # If a db was used, inform the user that the scraped data is also to be
@@ -364,7 +387,7 @@ class LyricsScraper:
             The skipped URL which will be added to the dictionary along with its
             corresponding error message.
         exc : Exception
-            The error message as an ``Exception``, e.g. ``TypeError``, which
+            The error message as an :exc:`Exception`, e.g. :exc:`TypeError`, which
             will be converted to a string and added to the dictionary along with
             its corresponding URL.
 
@@ -372,33 +395,6 @@ class LyricsScraper:
         self.logger_p.warning("Skipping the URL {}".format(url))
         self.skipped_urls.setdefault(url, [])
         self.skipped_urls[url].append(str(error))
-
-    def _update_scraped_data(self, data_tuple, scraped_data):
-        """Update scraped data.
-
-        Update the liste of scraped with a tuple of data.
-
-        The tuple of data must be **unique** in order to be added to the list
-        of scraped data.
-
-        Parameters
-        ----------
-        data_tuple : tuple
-            The tuple of data to be added to the list of scraped data.
-        scraped_data : list
-            The list of scraped data where the tuple of data will be added.
-
-        """
-        # Check if tuple of data is unique
-        if data_tuple in scraped_data:
-            # Tuple of data is not unique
-            self.logger_p.debug("Scraped data already previously saved:"
-                                " {}".format(data_tuple))
-        else:
-            # Tuple of data is unique. Thus, save it.
-            scraped_data.append(data_tuple)
-            self.logger_p.debug("Scraped data successfully saved:"
-                                " {}".format(data_tuple))
 
     def _check_url_if_processed(self, url):
         """Check if an URL was already processed.
@@ -456,7 +452,8 @@ class LyricsScraper:
             Raised if an URL was found more than once in the music db.
         OverwriteSongError
             Raised if a song was already found in the db and the db can't be
-            updated because the `update_tables` flag is disabled.
+            updated because the :ref:`update_tables
+            <LyricsScraperParametersLabel>` flag is disabled.
 
         """
         # Select all songs with the given URL from the music db
@@ -494,7 +491,7 @@ class LyricsScraper:
         scraped webpages.
 
         See the structure of the music database as defined in the `music.sql
-        schema (GitHub) <https://bit.ly/2kIMYvn/>`_.
+        schema`_.
 
         Returns
         -------
@@ -505,7 +502,7 @@ class LyricsScraper:
         ------
         sqlite3.Error
              Raised if any SQLite-related error occurs, such as
-             ``IntegrityError`` or ``OperationalError``.
+             :exc:`sqlite3.IntegrityError` or :exc:`sqlite3.OperationalError`.
 
         """
         # Connect to the music database
@@ -522,7 +519,7 @@ class LyricsScraper:
         """Count empty items in a tuple.
 
          Returns the number of empty items in a list or tuple which can be empty
-         strings or ``None``.
+         strings or :obj:`None`.
 
         Parameters
         ----------
@@ -532,11 +529,11 @@ class LyricsScraper:
         Returns
         -------
         count : int
-            The number of empty items (empty strings or ``None``) in the tuple.
+            The number of empty items (empty strings or :obj:`None`) in the tuple.
 
         Notes
         -----
-        A warning that empty item(s) is (are) found is logged.
+        A warning that empty items are found is logged.
 
         """
         # Count number of empty items in the list/tuple
@@ -595,20 +592,16 @@ class LyricsScraper:
         Raises
         ------
         InvalidURLDomainError
-            Raised if the URL is not from a valid domain. See `valid_domains`
-            in the ``LyricsScraper`` class' docstring.
+            Raised if the URL is not from a valid domain. See
+            :data:`~LyricsScraper.valid_domains`.
 
         Notes
         -----
-        There is a more robust parsing of the top-level domain: use a
-        specialized library (e.g. `tldextract`) [1]. For example, `urlparse`
+        There is a more robust parsing of the top-level domain: `use a
+        specialized library`_ (e.g. tldextract). For example, `urlparse`
         will not be able to extract the right domain from a more complex URL
         such as 'http://forums.news.cnn.com/'. On the other hand, `tldextract`
         will output 'cnn' which is correct.
-
-        References
-        ----------
-        .. [1] `<https://stackoverflow.com/a/56476496/>`_.
 
         """
         self.logger_p.info("Processing the URL {}".format(url))
@@ -672,8 +665,8 @@ class LyricsScraper:
         It crawls the webpage and scrapes any useful info to be saved, such as
         the song's title and the lyrics text.
 
-        The scraped data is saved in the `scraped_data` dictionary and in a
-        database (if it was initially configured).
+        The scraped data is saved in the :data:`~LyricsScraper.scraped_data`
+        dictionary and in a database (if it was initially configured).
 
         If the cache is used, the webpage HTML is also save on disk to reduce
         the number of requests to the server.
@@ -711,11 +704,6 @@ class LyricsScraper:
         If the album title and artist name are missing (i.e. empty strings), the
         album data will not be saved.
 
-        See Also
-        --------
-        _save_artist: Similar method that saves scraped data about artists.
-        _save_song: Similar method that saves scraped data about songs.
-
         """
         album_tuple = (album_title, artist_name, year,)
         self.logger_p.debug("Saving the album {}".format(album_tuple))
@@ -733,8 +721,8 @@ class LyricsScraper:
     def _save_artist(self, artist_name):
         """Save the scraped data about an artist.
 
-        The data will be saved in the `scraped_data` dictionary and a database
-        if it was initially configured.
+        The data will be saved in the :data:`~LyricsScraper.scraped_data`
+        dictionary and a database if it was initially configured.
 
         Parameters
         ----------
@@ -764,8 +752,8 @@ class LyricsScraper:
                    lyrics, year):
         """Save the scraped data about a song.
 
-        The data will be saved in the `scraped_data` dictionary and a database
-        if it was initially configured.
+        The data will be saved in the :data:`~LyricsScraper.scraped_data`
+        dictionary and a database if it was initially configured.
 
         Parameters
         ----------
@@ -802,6 +790,33 @@ class LyricsScraper:
         else:
             self.logger_p.warning("Song couldn't be saved!")
 
+    def _update_scraped_data(self, data_tuple, scraped_data):
+        """Update scraped data.
+
+        Update the list of scraped by adding the tuple of data.
+
+        The tuple of data must be **unique** in order to be added to the list
+        of scraped data.
+
+        Parameters
+        ----------
+        data_tuple : tuple
+            The tuple of data to be added to the list of scraped data.
+        scraped_data : list
+            The list of scraped data where the tuple of data will be added.
+
+        """
+        # Check if tuple of data is unique
+        if data_tuple in scraped_data:
+            # Tuple of data is not unique
+            self.logger_p.debug("Scraped data already previously saved:"
+                                " {}".format(data_tuple))
+        else:
+            # Tuple of data is unique. Thus, save it.
+            scraped_data.append(data_tuple)
+            self.logger_p.debug("Scraped data successfully saved:"
+                                " {}".format(data_tuple))
+
     def _execute_sql(self, sql, values):
         """Execute an SQL expression.
 
@@ -823,14 +838,18 @@ class LyricsScraper:
         -------
         cur.fetchall() : list of tuple
             List of tuple from the executed SELECT query, where each tuple
-            represents one row entry [1].
+            represents one row entry.
 
-            IMPORTANT: this returned value only happens with SELECT queries.
+            .. important::
+
+               This returned value only happens with SELECT queries.
         None
             Returned if the table couldn't be updated because of an
-            sqlite3.IntegrityError exception.
+            :exc:`sqlite3.IntegrityError` exception.
 
-            IMPORTANT: this returned value only happens with INSERT queries.
+            .. important::
+
+               This returned value only happens with INSERT queries.
 
             It is not a fatal exception that should stop the program execution
             since the exception can occur when the data to be inserted is
@@ -841,19 +860,16 @@ class LyricsScraper:
             The id of the last row in the updated table, after the insertion
             was successful.
 
-            IMPORTANT: this returned value only happens with INSERT queries.
+            .. important::
+
+               This returned value only happens with INSERT queries.
 
         Raises
         ------
         SQLSanityCheckError
             Raised if a sanity check on the SQL query failed, e.g. the
-            query's values are not of ``tuple`` type or wrong number of values
-            in the SQL query.
-
-        See Also
-        --------
-        See the structure of the music database as defined in the `music.sql
-        schema (GitHub) <https://bit.ly/2kIMYvn/>`_.
+            query's values are not of :obj:`tuple` type or wrong number of
+            values in the SQL query.
 
         Notes
         -----
@@ -863,12 +879,15 @@ class LyricsScraper:
 
         When executing an INSERT query, the returned value (i.e. `lastrowid`)
         is not used within the corresponding INSERT method, e.g.
-        `_insert_album()`.
+        :meth:`~LyricsScraper._insert_album`.
 
-        References
-        ----------
-        .. [1] `A thorough guide to SQLite database operations in Python
-        <https://bit.ly/2xYreie/>`_.
+        Check this `guide`_ for more information about SQLite database
+        operations.
+
+        .. important::
+
+           See the structure of the music database as defined in the `music.sql
+           schema`_.
 
         """
         cur = self.db_conn.cursor()
@@ -904,8 +923,7 @@ class LyricsScraper:
         Data about an album can consist in the album' title and the year the
         album was published.
 
-        See the `albums` table as defined in the `music.sql schema (GitHub)
-        <https://bit.ly/2kIMYvn/>`_.
+        See the `albums` table as defined in the `music.sql schema`_.
 
         Parameters
         ----------
@@ -924,8 +942,7 @@ class LyricsScraper:
 
         An artist's name can refer to a group or an individual (solo).
 
-        See the `artists` table as defined in the `music.sql schema (GitHub)
-        <https://bit.ly/2kIMYvn/>`_.
+        See the `artists` table as defined in the `music.sql schema`_.
 
         Parameters
         ----------
@@ -943,8 +960,7 @@ class LyricsScraper:
         The data about a song that will be added to the database can consist to
         the song title, artist name, and album title.
 
-        See the `songs` table as defined in the `music.sql schema (GitHub)
-        <https://bit.ly/2kIMYvn/>`_.
+        See the `songs` table as defined in the `music.sql schema`_.
 
         Parameters
         ----------
@@ -964,8 +980,7 @@ class LyricsScraper:
         The lyrics URL is used as the WHERE condition to be used for retrieving
         the associated song from the database.
 
-        See the `songs` table as defined in the `music.sql schema (GitHub)
-        <https://bit.ly/2kIMYvn/>`_.
+        See the `songs` table as defined in the `music.sql schema`_.
 
         Parameters
         ----------

@@ -64,9 +64,16 @@ templates_path = ['_templates']
 exclude_patterns = [
     'scrapers.azlyrics*',
     'scrapers.genius*',
-    'scrapers.lyrics*',
+    # 'scrapers.lyrics*',
     'scrapers.rst'
 ]
+
+# The default options for autodoc directives. They are applied to all autodoc
+# directives automatically.
+# Ref.: https://bit.ly/2mt4jsP
+autodoc_default_options = {
+    'private-members': True
+}
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -125,6 +132,10 @@ def add_custom_sections(app, what, name, obj, options, lines):
         lines[:] = new_lines
     elif name == "scripts.scraper":
         new_lines = first_lines + lines + ["Functions", "---------"]
+        lines[:] = new_lines
+    elif name == "scrapers.lyrics_scraper":
+        last_lines = ["Class and methods", "-----------------"]
+        new_lines = first_lines + lines + last_lines
         lines[:] = new_lines
     elif what == 'module':  # other modules
         last_lines = ["Classes and methods", "-------------------"]

@@ -6,5 +6,6 @@ API reference
    :maxdepth: 3
    :caption: Table of Contents
 
+   scrapers.lyrics_scraper
    scrapers.scraper_exceptions
    scripts.scraper

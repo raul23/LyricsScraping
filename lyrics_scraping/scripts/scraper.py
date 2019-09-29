@@ -216,17 +216,17 @@ def start_scraper(color_logs=None):
         scraper = AZLyricsScraper(**main_cfg)
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
-            sqlite3.Error, sqlite3.OperationalError,
-            log_exc.LoggingSanityCheckError) as e:
+            sqlite3.Error, log_exc.LoggingSanityCheckError) as e:
         logger.exception(e)
     else:
         # Success
         status_code = 0
-        logger.info("End of the lyrics scraping")
     finally:
         if status_code == 1:
             # Error
             logger.warning("Program will exit")
+        else:
+            logger.info("End of the lyrics scraping")
         # ipdb.set_trace()
         return status_code
 
@@ -304,7 +304,7 @@ def setup_arg_parser():
 def main():
     """Main entry-point to the script.
 
-    According to the user's choice of action, the script might:
+    According to the user's choice of action, the script will:
 
     - start the scraper,
     - edit a configuration file, or

@@ -62,7 +62,7 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = [
-    'scrapers.azlyrics*',
+    # 'scrapers.azlyrics*',
     'scrapers.genius*',
     # 'scrapers.lyrics*',
     'scrapers.rst'
@@ -73,6 +73,7 @@ exclude_patterns = [
 # Ref.: https://bit.ly/2mt4jsP
 autodoc_default_options = {
     # 'private-members': True
+    'inherited-members': True
 }
 
 

@@ -1,18 +1,21 @@
 """Module that defines the derived class for scraping artist and lyrics
-webpages from www.azlyrics.com
+webpages from `www.azlyrics.com`_
 
-``AZLyricsScraper`` is derived from the base class ``LyricsScraper``. This
-class crawls and scrapes artist and lyrics webpages from www.azlyrics.com
-for useful data to be saved, such as the artist's name, the album's title,
-and the lyrics text.
+:class:`AZLyricsScraper` is derived from the base class
+:class:`~scrapers.lyrics_scraper.LyricsScraper`. :class:`AZLyricsScraper`
+crawls and scrapes artist and lyrics webpages from `www.azlyrics.com`_ for
+useful data to be saved, such as the artist's name, the album's title, and the
+lyrics text.
 
 The actual saving of the data in a dictionary and a database is done by the
-base class ``LyricsScraper``.
+base class :class:`~scrapers.lyrics_scraper.LyricsScraper`.
 
-See Also
---------
-See the structure of the music database as defined in the `music.sql schema
-(GitHub) <https://bit.ly/2kIMYvn/>`_.
+Notes
+-----
+See the structure of the music database as defined in the `music.sql schema`_.
+
+.. _www.azlyrics.com: https://www.azlyrics.com/
+.. _music.sql schema: https://bit.ly/2kIMYvn
 
 """
 
@@ -37,32 +40,34 @@ logging.getLogger(__name__).addHandler(NullHandler())
 
 
 class AZLyricsScraper(LyricsScraper):
-    """Derived class for scraping artist and lyrics webpages from www.azlyrics.com
+    """Derived class from :class:`~scrapers.lyrics_scraper.LyricsScraper` for
+    scraping artist and lyrics webpages from `www.azlyrics.com`_
 
-    This class is responsible for scraping webpages from www.azlyrics.com for
+    This class is responsible for scraping webpages from `www.azlyrics.com`_ for
     any relevant data about albums, artists, and songs.
 
     The scraped data is then saved in a dictionary and a database (if one was
-    configured). The base class ``LyricsScraper`` is responsible for handling
-    the saving of the scraped data.
+    configured). The base class :class:`~scrapers.lyrics_scraper.LyricsScraper`
+    is responsible for handling the saving of the scraped data.
 
-    The `__init__()` method extends the superclass's own constructor by getting
+    The :meth:`__init__` method extends the superclass's constructor by getting
     its own logger.
-
-    Parameters
-    ----------
-    Same parameters as the base class ``LyricsScraper``.
-
 
     Attributes
     ----------
     logger : logging.Logger
         Logger for logging to console and file.
 
-    See Also
-    --------
-    See the structure of the music database as defined in the `music.sql schema
-    (GitHub)  <https://bit.ly/2kIMYvn/>`_
+
+    .. note::
+
+       See the structure of the music database as defined in the `music.sql
+       schema`_.
+
+    .. important::
+
+       :class:`AZLyrics`'s parameters are those from its parent class
+       :ref:`LyricsScraper <LyricsScraperParametersLabel>`.
 
     """
 
@@ -78,8 +83,8 @@ class AZLyricsScraper(LyricsScraper):
         """Scrape a given webpage and save the scraped data.
 
         Different scraping methods are called depending on the type of webpage:
-        `_scrape_artist_page()` if it is an artist webpage and
-        `_scrape_lyrics_page()` if it is a lyrics webpage.
+        :meth:`._scrape_artist_page()` if it is an artist webpage and
+        :meth:`_scrape_lyrics_page()` if it is a lyrics webpage.
 
         Parameters
         ----------
@@ -144,18 +149,16 @@ class AZLyricsScraper(LyricsScraper):
         ------
         HTTP404Error
             Raised if the server returns a 404 status code because the webpage
-            is not found.
+            is not found. TODO: add link to custom exception
         OverwriteFileError
             Raised if an existing file is being overwritten and the flag to
-            allow to overwrite is disabled.
+            allow to overwrite is disabled. TODO: add link to custom exception
         OSError
             Raised if an I/O related error occurs while writing the webpage on
             disk, e.g. the file doesn't exist.
 
         See Also
         --------
-        _scrape_webpage : Depending on the type of the webpage, it calls either
-                          `_scrape_artist_page()` or `_scrape_lyrics_page()`.
         _scrape_lyrics_page : Scrapes a lyrics webpage instead.
 
         """
@@ -264,8 +267,6 @@ class AZLyricsScraper(LyricsScraper):
 
         See Also
         --------
-        _scrape_webpage : Depending on the type of the webpage, it calls either
-                          `_scrape_artist_page()` or `_scrape_lyrics_page()`.
         _scrape_artist_page : Scrapes an artist webpage instead.
 
         """

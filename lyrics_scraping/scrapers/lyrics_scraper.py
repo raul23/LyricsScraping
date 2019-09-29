@@ -13,7 +13,7 @@ database is given via the argument :ref:`db_filepath
 
 See the structure of the music database as defined in the `music.sql schema`_.
 
-.. _guide: <https://bit.ly/2xYreie/>`_.
+.. _guide: <https://bit.ly/2xYreie
 .. _HTTP GET request: https://www.webopedia.com/TERM/H/HTTP_request_header.html
 .. _music.sql schema: https://bit.ly/2kIMYvn
 .. _saveutils.py: https://bit.ly/2m5z46A
@@ -143,14 +143,6 @@ class LyricsScraper:
     scraped_data : dict
         The scraped data is saved as a dictionary. Its structure is based on
         the database's `music.sql schema`_.
-
-    Methods
-    -------
-    start_scraping()
-        Starts the web scraping of lyrics webpages.
-    get_scraped_data()
-        Returns the scraped data as a dictionary whose structure is explained
-        in this class docstring (See :data:`~LyricsScraper.scraped_data`).
 
     Notes
     -----

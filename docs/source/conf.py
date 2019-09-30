@@ -190,8 +190,12 @@ def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
 
 
 def post_process(app, exception):
-    source_filepath = os.path.join(app.outdir, "scrapers.lyrics_scraper.html")
-    target_filepath = os.path.join(app.outdir, "scrapers.azlyrics_scraper.html")
+    # import ipdb
+    # ipdb.set_trace()
+    filepath = 'build/html/scrapers.lyrics_scraper.html'
+    print("isfile: {}".format(os.path.isfile(filepath)))
+    source_filepath = 'build/html/scrapers.lyrics_scraper.html'
+    target_filepath = 'build/html/scrapers.azlyrics_scraper.html'
     replace_dd_tag(
         source_filepath=source_filepath,
         target_filepath=target_filepath,

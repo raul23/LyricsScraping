@@ -247,13 +247,13 @@ def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
     return None
 
 
-def replace_hrefs(soup, filepath):
+def replace_hrefs(soup, replacements):
     """
 
     Parameters
     ----------
     soup : bs4.BeautifulSoup
-    filepath : str
+    replacements : list of dict
 
     Returns
     -------
@@ -274,13 +274,10 @@ def replace_hrefs(soup, filepath):
         for a in anchors:
             a.attrs['href'] = replace_with
 
-    replace_href(
-        pattern=re.compile("scraped-data-label$"),
-        replace_with='scrapers.azlyrics_scraper.html#scraped-data-label')
-    replace_href(
-        pattern=re.compile("lyrics_scraper.LyricsScraper.scraped_data$"),
-        replace_with='scrapers.azlyrics_scraper.html#scrapers.'
-                     'azlyrics_scraper.AZLyricsScraper.scraped_data')
+    for repl in replacements:
+        replace_href(
+            pattern=repl['pattern'],
+            replace_with=repl['replace_with'])
     return soup
 
 
@@ -301,7 +298,16 @@ def post_process(app, exception):
         source_id="scrapers.lyrics_scraper.LyricsScraper.scraped_data",
         target_id="scrapers.azlyrics_scraper.AZLyricsScraper.scraped_data"
     )
-    soup = replace_hrefs(soup, azlyrics_filepath)
+    href_replacements = [
+        {'pattern': re.compile("scraped-data-label$"),
+         'replace_with': 'scrapers.azlyrics_scraper.html#scraped-data-label'
+         },
+        {'pattern': re.compile("lyrics_scraper.LyricsScraper.scraped_data$"),
+         'replace_with': 'scrapers.azlyrics_scraper.html#scrapers.'
+                         'azlyrics_scraper.AZLyricsScraper.scraped_data'
+         }
+    ]
+    soup = replace_hrefs(soup, href_replacements)
     if soup:
         write_file(azlyrics_filepath, str(soup))
 

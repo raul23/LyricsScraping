@@ -15,7 +15,7 @@ import sys
 # Third-party modules
 import sphinx_rtd_theme
 from bs4 import BeautifulSoup
-sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../lyrics_scraping'))
 
 

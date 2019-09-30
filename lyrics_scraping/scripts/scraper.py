@@ -1,5 +1,5 @@
 #!/usr/script/env python
-"""Script to scrape lyrics websites, edit and reset a configuration file.
+"""Script to scrape lyrics webpages, edit and reset a configuration file.
 
 The script scrapes lyrics from webpages and saves them in a dictionary and a
 database (if one was initially configured).

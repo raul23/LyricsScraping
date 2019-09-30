@@ -11,6 +11,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import re
 import sys
 # Third-party modules
 from bs4 import BeautifulSoup
@@ -154,49 +155,156 @@ def add_custom_sections(app, what, name, obj, options, lines):
     """
 
 
-def find_all_dl_tags(filepath):
+def read_file(filepath):
+    """
+
+    Parameters
+    ----------
+    filepath
+
+    Returns
+    -------
+
+    """
     with open(filepath, 'r') as f:
-        html = f.read()
+        return f.read()
+
+
+def write_file(filepath, data):
+    """
+
+    Parameters
+    ----------
+    filepath
+    data
+
+    """
+    with open(filepath, 'w') as f:
+        f.write(data)
+
+
+def find_all_dl_tags(filepath):
+    """
+
+    Parameters
+    ----------
+    filepath : str
+
+    Returns
+    -------
+    tuple : (bs4.BeautifulSoup, list)
+
+    """
+    html = read_file(filepath)
     soup = BeautifulSoup(html, 'lxml')
     return soup, soup.find_all("dl", class_="attribute")
 
 
 def find_dd_tag(filepath, id):
-    data = None
+    """
+
+    Parameters
+    ----------
+    filepath : str
+    id : str
+
+    Returns
+    -------
+    list
+    None
+
+    """
     _, results = find_all_dl_tags(filepath)
     for res in results:
         if res.find(id=id):
             return res.find("dd")
-    return data
+    return None
 
 
 def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
+    """
+
+    Parameters
+    ----------
+    source_filepath : str
+    target_filepath : str
+    source_id : str
+    target_id : str
+
+    Returns
+    -------
+    soup : bs4.BeautifulSoup
+    None
+
+    """
     data = find_dd_tag(source_filepath, source_id)
     if data:
-        """
-        html = read_file(target_filepath)
-        soup = BeautifulSoup(html, 'lxml')
-        results = soup.find_all("dl", class_="attribute")
-        """
         soup, results = find_all_dl_tags(target_filepath)
         for res in results:
             if res.find(id=target_id):
                 res.find("dd").replaceWith(data)
-                with open(target_filepath, 'w') as f:
-                    f.write(str(soup))
-                return 0
-    return 1
+                write_file(target_filepath, str(soup))
+                return soup
+    return None
+
+
+def replace_hrefs(soup, filepath):
+    """
+
+    Parameters
+    ----------
+    soup : bs4.BeautifulSoup
+    filepath : str
+
+    Returns
+    -------
+    soup : bs4.BeautifulSoup
+
+    """
+
+    def replace_href(pattern, replace_with):
+        """
+
+        Parameters
+        ----------
+        pattern : str or re.Pattern
+        replace_with : str
+
+        """
+        anchors = soup.find_all("a", href=pattern)
+        for a in anchors:
+            a.attrs['href'] = replace_with
+
+    replace_href(
+        pattern=re.compile("scraped-data-label$"),
+        replace_with='scrapers.azlyrics_scraper.html#scraped-data-label')
+    replace_href(
+        pattern=re.compile("lyrics_scraper.LyricsScraper.scraped_data$"),
+        replace_with='scrapers.azlyrics_scraper.html#scrapers.'
+                     'azlyrics_scraper.AZLyricsScraper.scraped_data')
+    write_file(filepath, str(soup))
+    return soup
 
 
 def post_process(app, exception):
-    source_filepath = '_build/html/scrapers.lyrics_scraper.html'
-    target_filepath = '_build/html/scrapers.azlyrics_scraper.html'
-    replace_dd_tag(
-        source_filepath=source_filepath,
-        target_filepath=target_filepath,
+    """
+
+    Parameters
+    ----------
+    app
+    exception
+
+    """
+    lyrics_filepath = '_build/html/scrapers.lyrics_scraper.html'
+    azlyrics_filepath = '_build/html/scrapers.azlyrics_scraper.html'
+    soup = replace_dd_tag(
+        source_filepath=lyrics_filepath,
+        target_filepath=azlyrics_filepath,
         source_id="scrapers.lyrics_scraper.LyricsScraper.scraped_data",
         target_id="scrapers.azlyrics_scraper.AZLyricsScraper.scraped_data"
     )
+    if soup:
+        replace_hrefs(soup, azlyrics_filepath)
 
 
 def setup(app):
@@ -225,4 +333,3 @@ def setup(app):
     app.connect('autodoc-process-docstring', add_custom_sections)
     app.connect('build-finished', post_process)
     # app.connect('source-read', source_read)
-

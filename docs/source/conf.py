@@ -194,7 +194,7 @@ def post_process(app, exception):
     # ipdb.set_trace()
     file_path = os.path.dirname(os.path.abspath(__file__))
     os.chdir(file_path)
-    filepath = 'build/html/scrapers.lyrics_scraper.html'
+    filepath = '_build/localmedia/html/scrapers.lyrics_scraper.html'
     print("isfile: {}".format(os.path.isfile(filepath)))
     """
     source_filepath = 'build/html/scrapers.lyrics_scraper.html'

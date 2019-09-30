@@ -45,7 +45,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_rtd_theme'
 ]
-autodoc_mock_imports = ['bs4', 'pyutils', 'requests', 'yaml']
+autodoc_mock_imports = ['pyutils', 'requests', 'yaml']
 # This value controls the docstrings inheritance. Default is True.
 # Ref.: https://bit.ly/2ofNvGi
 # autodoc_inherit_docstrings = False
@@ -171,11 +171,7 @@ def find_dd_tag(filepath, id):
     return data
 
 
-import ipdb
-
-
 def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
-    ipdb.set_trace()
     data = find_dd_tag(source_filepath, source_id)
     if data:
         """
@@ -194,7 +190,6 @@ def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
 
 
 def post_process(app, exception):
-    ipdb.set_trace()
     source_filepath = os.path.join(app.outdir, "scrapers.lyrics_scraper.html")
     target_filepath = os.path.join(app.outdir, "scrapers.azlyrics_scraper.html")
     replace_dd_tag(

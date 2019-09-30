@@ -243,7 +243,6 @@ def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
         for res in results:
             if res.find(id=target_id):
                 res.find("dd").replaceWith(data)
-                write_file(target_filepath, str(soup))
                 return soup
     return None
 
@@ -282,7 +281,6 @@ def replace_hrefs(soup, filepath):
         pattern=re.compile("lyrics_scraper.LyricsScraper.scraped_data$"),
         replace_with='scrapers.azlyrics_scraper.html#scrapers.'
                      'azlyrics_scraper.AZLyricsScraper.scraped_data')
-    write_file(filepath, str(soup))
     return soup
 
 
@@ -303,8 +301,9 @@ def post_process(app, exception):
         source_id="scrapers.lyrics_scraper.LyricsScraper.scraped_data",
         target_id="scrapers.azlyrics_scraper.AZLyricsScraper.scraped_data"
     )
+    soup = replace_hrefs(soup, azlyrics_filepath)
     if soup:
-        replace_hrefs(soup, azlyrics_filepath)
+        write_file(azlyrics_filepath, str(soup))
 
 
 def setup(app):

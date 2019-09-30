@@ -2,11 +2,37 @@
 API Reference
 =============
 
-.. toctree::
-   :maxdepth: 3
-   :caption: Table of Contents
+.. contents::
+   :depth: 2
 
-   scrapers.lyrics_scraper
-   scrapers.azlyrics_scraper
-   scrapers.scraper_exceptions
-   scripts.scraper
+scrapers.lyrics\_scraper
+========================
+
+.. automodule:: scrapers.lyrics_scraper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scrapers.azlyrics\_scraper
+==========================
+
+.. automodule:: scrapers.azlyrics_scraper
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scrapers.scraper\_exceptions
+============================
+
+.. automodule:: scrapers.scraper_exceptions
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scripts.scraper
+===============
+
+.. automodule:: scripts.scraper
+   :members:
+   :undoc-members:
+   :show-inheritance:

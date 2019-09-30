@@ -11,7 +11,7 @@ Welcome to LyricsScraping's documentation!
    <p align="center"><img src="https://raw.githubusercontent.com/raul23/images/master/LyricsScraping/LyricsScraping_logo.png"></p>
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Table of Contents
 
    README

@@ -221,13 +221,12 @@ def find_dd_tag(filepath, id):
     return None
 
 
-def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
+def replace_dd_tag(filepath, source_id, target_id):
     """
 
     Parameters
     ----------
-    source_filepath : str
-    target_filepath : str
+    filepath : str
     source_id : str
     target_id : str
 
@@ -237,11 +236,14 @@ def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
     None
 
     """
-    data = find_dd_tag(source_filepath, source_id)
+    data = find_dd_tag(filepath, source_id)
     if data:
-        soup, results = find_all_dl_tags(target_filepath)
+        soup, results = find_all_dl_tags(filepath)
         for res in results:
             if res.find(id=target_id):
+                # TODO: explain
+                data.find("p", id="scraped-data-label").attrs['id'] \
+                    = "scraped-data-label-2"
                 res.find("dd").replaceWith(data)
                 return soup
     return None
@@ -274,10 +276,10 @@ def replace_hrefs(soup, replacements):
         for a in anchors:
             a.attrs['href'] = replace_with
 
-    for repl in replacements:
+    for rep in replacements:
         replace_href(
-            pattern=repl['pattern'],
-            replace_with=repl['replace_with'])
+            pattern=rep['pattern'],
+            replace_with=rep['replace_with'])
     return soup
 
 
@@ -290,26 +292,27 @@ def post_process(app, exception):
     exception
 
     """
-    lyrics_filepath = '_build/html/scrapers.lyrics_scraper.html'
-    azlyrics_filepath = '_build/html/scrapers.azlyrics_scraper.html'
-    soup = replace_dd_tag(
-        source_filepath=lyrics_filepath,
-        target_filepath=azlyrics_filepath,
+    filepath = '_build/html/api_reference.html'
+    whole_soup = replace_dd_tag(
+        filepath=filepath,
         source_id="scrapers.lyrics_scraper.LyricsScraper.scraped_data",
         target_id="scrapers.azlyrics_scraper.AZLyricsScraper.scraped_data"
     )
+    # TODO: explain '-2' in replace_with
     href_replacements = [
         {'pattern': re.compile("scraped-data-label$"),
-         'replace_with': 'scrapers.azlyrics_scraper.html#scraped-data-label'
+         'replace_with': 'api_reference.html#scraped-data-label-2'
          },
         {'pattern': re.compile("lyrics_scraper.LyricsScraper.scraped_data$"),
-         'replace_with': 'scrapers.azlyrics_scraper.html#scrapers.'
-                         'azlyrics_scraper.AZLyricsScraper.scraped_data'
+         'replace_with': 'api_reference.html#scrapers.azlyrics_scraper.'
+                         'AZLyricsScraper.scraped_data'
          }
     ]
-    soup = replace_hrefs(soup, href_replacements)
-    if soup:
-        write_file(azlyrics_filepath, str(soup))
+    azlyrics_soup = whole_soup.find(id="module-scrapers.azlyrics_scraper",
+                                    class_="section")
+    replace_hrefs(azlyrics_soup, href_replacements)
+    if whole_soup:
+        write_file(filepath, str(whole_soup))
 
 
 def setup(app):

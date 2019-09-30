@@ -15,8 +15,7 @@ import sys
 # Third-party modules
 import sphinx_rtd_theme
 from bs4 import BeautifulSoup
-sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath('../../lyrics_scraping'))
+sys.path.insert(0, os.path.abspath('../lyrics_scraping'))
 
 
 # -- Project information -----------------------------------------------------
@@ -190,8 +189,6 @@ def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
 
 
 def post_process(app, exception):
-    # filepath = '_build/html/scrapers.lyrics_scraper.html'
-    # print("isfile: {}".format(os.path.isfile(filepath)))
     source_filepath = '_build/html/scrapers.lyrics_scraper.html'
     target_filepath = '_build/html/scrapers.azlyrics_scraper.html'
     replace_dd_tag(

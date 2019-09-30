@@ -12,7 +12,9 @@
 #
 import os
 import sys
+# Third-party modules
 import sphinx_rtd_theme
+from bs4 import BeautifulSoup
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../../lyrics_scraping'))
 
@@ -44,6 +46,9 @@ extensions = [
     'sphinx_rtd_theme'
 ]
 autodoc_mock_imports = ['bs4', 'pyutils', 'requests', 'yaml']
+# This value controls the docstrings inheritance. Default is True.
+# Ref.: https://bit.ly/2ofNvGi
+# autodoc_inherit_docstrings = False
 napoleon_google_docstring = False
 # If False, no cross-referencing with Python types
 napoleon_use_param = True
@@ -53,7 +58,7 @@ source_suffix = '.rst'
 # source_suffix = ['.rst', '.md']
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'python': ('http://docs.python.org/3', None)}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -150,6 +155,56 @@ def add_custom_sections(app, what, name, obj, options, lines):
     """
 
 
+def find_all_dl_tags(filepath):
+    with open(filepath, 'r') as f:
+        html = f.read()
+    soup = BeautifulSoup(html, 'lxml')
+    return soup, soup.find_all("dl", class_="attribute")
+
+
+def find_dd_tag(filepath, id):
+    data = None
+    _, results = find_all_dl_tags(filepath)
+    for res in results:
+        if res.find(id=id):
+            return res.find("dd")
+    return data
+
+
+import ipdb
+
+
+def replace_dd_tag(source_filepath, target_filepath, source_id, target_id):
+    ipdb.set_trace()
+    data = find_dd_tag(source_filepath, source_id)
+    if data:
+        """
+        html = read_file(target_filepath)
+        soup = BeautifulSoup(html, 'lxml')
+        results = soup.find_all("dl", class_="attribute")
+        """
+        soup, results = find_all_dl_tags(target_filepath)
+        for res in results:
+            if res.find(id=target_id):
+                res.find("dd").replaceWith(data)
+                with open(target_filepath, 'w') as f:
+                    f.write(str(soup))
+                return 0
+    return 1
+
+
+def post_process(app, exception):
+    ipdb.set_trace()
+    source_filepath = os.path.join(app.outdir, "scrapers.lyrics_scraper.html")
+    target_filepath = os.path.join(app.outdir, "scrapers.azlyrics_scraper.html")
+    replace_dd_tag(
+        source_filepath=source_filepath,
+        target_filepath=target_filepath,
+        source_id="scrapers.lyrics_scraper.LyricsScraper.scraped_data",
+        target_id="scrapers.azlyrics_scraper.AZLyricsScraper.scraped_data"
+    )
+
+
 def setup(app):
     """Setup event handlers.
 
@@ -174,3 +229,6 @@ def setup(app):
     """
     # Connect (register) handlers to events
     app.connect('autodoc-process-docstring', add_custom_sections)
+    app.connect('build-finished', post_process)
+    # app.connect('source-read', source_read)
+

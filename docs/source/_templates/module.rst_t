@@ -1,5 +1,6 @@
 {%- if show_headings %}
-{{- [basename, "module"] | join(' ') | e | heading }}
+{{- basename | e | heading }}
+{#{- [basename, "module"] | join(' ') | e | heading }#}
 {% endif -%}
 
 .. automodule:: {{ qualname }}

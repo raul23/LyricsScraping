@@ -1,5 +1,6 @@
-scrapers.lyrics\_scraper module
-===============================
+scrapers.lyrics\_scraper
+========================
+
 .. automodule:: scrapers.lyrics_scraper
    :members:
    :undoc-members:

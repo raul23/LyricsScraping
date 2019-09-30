@@ -66,7 +66,7 @@ class AZLyricsScraper(LyricsScraper):
 
     .. important::
 
-       :class:`AZLyrics`'s parameters are those from its parent class
+       :class:`AZLyricsScraper`'s parameters are those from its parent class
        :ref:`LyricsScraper <LyricsScraperParametersLabel>`.
 
     """
@@ -282,9 +282,10 @@ class AZLyricsScraper(LyricsScraper):
         # - the text of the song
         # - the album title the song comes from
         # - the year the album was released
+        # TODO: explain
         song_title = bs_obj.title.text.split('- ')[1].split(' Lyrics')[0]
         artist_name = bs_obj.title.text.split(' -')[0]
-        lyrics_result = bs_obj.find_all('div', class_="", id="")
+        lyrics_result = bs_obj.find_all("div", class_="", id="")
         # Sanity check on lyrics: lyrics are ONLY found within a <div>
         # without class and id
         if len(lyrics_result) != 1:

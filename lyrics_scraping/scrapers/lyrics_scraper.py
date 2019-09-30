@@ -1,8 +1,9 @@
 """Module that defines the base class for scraping lyrics websites and saving
 the scraped content.
 
-More specifically, the derived classes (e.g. ``AZLyricsScraper``) are the ones
-that do the actual scraping of the lyrics webpages.
+More specifically, the derived classes (e.g.
+:class:`~scrapers.azlyrics_scraper.AZLyricsScraper`) are the ones that do the
+actual scraping of the lyrics webpages.
 
 By default, the scraped data is saved in a dictionary (see the variable
 :data:`~LyricsScraper.scraped_data`).
@@ -56,11 +57,11 @@ class LyricsScraper:
     scraping starts, such as setting up logging and the database.
 
     The actual scraping of the lyrics websites is done by the derived classes
-    (e.g. ``AzlyricsScraper``) since each lyrics websites have their own way
-    of being crawled (they are all designed differently). However, the base
-    class is responsible for saving the scraped data in a dictionary (
-    :data:`~LyricsScraper.scraped_data`) and in a database (if it was initially
-    configured).
+    (e.g. :class:`~scrapers.azlyrics_scraper.AZLyricsScraper`) since each lyrics
+    websites have their own way of being crawled (they are all designed
+    differently). However, the base class is responsible for saving the scraped
+    data in a dictionary (:data:`~LyricsScraper.scraped_data`) and in a database
+    (if it was initially make configured).
 
     .. _LyricsScraperParametersLabel:
 
@@ -162,10 +163,9 @@ class LyricsScraper:
 
     `logger_p` is a logger that is associated with the base class
     :class:`LyricsScraper`. The derive classes, such as
-    :class:`AZLyricsScraper`, have their own logger. Hence, we can
-    differentiate whose logs belong to what module, when reading the log file.
-
-    TODO: check links to AZLyricsScraper class
+    :class:`~scrapers.azlyrics_scraper.AZLyricsScraper`, have their own logger.
+    Hence, we can differentiate whose logs belong to what module, when reading
+    the log file.
 
     """
 
@@ -358,7 +358,7 @@ class LyricsScraper:
         -------
         scraped_data : dict
             The scraped data whose content is described in
-            :data:`~LyricsScraper.scraped_data`.
+            :data:`~scrapers.lyrics_scraper.LyricsScraper.scraped_data`.
 
         """
         # If a db was used, inform the user that the scraped data is also to be

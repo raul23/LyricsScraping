@@ -1,5 +1,6 @@
-scrapers.azlyrics\_scraper module
-=================================
+scrapers.azlyrics\_scraper
+==========================
+
 .. automodule:: scrapers.azlyrics_scraper
    :members:
    :undoc-members:

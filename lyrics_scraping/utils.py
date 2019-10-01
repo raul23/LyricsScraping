@@ -11,11 +11,13 @@ def get_data_filepath(file_type, default=False):
     """Return the path to a data file used by the `lyrics_scraping` module.
 
     The data file can either be the:
-    - SQL music schema file [1]: used for creating the SQLite database used for
-                                 storing the scraped data
-    - main configuration file [2] : used for configuring a lyrics scraper
-    - logging configuration file [3] : used to set up the logging for all
-                                       custom modules
+
+    - `SQL music schema file <https://bit.ly/2kIMYvn>`_: used for creating the
+      SQLite database used for storing the scraped data
+    - `main configuration file <https://bit.ly/2n764MV>`_: used for configuring
+      a lyrics scraper
+    - `logging configuration file <https://bit.ly/2oPJSr4>`_: used to set up
+      the logging for all custom modules
 
     By setting `default` to True, you get instead the path to the configuration
     file with default values. Otherwise, you get the path to the configuration
@@ -45,12 +47,6 @@ def get_data_filepath(file_type, default=False):
         Raised if the wrong type of data file is given to the function. Only
         {'log', 'main', 'schema'} are accepted for `file_type`.
 
-     References
-     ----------
-     .. [1] `TODO: add URL to SQL schema file`_.
-     .. [2] `TODO: add URL to main config file`_.
-     .. [3] `TODO: add URL to logging config file`_.
-
     """
     if file_type == "log":
         filename = 'default_logging_cfg.yaml' if default else 'logging_cfg.yaml'
@@ -59,7 +55,6 @@ def get_data_filepath(file_type, default=False):
     elif file_type == 'schema':
         filename = 'music.sql'
     else:
-
         raise AssertionError("Wrong type of data file: '{}' (choose from "
                              "'log', 'main', 'schema')".format(file_type))
     return os.path.join(data.__path__[0], filename)

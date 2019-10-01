@@ -307,7 +307,7 @@ def add_custom_sections(app, what, name, obj, options, lines):
     if name == "scrapers.scraper_exceptions":
         new_lines = first_lines + lines + ["Classes", "-------"]
         lines[:] = new_lines
-    elif name == "scripts.scraper":
+    elif name in ["scripts.scraper", ""]:
         new_lines = first_lines + lines + ["Functions", "---------"]
         lines[:] = new_lines
     elif what == 'module':  # other modules

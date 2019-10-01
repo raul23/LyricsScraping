@@ -18,6 +18,7 @@ See the structure of the music database as defined in the `music.sql schema`_.
 .. _HTTP GET request: https://www.webopedia.com/TERM/H/HTTP_request_header.html
 .. _music.sql schema: https://bit.ly/2kIMYvn
 .. _saveutils.py: https://bit.ly/2m5z46A
+.. _saveutils.SaveWebpages: https://bit.ly/2oaz7Px
 .. _scraper.py: https://bit.ly/2msZDTC
 .. _use a specialized library: https://stackoverflow.com/a/56476496
 .. _YAML logging file: https://bit.ly/2m5wjSM
@@ -104,7 +105,7 @@ class LyricsScraper:
         The information added to the `HTTP GET request`_ that a user's browser
         sends to a Web server containing the details of what the browser wants
         and will accept back from the server. (the default value is defined
-        in `saveutils.py`_).
+        in `saveutils.SaveWebpages`_).
     use_logging : bool, optional
         Whether to log messages on console and file. The logging is setup
         according to the `YAML logging file`_ (the default value is False which

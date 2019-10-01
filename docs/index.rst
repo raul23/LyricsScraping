@@ -12,10 +12,10 @@ Welcome to LyricsScraping's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Table of Contents
 
    README
    api_reference
+
 
 Indices and tables
 ==================

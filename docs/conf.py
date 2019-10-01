@@ -142,13 +142,13 @@ def find_all_dl_tags(filepath):
     return soup, soup.find_all("dl", class_="attribute")
 
 
-def find_dd_tag(filepath, id):
+def find_dd_tag(filepath, id_):
     """
 
     Parameters
     ----------
     filepath : str
-    id : str
+    id_ : str
 
     Returns
     -------
@@ -158,7 +158,7 @@ def find_dd_tag(filepath, id):
     """
     _, results = find_all_dl_tags(filepath)
     for res in results:
-        if res.find(id=id):
+        if res.find(id=id_):
             return res.find("dd")
     return None
 
@@ -192,7 +192,7 @@ def replace_dd_tag(filepath, source_id, target_id):
 
 
 def replace_hrefs(soup, replacements):
-    """
+    """TODO
 
     Parameters
     ----------
@@ -206,7 +206,7 @@ def replace_hrefs(soup, replacements):
     """
 
     def replace_href(pattern, replace_with):
-        """
+        """TODO
 
         Parameters
         ----------
@@ -253,6 +253,17 @@ def post_process(app, exception):
     azlyrics_soup = whole_soup.find(id="module-scrapers.azlyrics_scraper",
                                     class_="section")
     replace_hrefs(azlyrics_soup, href_replacements)
+    # Fix link to LyricsScraper Base
+    # TODO: explain
+    # TOOD: add note about select() [CSS selector] not working if id has dots
+    new_tag = "<a class='reference external' href='#scrapers.lyrics_scraper." \
+              "LyricsScraper' title='scrapers.lyrics_scraper.LyricsScraper'>" \
+              "<code class='xref py py-class docutils literal notranslate'>" \
+              "<span class='pre'>scrapers.lyrics_scraper.LyricsScraper</span>" \
+              "</code></a>"
+    dt_tag = whole_soup.find(id="scrapers.azlyrics_scraper.AZLyricsScraper")
+    dd_tag = dt_tag.find_next_sibling()
+    dd_tag.p.code.replace_with(BeautifulSoup(new_tag, 'lxml').a)
     if whole_soup:
         write_file(filepath, str(whole_soup))
 

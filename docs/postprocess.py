@@ -1,7 +1,9 @@
-"""Module that defines functions used with `build-finished`.
+"""Module that defines functions used when `build-finished` is emitted.
 
-`build-finished` event is emitted after the build has finished, before Sphinx
-exits.
+`build-finished` event is emitted by Sphinx after the build has finished,
+before Sphinx exits.
+
+These functions are called in :meth:`setup` from conf.py
 
 See Also
 --------
@@ -56,7 +58,7 @@ def write_file(filepath, data):
         f.write(data)
 
 
-def find_dd_tag(id_, filepath=None, soup=None):
+def _find_dd_tag(id_, filepath=None, soup=None):
     """Find a <dd> tag in an HTML document.
 
     We make use of the <dt> that is a top sibling to the <dd> tag in order to
@@ -99,7 +101,7 @@ def find_dd_tag(id_, filepath=None, soup=None):
     return soup, dd_tag
 
 
-def replace_hrefs(soup, replacements):
+def _replace_hrefs(soup, replacements):
     """Replace URLs in an HTML document with new ones.
 
     Parameters
@@ -129,7 +131,7 @@ def replace_hrefs(soup, replacements):
 
     """
 
-    def replace_href(pattern, replace_with):
+    def _replace_href(pattern, replace_with):
         """Replace a single URL in the HTML document.
 
         Parameters
@@ -148,13 +150,13 @@ def replace_hrefs(soup, replacements):
             a.attrs['href'] = replace_with
 
     for rep in replacements:
-        replace_href(
+        _replace_href(
             pattern=rep['pattern'],
             replace_with=rep['replace_with'])
     return soup
 
 
-def copy_dd_tag():
+def _copy_dd_tag():
     """Copy LyricsScraper's <dd> tag to AZLyricsScraper section.
 
     More specifically, it's the LyricsScraper's <dd> tag associated with the
@@ -181,8 +183,8 @@ def copy_dd_tag():
     # detailed structure is shown. This <dd> tag is to be found in the
     # LyricsScraper section. This <dd> tag will then be copied into the
     # AZLyricsScraper section
-    whole_soup, source_dd_tag_soup = find_dd_tag(source_id,
-                                                 filepath=API_HTML_FILEPATH)
+    whole_soup, source_dd_tag_soup = _find_dd_tag(source_id,
+                                                  filepath=API_HTML_FILEPATH)
     # I need to make a copy of the <dd> tag from the LyricsScraper because if I
     # don't, all the changes I will be doing on this <dd> tag will also be
     # reflected in the <dd> tag from the LyricsScraper section, and I just want
@@ -228,12 +230,12 @@ def copy_dd_tag():
         azlyrics_soup = whole_soup.find(id="module-scrapers.azlyrics_scraper",
                                         class_="section")
         # Do the URL replacements in the AZLyricsScraper section
-        replace_hrefs(azlyrics_soup, href_replacements)
+        _replace_hrefs(azlyrics_soup, href_replacements)
         # ==================================================
         # Copy the <dd> tag into the AZLyricsScraper section
         # ==================================================
         # Find the <dd> tag in the AZLyricsScraper section where we will copy
-        _, target_dd_tag_soup = find_dd_tag(id_=target_id, soup=azlyrics_soup)
+        _, target_dd_tag_soup = _find_dd_tag(id_=target_id, soup=azlyrics_soup)
         # Do the copying
         target_dd_tag_soup.replaceWith(copy_source_dd_tag_soup)
     return whole_soup
@@ -257,6 +259,10 @@ def post_process_api_reference(app, exception):
         an exception. See Sphinx's doc on `build-finished
         <https://bit.ly/2o3aynS>`_.
 
+    Notes
+    -----
+    This function function is called in :meth:`setup` from conf.py
+
     References
     ----------
     .. [2] `build-finished <https://bit.ly/2o3aynS>`_.
@@ -266,7 +272,7 @@ def post_process_api_reference(app, exception):
     # OPERATION 1: Copy LyricsScraper's detailed description of `scraped_data`
     #              structure to AZLyricsScraper section
     # ========================================================================
-    soup = copy_dd_tag()
+    soup = _copy_dd_tag()
     # =======================================================================
     # OPERATION 2: Add link in the 'Bases' part of the AZLyricsScrape section
     # =======================================================================

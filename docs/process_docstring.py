@@ -1,12 +1,14 @@
-"""Module that defines functions used with `autodoc-process-docstring`.
+"""Module that defines functions used when `autodoc-process-docstring` is
+emitted.
 
-`autodoc-process-docstring` is emitted when autodoc has read and processed a
-docstring [1]_.
+`autodoc-process-docstring` is emitted by Sphinx when autodoc has read and
+processed a docstring [1]_.
+
+These functions are called in :meth:`setup` from conf.py
 
 See Also
 --------
-postprocess : a module that defines functions used with
-              `build-finished`.
+postprocess : a module that defines functions used with `build-finished`.
 
 References
 ----------
@@ -22,8 +24,8 @@ def add_custom_sections(app, what, name, obj, options, lines):
     a class' docstring for example. Otherwise, Sphinx will complain that the
     title of the section is invalid.
 
-    This function is called when `autodoc-process-docstring` is emitted. It is
-    emitted when autodoc has read and processed a docstring [2]_.
+    This function is called by Sphinx when `autodoc-process-docstring` is
+    emitted. It is emitted when autodoc has read and processed a docstring [2]_.
 
     The description of the parameters is taken from `sphinx's documentation
     <https://bit.ly/2nghVI4>`_.
@@ -49,9 +51,14 @@ def add_custom_sections(app, what, name, obj, options, lines):
         the processed docstring – that the event handler can modify in place to
         change what Sphinx puts into the output.
 
+    Notes
+    -----
+    This function function is called in :meth:`setup` from conf.py
+
     References
     ----------
     .. [2] `autodoc-process-docstring <https://bit.ly/2nghVI4>`_.
+
 
     """
     # TODO: find another way to add custom sections into docstrings

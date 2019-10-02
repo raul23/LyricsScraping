@@ -248,7 +248,7 @@ def post_process_api_reference(app, exception):
     build has finished, before Sphinx exits [2]_.
 
     The `api_reference.html` file is processed in order to copy content to some
-    other parts of the HTML file, and to fix some links.
+    other parts of the HTML file, fix some links, and replace some content.
 
     Parameters
     ----------
@@ -268,14 +268,14 @@ def post_process_api_reference(app, exception):
     .. [2] `build-finished <https://bit.ly/2o3aynS>`_.
 
     """
-    # ========================================================================
-    # OPERATION 1: Copy LyricsScraper's detailed description of `scraped_data`
-    #              structure to AZLyricsScraper section
-    # ========================================================================
+    # ==========================================================================
+    # POSTPROCESS 1: Copy LyricsScraper's detailed description of `scraped_data`
+    #                structure to AZLyricsScraper section
+    # ==========================================================================
     soup = _copy_dd_tag()
-    # =======================================================================
-    # OPERATION 2: Add link in the 'Bases' part of the AZLyricsScrape section
-    # =======================================================================
+    # =========================================================================
+    # POSTPROCESS 2: Add link in the 'Bases' part of the AZLyricsScrape section
+    # =========================================================================
     # Define a new anchor tag that will be used to add link in the 'Bases' part
     # of the AZLyricsScraper section
     new_tag = "<a class='reference external' href='#scrapers.lyrics_scraper." \

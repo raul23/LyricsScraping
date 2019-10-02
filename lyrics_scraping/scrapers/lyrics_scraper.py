@@ -14,7 +14,7 @@ database is given via the argument :ref:`db_filepath
 
 See the structure of the music database as defined in the `music.sql schema`_.
 
-.. _guide: <https://bit.ly/2xYreie
+.. _guide: https://bit.ly/2xYreie
 .. _HTTP GET request: https://www.webopedia.com/TERM/H/HTTP_request_header.html
 .. _music.sql schema: https://bit.ly/2kIMYvn
 .. _saveutils.py: https://bit.ly/2m5z46A
@@ -281,6 +281,9 @@ class LyricsScraper:
         self.http_get_timeout = http_get_timeout
         self.delay_between_requests = delay_between_requests
         self.headers = headers
+        # =============
+        # Saving config
+        # =============
         # Create instance for retrieving and saving webpages
         self.saver = SaveWebpages(
             overwrite_webpages=self.overwrite_webpages,

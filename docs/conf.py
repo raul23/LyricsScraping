@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('../lyrics_scraping'))
 
 # Custom modules
-from docs.postprocess import post_process
+from docs.postprocess import post_process_api_reference
 from docs.process_docstring import add_custom_sections
 
 
@@ -124,5 +124,5 @@ def setup(app):
     """
     # Connect (register) handlers to events
     app.connect('autodoc-process-docstring', add_custom_sections)
-    app.connect('build-finished', post_process)
+    app.connect('build-finished', post_process_api_reference)
     # app.connect('source-read', source_read)

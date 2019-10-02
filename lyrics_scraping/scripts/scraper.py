@@ -157,6 +157,7 @@ def reset_config(cfg_type):
     # Get the paths to the default and user config files
     default_cfg_filepath = get_data_filepath(file_type=cfg_type, default=True)
     user_cfg_filepath = get_data_filepath(file_type=cfg_type, default=False)
+    # TODO: use shutils.copyfile
     try:
         copy_file(source_filepath=default_cfg_filepath,
                   dest_filepath=user_cfg_filepath)

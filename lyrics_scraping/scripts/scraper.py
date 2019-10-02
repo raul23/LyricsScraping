@@ -49,6 +49,7 @@ import argparse
 import logging
 import os
 import platform
+import shutil
 import sqlite3
 import traceback
 # Custom modules
@@ -95,6 +96,7 @@ def edit_config(cfg_type, app=None):
         of the application doesn't refer to an executable.
 
     """
+    # Get path to user-defined config file
     filepath = get_data_filepath(cfg_type)
     # Command to open the config file with the default application on the
     # specific OS or by the user-specified app, e.g. `open file_path` in macOS
@@ -154,13 +156,13 @@ def reset_config(cfg_type):
         is 0 if the config was reset successfully.
 
     """
-    # Get the paths to the default and user config files
-    default_cfg_filepath = get_data_filepath(file_type=cfg_type, default=True)
-    user_cfg_filepath = get_data_filepath(file_type=cfg_type, default=False)
+    # Get the paths to the default and user-defined config files
+    default_cfg_filepath = get_data_filepath(
+        file_type='default_s{}'.format(cfg_type))
+    user_cfg_filepath = get_data_filepath(file_type=cfg_type)
     # TODO: use shutils.copyfile
     try:
-        copy_file(source_filepath=default_cfg_filepath,
-                  dest_filepath=user_cfg_filepath)
+        shutil.copyfile(default_cfg_filepath, user_cfg_filepath)
     except OSError as e:
         print(e)
         return 1
@@ -188,9 +190,9 @@ def start_scraper(color_logs=None):
 
     """
     status_code = 1
-    # Get the filepaths to the main and logging config files
-    main_cfg_filepath = get_data_filepath(file_type='main', default=False)
-    log_cfg_filepath = get_data_filepath(file_type='log', default=False)
+    # Get the filepaths to the user-defined main and logging config files
+    main_cfg_filepath = get_data_filepath(file_type='main')
+    log_cfg_filepath = get_data_filepath(file_type='log')
     # Load the main config dict from the config file on disk
     main_cfg = read_yaml(main_cfg_filepath)
     # Setup logging if required

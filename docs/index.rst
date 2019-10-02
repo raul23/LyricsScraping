@@ -8,7 +8,7 @@ Welcome to LyricsScraping's documentation!
 
 .. raw:: html
 
-   <p align="center"><img src="https://raw.githubusercontent.com/raul23/images/master/LyricsScraping/LyricsScraping_logo.png"></p>
+   <p align="center"><img src=images/LyricsScraping_logo.png></p>
 
 .. toctree::
    :maxdepth: 2

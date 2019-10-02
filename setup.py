@@ -15,14 +15,14 @@ dirpath = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(dirpath, "README.rst")) as f:
     README = f.read()
 
+# TODO: get the version programmatically
 setup(name='LyricsScraping',
-      version='1.0',
+      version='0.1',
       description='Crawl and scrap lyrics from song webpages',
       long_description=README,
       long_description_content_type='text/x-rst',
       classifiers=[
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Operating System :: OS Independent',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',

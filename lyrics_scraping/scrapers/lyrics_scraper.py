@@ -141,7 +141,8 @@ class LyricsScraper:
         Path to the `YAML logging file`_ which is used to setup logging for all
         custom modules.
     schema_filepath : str
-        Path to `music.sql schema`_ for the music database.
+        Path to `music.sql schema`_ for building the music database which will
+        store the scraped data.
     scraped_data : dict
         The scraped data is saved as a dictionary. Its structure is based on
         the database's `music.sql schema`_.
@@ -171,19 +172,21 @@ class LyricsScraper:
     """
 
     valid_domains = ["www.azlyrics.com"]
-    logging_filepath = get_data_filepath(file_type='log')
-    schema_filepath = get_data_filepath(file_type='schema')
     scraped_data = {
-        'albums':
-            {'headers': ('album_title', 'artist_name', 'year',),
-             'data': []},
-        'artists':
-            {'headers': ('artist_name',),
-             'data': []},
-        'songs':
-            {'headers': ('song_title', 'artist_name', 'album_title',
-                         'lyrics_url', 'lyrics', 'year',),
-             'data': []}}
+        'albums': {
+            'headers': ('album_title', 'artist_name', 'year',),
+            'data': []
+        },
+        'artists': {
+            'headers': ('artist_name',),
+            'data': []
+        },
+        'songs': {
+            'headers': ('song_title', 'artist_name', 'album_title',
+                        'lyrics_url', 'lyrics', 'year',),
+            'data': []
+        }
+    }
     """The scraped data is saved as a dictionary.
 
     .. _scraped-data-Label:
@@ -223,6 +226,8 @@ class LyricsScraper:
         self.skipped_urls = {}
         self.good_urls = set()
         self.checked_urls = set()
+        self.logging_filepath = get_data_filepath(file_type='log')
+        self.schema_filepath = get_data_filepath(file_type='schema')
         # =============
         # Logging setup
         # =============

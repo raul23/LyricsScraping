@@ -118,10 +118,9 @@ class LyricsScraper:
     ----------
     skipped_urls : dict [str, str]
         Stores the URLs that were skipped because of an error such as
-        :exc:`OSError` or :exc:`~pyutils.exceptions.connection.HTTP404Error`,
+        :exc:`OSError` or :exc:`~exceptions.connection.HTTP404Error`,
         along with the error message. The keys are the URLs and the values are
         the associated error messages.
-        TODO: add link to HTTP404Error custom exception
     good_urls : set
         Stores the unique URLs that were successfully processed and saved.
     checked_urls : set
@@ -133,8 +132,7 @@ class LyricsScraper:
     db_conn : sqlite3.Connection
         SQLite database connection.
     saver : SaveWebpages
-        For retrieving webpages and saving them in cache. See `saveutils.py`_.
-        TODO: add link to SaveWebpages type
+        For retrieving webpages and saving them in cache. See :mod:`saveutils`.
     valid_domains : list
         Only URLs from these domains will be processed.
     logging_filepath : str

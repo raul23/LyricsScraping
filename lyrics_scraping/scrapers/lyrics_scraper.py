@@ -105,7 +105,7 @@ class LyricsScraper:
         The information added to the `HTTP GET request`_ that a user's browser
         sends to a Web server containing the details of what the browser wants
         and will accept back from the server. (the default value is defined
-        in `saveutils.SaveWebpages`_).
+        in :obj:`saveutils.SaveWebpages.headers`).
     use_logging : bool, optional
         Whether to log messages on console and file. The logging is setup
         according to the `YAML logging file`_ (the default value is False which
@@ -131,7 +131,7 @@ class LyricsScraper:
         Logger for logging to console and file.
     db_conn : sqlite3.Connection
         SQLite database connection.
-    saver : SaveWebpages
+    saver : :class:`saveutils.SaveWebpages`
         For retrieving webpages and saving them in cache. See :mod:`saveutils`.
     valid_domains : list
         Only URLs from these domains will be processed.
@@ -152,7 +152,8 @@ class LyricsScraper:
 
     By default, the scraped data is saved in a dictionary whose structure is
     described below (see :data:`~LyricsScraper.scraped_data`). The scraped data
-    will also be saved if a database is given via `db_filepath`.
+    will also be saved if a database is given via :ref:`db_filepath
+    <LyricsScraperParametersLabel>`.
 
     See the structure of the music database as defined in the `music.sql
     schema`_.

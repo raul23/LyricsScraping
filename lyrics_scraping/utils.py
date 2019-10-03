@@ -5,6 +5,7 @@
 .. _user-defined logging configuration file: https://bit.ly/2niTDgY
 .. _user-defined main configuration file: https://bit.ly/2oyt0VJ
 .. _SQL schema file music.sql: https://bit.ly/2kIMYvn
+
 """
 
 import os

@@ -312,6 +312,7 @@ def process_api_ref(app, exception):
         for p in p_tags:
             p.attrs["style"] = "margin-bottom: 0px;"
     except AttributeError as e:
+        # TODO: Investigate this error
         print(e)
     else:
         # ==============================

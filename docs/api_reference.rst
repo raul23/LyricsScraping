@@ -25,10 +25,10 @@ API Reference
    :undoc-members:
    :show-inheritance:
 
-:mod:`scrapers.scraper\_exceptions`
+:mod:`scrapers.exceptions`
 -----------------------------------
 
-.. automodule:: scrapers.scraper_exceptions
+.. automodule:: scrapers.exceptions
    :members:
    :undoc-members:
    :show-inheritance:

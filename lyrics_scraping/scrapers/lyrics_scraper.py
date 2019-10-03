@@ -40,7 +40,7 @@ from logging import NullHandler
 import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
 import pyutils.exceptions.sql as sql_exc
-import lyrics_scraping.scrapers.scraper_exceptions as scraper_exc
+import lyrics_scraping.scrapers.exceptions as scraper_exc
 from lyrics_scraping.utils import get_data_filepath
 from pyutils.dbutils import connect_db, create_db, sql_sanity_check
 from pyutils.genutils import add_plural_ending, create_directory

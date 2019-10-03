@@ -27,7 +27,7 @@ from urllib.parse import urlparse
 # Third-party modules
 from bs4 import BeautifulSoup
 # Custom modules
-import lyrics_scraping.scrapers.scraper_exceptions as scraper_exc
+import lyrics_scraping.scrapers.exceptions as scraper_exc
 import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
 from lyrics_scraping.scrapers.lyrics_scraper import LyricsScraper

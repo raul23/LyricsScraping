@@ -63,7 +63,7 @@ source_suffix = '.rst'
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
-    'pyutils': ('https://py-common-utils.readthedocs.io/en/latest/api_reference.html', None)}
+    'pyutils': ('https://py-common-utils.readthedocs.io/en/latest', None)}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -241,8 +241,8 @@ def _copy_dd_tag():
     return whole_soup
 
 
-def post_process_api_reference(app, exception):
-    """Process HTML files generated after the build process.
+def process_api_ref(app, exception):
+    """Process `api_reference.html` after the build process.
 
     This function is called when the `build-finished` event is emitted after the
     build has finished, before Sphinx exits [2]_.
@@ -274,10 +274,10 @@ def post_process_api_reference(app, exception):
         #                `scraped_data` structure to AZLyricsScraper section
         # ==================================================================
         soup = _copy_dd_tag()
-        # =================================================================
-        # POSTPROCESS 2: Add link in the 'Bases' part of the AZLyricsScrape
+        # ==================================================================
+        # POSTPROCESS 2: Add link in the 'Bases' part of the AZLyricsScraper
         #                section
-        # =================================================================
+        # ==================================================================
         # Define a new anchor tag that will be used to add link in the 'Bases'
         # part of the AZLyricsScraper section
         new_tag = "<a class='reference external' href='#scrapers." \
@@ -293,6 +293,21 @@ def post_process_api_reference(app, exception):
         dd_tag = dt_tag.find_next_sibling()
         # Replace the <code> tag with the new <a> tag
         dd_tag.p.code.replace_with(BeautifulSoup(new_tag, 'lxml').a)
+        # =============================================
+        # POSTPROCESS 3: Remove some items from the TOC
+        # =============================================
+        # TODO: add comments
+        soup.select_one("div#contents > ul > li:nth-child(3) > ul").extract()
+        # =========================================
+        # POSTPROCESS 4: Update style for some tags
+        # =========================================
+        # TODO: add comments
+        li_tags = soup.select("div#contents > ul > li")
+        for li in li_tags:
+            li.attrs["style"] = "margin-bottom: 12px;"
+        p_tags = soup.select("div#contents > ul > li > p")
+        for p in p_tags:
+            p.attrs["style"] = "margin-bottom: 0px;"
         # ==============================
         # Save the modified HTML to disk
         # ==============================

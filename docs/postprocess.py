@@ -311,4 +311,5 @@ def process_api_ref(app, exception):
         # ==============================
         # Save the modified HTML to disk
         # ==============================
+        print("Writing ...")
         write_file(API_HTML_FILEPATH, str(soup))

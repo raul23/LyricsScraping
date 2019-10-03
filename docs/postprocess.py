@@ -270,7 +270,8 @@ def process_api_ref(app, exception):
     """
     # TODO: add printings
     # TODO: next line not working on readthedocs but locally yes
-    if exception is None and app.builder.name == 'html':
+    # if exception is None and app.builder.name == 'html':
+    try:
         # ==================================================================
         # POSTPROCESS 1: Copy LyricsScraper's detailed description of
         #                `scraped_data` structure to AZLyricsScraper section
@@ -310,6 +311,9 @@ def process_api_ref(app, exception):
         p_tags = soup.select("div#contents > ul > li > p")
         for p in p_tags:
             p.attrs["style"] = "margin-bottom: 0px;"
+    except AttributeError as e:
+        print(e)
+    else:
         # ==============================
         # Save the modified HTML to disk
         # ==============================

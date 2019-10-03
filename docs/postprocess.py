@@ -268,48 +268,49 @@ def process_api_ref(app, exception):
     .. [2] `build-finished <https://bit.ly/2o3aynS>`_.
 
     """
-    if exception is None and app.builder.name == 'html':
-        # ==================================================================
-        # POSTPROCESS 1: Copy LyricsScraper's detailed description of
-        #                `scraped_data` structure to AZLyricsScraper section
-        # ==================================================================
-        soup = _copy_dd_tag()
-        # ==================================================================
-        # POSTPROCESS 2: Add link in the 'Bases' part of the AZLyricsScraper
-        #                section
-        # ==================================================================
-        # Define a new anchor tag that will be used to add link in the 'Bases'
-        # part of the AZLyricsScraper section
-        new_tag = "<a class='reference external' href='#scrapers." \
-                  "lyrics_scraper.LyricsScraper' title='scrapers." \
-                  "lyrics_scraper.LyricsScraper'> <code class='xref py " \
-                  "py-class docutils literal notranslate'> <span " \
-                  "class='pre'> scrapers.lyrics_scraper.LyricsScraper</span> " \
-                  "</code></a>"
-        # Find the <dt> tag that is a top sibling to the <dd> tag where we want
-        # to add the <a> tag. We do that because the <dd> tag where we want to
-        # add the update is not identified by an id.
-        dt_tag = soup.find("dt", id="scrapers.azlyrics_scraper.AZLyricsScraper")
-        dd_tag = dt_tag.find_next_sibling()
-        # Replace the <code> tag with the new <a> tag
-        dd_tag.p.code.replace_with(BeautifulSoup(new_tag, 'lxml').a)
-        # =============================================
-        # POSTPROCESS 3: Remove some items from the TOC
-        # =============================================
-        # TODO: add comments
-        soup.select_one("div#contents > ul > li:nth-child(3) > ul").extract()
-        # =========================================
-        # POSTPROCESS 4: Update style for some tags
-        # =========================================
-        # TODO: add comments
-        li_tags = soup.select("div#contents > ul > li")
-        for li in li_tags:
-            li.attrs["style"] = "margin-bottom: 12px;"
-        p_tags = soup.select("div#contents > ul > li > p")
-        for p in p_tags:
-            p.attrs["style"] = "margin-bottom: 0px;"
-        # ==============================
-        # Save the modified HTML to disk
-        # ==============================
-        print("Writing ...")
-        write_file(API_HTML_FILEPATH, str(soup))
+    # TODO: next line not working on readthedocs but locally yes
+    # if exception is None and app.builder.name == 'html':
+    # ==================================================================
+    # POSTPROCESS 1: Copy LyricsScraper's detailed description of
+    #                `scraped_data` structure to AZLyricsScraper section
+    # ==================================================================
+    soup = _copy_dd_tag()
+    # ==================================================================
+    # POSTPROCESS 2: Add link in the 'Bases' part of the AZLyricsScraper
+    #                section
+    # ==================================================================
+    # Define a new anchor tag that will be used to add link in the 'Bases'
+    # part of the AZLyricsScraper section
+    new_tag = "<a class='reference external' href='#scrapers." \
+              "lyrics_scraper.LyricsScraper' title='scrapers." \
+              "lyrics_scraper.LyricsScraper'> <code class='xref py " \
+              "py-class docutils literal notranslate'> <span " \
+              "class='pre'> scrapers.lyrics_scraper.LyricsScraper</span> " \
+              "</code></a>"
+    # Find the <dt> tag that is a top sibling to the <dd> tag where we want
+    # to add the <a> tag. We do that because the <dd> tag where we want to
+    # add the update is not identified by an id.
+    dt_tag = soup.find("dt", id="scrapers.azlyrics_scraper.AZLyricsScraper")
+    dd_tag = dt_tag.find_next_sibling()
+    # Replace the <code> tag with the new <a> tag
+    dd_tag.p.code.replace_with(BeautifulSoup(new_tag, 'lxml').a)
+    # =============================================
+    # POSTPROCESS 3: Remove some items from the TOC
+    # =============================================
+    # TODO: add comments
+    soup.select_one("div#contents > ul > li:nth-child(3) > ul").extract()
+    # =========================================
+    # POSTPROCESS 4: Update style for some tags
+    # =========================================
+    # TODO: add comments
+    li_tags = soup.select("div#contents > ul > li")
+    for li in li_tags:
+        li.attrs["style"] = "margin-bottom: 12px;"
+    p_tags = soup.select("div#contents > ul > li > p")
+    for p in p_tags:
+        p.attrs["style"] = "margin-bottom: 0px;"
+    # ==============================
+    # Save the modified HTML to disk
+    # ==============================
+    print("Writing ...")
+    write_file(API_HTML_FILEPATH, str(soup))

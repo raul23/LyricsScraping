@@ -31,7 +31,7 @@ import lyrics_scraping.scrapers.exceptions as scraper_exc
 import pyutils.exceptions.connection as connec_exc
 import pyutils.exceptions.files as files_exc
 from lyrics_scraping.scrapers.lyrics_scraper import LyricsScraper
-from pyutils.genutils import add_plural_ending
+from lyrics_scraping.utils import add_plural_ending
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import get_error_msg
 

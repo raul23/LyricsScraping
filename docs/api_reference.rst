@@ -9,6 +9,9 @@ API Reference
 :mod:`lyrics\_scraping.scrapers`
 ================================
 
+:mod:`lyrics\_scraping.scrapers` is a package that contains modules that define
+scrapers for specific lyrics websites, e.g. :mod:`~scrapers.azlyrics\_scraper`.
+
 :mod:`scrapers.lyrics\_scraper`
 -------------------------------
 
@@ -35,6 +38,9 @@ API Reference
 
 :mod:`lyrics\_scraping.scripts`
 ===============================
+
+:mod:`lyrics\_scraping.scrapers` is a package that contains modules that define
+scripts, e.g. :mod:`scripts.scraper`.
 
 :mod:`scripts.scraper`
 ----------------------

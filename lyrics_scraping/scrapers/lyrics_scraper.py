@@ -300,7 +300,7 @@ class LyricsScraper:
 
         This method iterates through each lyrics URL from the main config file
         and delegates the important tasks (URL processing and scraping) to
-        separate methods (`_process_url()` and `_scrape_webpage()`).
+        separate methods (:meth:`_process_url` and :meth:`_scrape_webpage`).
 
         Notes
         -----
@@ -437,10 +437,9 @@ class LyricsScraper:
     def _check_url_in_db(self, url):
         """Check if an URL is already present in the database.
 
-        The first thing to do when processing a given artist or lyrics URL is
-        to check if it has not already been processed previously, i.e. verify
-        if the URL is already in the db. Hence, we speed up the program
-        execution.
+        When processing a given artist or lyrics URL, we check if it is
+        already in the db. Hence, we speed up the program execution by not
+        processing the same URL again.
 
         Parameters
         ----------
@@ -472,6 +471,7 @@ class LyricsScraper:
                                     " music db will be updated as a consequence")
             else:
                 # Song can't be updated
+                # TODO: it should be a warning
                 raise scraper_exc.OverwriteSongError(
                     "Since the 'update_tables' flag is set to False, the URL"
                     " will be ignored")
@@ -843,14 +843,14 @@ class LyricsScraper:
 
             .. important::
 
-               This returned value only happens with SELECT queries.
+               This returned value only happens with **SELECT** queries.
         None
             Returned if the table couldn't be updated because of an
             :exc:`sqlite3.IntegrityError` exception.
 
             .. important::
 
-               This returned value only happens with INSERT queries.
+               This returned value only happens with **INSERT** queries.
 
             It is not a fatal exception that should stop the program execution
             since the exception can occur when the data to be inserted is
@@ -863,7 +863,7 @@ class LyricsScraper:
 
             .. important::
 
-               This returned value only happens with INSERT queries.
+               This returned value only happens with **INSERT** queries.
 
         Raises
         ------
@@ -874,11 +874,11 @@ class LyricsScraper:
 
         Notes
         -----
-        `values` is needed only in the case of an INSERT query since we are
+        ``values`` is needed only in the case of an INSERT query since we are
         inserting data into the db, unlike a SELECT query which only retrieve
         data from the db.
 
-        When executing an INSERT query, the returned value (i.e. `lastrowid`)
+        When executing an INSERT query, the returned value (i.e. ``lastrowid``)
         is not used within the corresponding INSERT method, e.g.
         :meth:`~LyricsScraper._insert_album`.
 

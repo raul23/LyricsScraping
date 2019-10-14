@@ -52,11 +52,11 @@ import platform
 import shutil
 import sqlite3
 import traceback
-# Custom modules
-import pyutils.exceptions.log as log_exc
+
+import pyutils.exceptions
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
 from lyrics_scraping.utils import get_data_filepath
-from pyutils.genutils import read_yaml, run_cmd
+from pyutils.genutils import load_yaml, run_cmd
 from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import setup_logging
 
@@ -129,11 +129,11 @@ def edit_config(cfg_type, app=None):
             specific_app_dict = {'Darwin': 'open -a {app}'.format(app=app)}
             cmd = specific_app_dict.get(platform.system(), app) + " " + filepath
             retcode = run_cmd(cmd)
-        else:
-            raise FileNotFoundError(e)
-    if retcode == 0:
-        print("Opening the {} configuration file ...".format(cfg_type))
-    return retcode
+        raise
+    finally:
+        if retcode == 0:
+            print("Opening the {} configuration file ...".format(cfg_type))
+        return retcode
 
 
 def reset_config(cfg_type):
@@ -194,7 +194,7 @@ def start_scraper(color_logs=None):
     main_cfg_filepath = get_data_filepath(file_type='main')
     log_cfg_filepath = get_data_filepath(file_type='log')
     # Load the main config dict from the config file on disk
-    main_cfg = read_yaml(main_cfg_filepath)
+    main_cfg = load_yaml(main_cfg_filepath)
     # Setup logging if required
     if main_cfg['use_logging']:
         # Setup logging from the logging config file: this will setup the
@@ -219,7 +219,7 @@ def start_scraper(color_logs=None):
         scraper = AZLyricsScraper(**main_cfg)
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
-            sqlite3.Error, log_exc.LoggingSanityCheckError) as e:
+            sqlite3.Error, pyutils.exceptions.LoggingSanityCheckError) as e:
         logger.exception(e)
     else:
         # Success

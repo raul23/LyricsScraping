@@ -72,11 +72,6 @@ class AZLyricsScraper(LyricsScraper):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.logger = logging.getLogger(__name__)
-        # Experimental option: add color to log messages
-        if os.environ.get('COLOR_LOGS'):
-            from pyutils.logging_wrapper import LoggingWrapper
-            self.logger = LoggingWrapper(self.logger,
-                                         os.environ.get('COLOR_LOGS'))
 
     def _scrape_webpage(self, url, webpage_filepath):
         """Scrape a given webpage and save the scraped data.

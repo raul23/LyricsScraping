@@ -41,7 +41,7 @@ import pyutils.exceptions
 from lyrics_scraping.utils import add_plural_ending, get_data_filepath
 from pyutils.dbutils import connect_db, create_db, sql_sanity_check
 from pyutils.genutils import create_dir
-from pyutils.logutils import get_error_msg, setup_logging
+from pyutils.logutils import get_error_msg, setup_logging_from_cfg
 from pyutils.webcache import WebCache
 
 
@@ -230,11 +230,6 @@ class LyricsScraper:
         # =============
         self.use_logging = use_logging
         self.logger_p = logging.getLogger(__name__)
-        # Experimental option: add color to log messages
-        if os.environ.get('COLOR_LOGS'):
-            from pyutils.log.logging_wrapper import LoggingWrapper
-            self.logger_p = LoggingWrapper(self.logger_p,
-                                           os.environ.get('COLOR_LOGS'))
         if self.use_logging:
             # Before setting up logging from a logging config file, make sure
             # that logging was not already setup previously by a script
@@ -246,7 +241,7 @@ class LyricsScraper:
                     isinstance(handlers[0], NullHandler):
                 # Setup logging for all custom modules based on the default
                 # YAML logging config file
-                setup_logging(self.logging_filepath)
+                setup_logging_from_cfg(self.logging_filepath)
                 self.logger_p.info("Logging is setup")
             else:
                 self.logger_p.warning("The logger was already setup for "

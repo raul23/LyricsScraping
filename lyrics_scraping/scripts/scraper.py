@@ -47,7 +47,6 @@ More information is available at:
 
 import argparse
 import logging
-import os
 import platform
 import shutil
 import sqlite3
@@ -57,8 +56,7 @@ import pyutils.exceptions
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
 from lyrics_scraping.utils import get_data_filepath
 from pyutils.genutils import load_yaml, run_cmd
-from pyutils.log.logging_wrapper import LoggingWrapper
-from pyutils.logutils import setup_logging
+from pyutils.logutils import setup_logging_from_cfg
 
 
 def edit_config(cfg_type, app=None):
@@ -199,19 +197,9 @@ def start_scraper(color_logs=None):
     if main_cfg['use_logging']:
         # Setup logging from the logging config file: this will setup the
         # logging to all custom modules, including the current script
-        setup_logging(log_cfg_filepath)
+        setup_logging_from_cfg(log_cfg_filepath)
     logger = logging.getLogger('scripts.scraper')
     try:
-        # Experimental option: add color to log messages
-        if color_logs is not None:
-            os.environ['COLOR_LOGS'] = color_logs
-            logger = LoggingWrapper(logger, color_logs)
-            # We need to wrap the db_utils's logger with LoggingWrapper which
-            # will add color to log messages.
-            from pyutils import dbutils
-            dbutils.logger = LoggingWrapper(dbutils.logger, color_logs)
-            logger.debug("The log messages will be colored"
-                         " ('{}')".format(color_logs))
         logger.info("Main config file loaded")
         logger.info("Logging is setup")
         # Start the scraping of lyrics webpages
@@ -256,12 +244,13 @@ def setup_arg_parser():
        <https://docs.python.org/3.7/library/argparse.html#argparse.Namespace>`_.
 
     """
+    # TODO: add version and verbose/quite options
     # Setup the parser
     parser = argparse.ArgumentParser(
         description="Scrape lyrics from webpages and save them locally in a "
-                    "SQLite database or a dictionary. Also, you can edit or "
-                    "reset a configuration file which can either be the "
-                    "logging or the main config file.")
+                    "SQLite database. Also, you can edit or reset a "
+                    "configuration file which can either be the logging or the "
+                    "main config file.")
     # Group arguments that are closely related
     start_group = parser.add_argument_group('Start the lyrics scraping')
     start_group.add_argument(
@@ -269,16 +258,6 @@ def setup_arg_parser():
         action="store_true",
         help="Scrape lyrics from webpages and save them locally in a SQLite "
              "database or a dictionary")
-    start_group.add_argument(
-        "-c", "--color_logs",
-        const="u",
-        nargs='?',
-        default=None,
-        choices=["u", "p"],
-        help="Add colors to log messages. By default, we use colors as"
-             " defined for the standard Unix Terminal ('u'). If working with"
-             " the PyCharm terminal, use the value 'p' to get better"
-             " colors suited for this type of terminal.")
     edit_group = parser.add_argument_group('Edit a configuration file')
     edit_group.add_argument(
         "-e", "--edit",

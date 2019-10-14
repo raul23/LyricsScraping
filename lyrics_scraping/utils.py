@@ -9,7 +9,7 @@
 """
 
 import os
-# Custom modules
+
 from lyrics_scraping import data
 
 
@@ -41,12 +41,17 @@ def add_plural_ending(obj, plural_end="s", singular_end=""):
         "s" if number is greater than 1 or more than one item is found in the
         list, "" (empty string) otherwise.
 
+    Raises
+    ------
+    TypeError
+        TODO
+
     """
     if isinstance(obj, list):
         num = len(obj)
     else:
-        assert isinstance(obj, int) or isinstance(obj, float), \
-            "obj must be a list, int or float"
+        if not (isinstance(obj, int) or isinstance(obj, float)):
+            raise TypeError("obj must be a list, int or float")
         num = obj
     return plural_end if num > 1 else singular_end
 

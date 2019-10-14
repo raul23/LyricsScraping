@@ -24,15 +24,13 @@ import os
 import re
 from logging import NullHandler
 from urllib.parse import urlparse
-# Third-party modules
+
 from bs4 import BeautifulSoup
-# Custom modules
-import lyrics_scraping.scrapers.exceptions as scraper_exc
-import pyutils.exceptions.connection as connec_exc
-import pyutils.exceptions.files as files_exc
+
+import lyrics_scraping.exceptions
+import pyutils.exceptions
 from lyrics_scraping.scrapers.lyrics_scraper import LyricsScraper
 from lyrics_scraping.utils import add_plural_ending
-from pyutils.log.logging_wrapper import LoggingWrapper
 from pyutils.logutils import get_error_msg
 
 
@@ -76,6 +74,7 @@ class AZLyricsScraper(LyricsScraper):
         self.logger = logging.getLogger(__name__)
         # Experimental option: add color to log messages
         if os.environ.get('COLOR_LOGS'):
+            from pyutils.logging_wrapper import LoggingWrapper
             self.logger = LoggingWrapper(self.logger,
                                          os.environ.get('COLOR_LOGS'))
 
@@ -124,7 +123,7 @@ class AZLyricsScraper(LyricsScraper):
             self._scrape_artist_page(webpage_filepath, url)
         else:
             # Bad URL
-            raise scraper_exc.InvalidURLCategoryError(
+            raise lyrics_scraping.exceptions.InvalidURLCategoryError(
                 "The URL {} is not recognized as referring to neither "
                 "an artist's nor a lyrics webpage".format(url))
 
@@ -166,13 +165,12 @@ class AZLyricsScraper(LyricsScraper):
         # Load the webpage or save the webpage and retrieve its html
         html = None
         try:
-            # Save the webpage and retrieve its html content
-            html = self._get_html(artist_filepath, artist_url)
-        except (connec_exc.HTTP404Error,
-                files_exc.OverwriteFileError,
-                OSError) as e:
-            # TODO: is it correct or `raise Exception(e)` or something else?
-            raise e
+            # Cache the webpage and retrieve its html content
+            html = self.webcache.get_webpage(artist_url)[0]
+        except (pyutils.exceptions.HTTP404Error,
+                FileExistsError,
+                OSError):
+            raise
         bs_obj = BeautifulSoup(html, 'lxml')
         # Get the name of the artist
         # The name of the artist is found in the title of the artist's webpage
@@ -216,15 +214,15 @@ class AZLyricsScraper(LyricsScraper):
             except OSError as e:
                 self.logger.exception(e)
                 error = e
-            except (connec_exc.HTTP404Error,
-                    files_exc.OverwriteFileError,
-                    scraper_exc.CurrentSessionURLError,
-                    scraper_exc.MultipleAlbumError,
-                    scraper_exc.MultipleLyricsURLError,
-                    scraper_exc.NonUniqueLyricsError,
-                    scraper_exc.NonUniqueAlbumYearError,
-                    scraper_exc.OverwriteSongError,
-                    scraper_exc.WrongAlbumYearError) as e:
+            except (FileExistsError,
+                    pyutils.exceptions.HTTP404Error,
+                    lyrics_scraping.exceptions.CurrentSessionURLError,
+                    lyrics_scraping.exceptions.MultipleAlbumError,
+                    lyrics_scraping.exceptions.MultipleLyricsURLError,
+                    lyrics_scraping.exceptions.NonUniqueLyricsError,
+                    lyrics_scraping.exceptions.NonUniqueAlbumYearError,
+                    lyrics_scraping.exceptions.OverwriteSongError,
+                    lyrics_scraping.exceptions.WrongAlbumYearError) as e:
                 self.logger.error(e)
                 error = e
             else:
@@ -237,7 +235,7 @@ class AZLyricsScraper(LyricsScraper):
                                       "{}".format(lyrics_url))
                     self.good_urls.add(lyrics_url)
 
-    def _scrape_lyrics_page(self, lyrics_filepath, lyrics_url):
+    def _scrape_lyrics_page(self, lyrics_url):
         """Scrape the lyrics webpage.
 
         It crawls the lyrics webpage and scrapes any useful info to be saved,
@@ -248,9 +246,6 @@ class AZLyricsScraper(LyricsScraper):
 
         Parameters
         ----------
-        lyrics_filepath : str
-            File path of the lyrics webpage that is being scraped. The filename
-            will be used to save the HTML document in cache.
         lyrics_url : str
             URL to the lyrics webpage that is being scraped.
 
@@ -273,8 +268,8 @@ class AZLyricsScraper(LyricsScraper):
         self.logger.debug("Scraping the lyrics webpage {}".format(lyrics_url))
         # Check first if the URL was already processed, e.g. is found in the db
         self._check_url_if_processed(lyrics_url)
-        # Save the webpage and retrieve its html content
-        html = self._get_html(lyrics_filepath, lyrics_url)
+        # Cache the webpage and retrieve its html content
+        html = self.webcache.get_webpage(lyrics_url)
         bs_obj = BeautifulSoup(html, 'lxml')
         # Get the following data from the lyrics webpage:
         # - the title of the song
@@ -289,7 +284,7 @@ class AZLyricsScraper(LyricsScraper):
         # Sanity check on lyrics: lyrics are ONLY found within a <div>
         # without class and id
         if len(lyrics_result) != 1:
-            raise scraper_exc.NonUniqueLyricsError(
+            raise lyrics_scraping.exceptions.NonUniqueLyricsError(
                 "Lyrics extraction scheme broke: no lyrics found or more "
                 "than one lyrics were found")
         lyrics_text = lyrics_result[0].text.strip()
@@ -326,13 +321,13 @@ class AZLyricsScraper(LyricsScraper):
                 # album's year extracted
                 if len(year_result) != 1:
                     # 0 or more than 1 album's year found
-                    raise scraper_exc.NonUniqueAlbumYearError(
+                    raise lyrics_scraping.exceptions.NonUniqueAlbumYearError(
                         "The album's year extraction doesn't result in a "
                         "UNIQUE number")
                 # Sanity check on the album's year: the year should be a number
                 # with four digits
                 if not (len(year_result[0]) and year_result[0].isdecimal()):
-                    raise scraper_exc.WrongAlbumYearError(
+                    raise lyrics_scraping.exceptions.WrongAlbumYearError(
                         "The Album's year extraction scheme broke: the year "
                         "'{}' is not a number with four digits".format(
                             year_result[0]))

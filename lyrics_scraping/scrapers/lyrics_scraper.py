@@ -28,24 +28,21 @@ See the structure of the music database as defined in the `music.sql schema`_.
 import logging
 import os
 import sqlite3
-# NOTES:
-# * I'm using requests in ../save_webpages/run_saver.py
-# * For urllib with Python 2, it is
+# NOTE:
+# For urllib with Python 2, it is
 # from six.moves.urllib.parse import urlparse
 import urllib
+from logging import NullHandler
 from urllib.request import urlopen
 from urllib.parse import urlparse
-from logging import NullHandler
-# Custom modules
-import pyutils.exceptions.connection as connec_exc
-import pyutils.exceptions.files as files_exc
-import pyutils.exceptions.sql as sql_exc
-import lyrics_scraping.scrapers.exceptions as scraper_exc
+
+import lyrics_scraping.exceptions
+import pyutils.exceptions
 from lyrics_scraping.utils import add_plural_ending, get_data_filepath
 from pyutils.dbutils import connect_db, create_db, sql_sanity_check
-from pyutils.genutils import create_directory
+from pyutils.genutils import create_dir
 from pyutils.logutils import get_error_msg, setup_logging
-from pyutils.saveutils import SaveWebpages
+from pyutils.webcache import WebCache
 
 
 logging.getLogger(__name__).addHandler(NullHandler())
@@ -71,10 +68,9 @@ class LyricsScraper:
     lyrics_urls : list [str]
         List of URLs to lyrics webpages which will be scraped.
     db_filepath : str, optional
-        File path to the SQLite music database (the default value is an empty
-        string which implies that no database will be used. The scraped data
-        will be saved only in the :data:`~LyricsScraper.scraped_data`
-        dictionary).
+        File path to the SQLite music database (the default value is :obj:`None`
+        which implies that no database will be used. The scraped data will be
+        saved only in the :data:`~LyricsScraper.scraped_data` dictionary).
     autocommit : bool, optional
         Whether the changes to the database are committed right away (the
         default is False which implies that the changes won't take effect
@@ -88,7 +84,7 @@ class LyricsScraper:
         False).
     cache_dirpath : str, optional
         Path to the cache directory where webpages are saved (the default value
-        is the empty string which implies that the cache will not be used).
+        is :obj:`None` which implies that the cache will not be used).
     overwrite_webpages : bool, optional
         Whether the webpages saved in cache can be overwritten (the default value
         is False).
@@ -216,11 +212,13 @@ class LyricsScraper:
     """
     # TODO: add example of data.
 
-    def __init__(self, lyrics_urls, db_filepath="", autocommit=False,
-                 overwrite_db=False, update_tables=False, cache_dirpath="",
+    def __init__(self, lyrics_urls, db_filepath=None, autocommit=False,
+                 overwrite_db=False, update_tables=False, cache_dirpath=None,
                  overwrite_webpages=False, http_get_timeout=5,
-                 delay_between_requests=8, headers=SaveWebpages.headers,
+                 delay_between_requests=8, headers=WebCache.HEADERS,
                  use_logging=False, **kwargs):
+        db_filepath = "" if db_filepath is None else db_filepath
+        cache_dirpath = "" if cache_dirpath is None else cache_dirpath
         self.lyrics_urls = lyrics_urls
         self.skipped_urls = {}
         self.good_urls = set()
@@ -265,7 +263,7 @@ class LyricsScraper:
         self.update_tables = update_tables
         if self.db_filepath:
             # Create music db
-            create_db(self.overwrite_db, self.db_filepath, self.schema_filepath)
+            create_db(self.db_filepath, self.schema_filepath, self.overwrite_db)
             # Connect to the music database
             self.db_conn = self._connect_db()
         else:
@@ -285,12 +283,12 @@ class LyricsScraper:
         self.http_get_timeout = http_get_timeout
         self.delay_between_requests = delay_between_requests
         self.headers = headers
-        # =============
-        # Saving config
-        # =============
-        # Create instance for retrieving and saving webpages
-        self.saver = SaveWebpages(
-            overwrite_webpages=self.overwrite_webpages,
+        # ==================
+        # Web caching config
+        # ==================
+        # Create WebCache instance for retrieving and caching webpages
+        # TODO: add more options
+        self.webcache = WebCache(
             http_get_timeout=self.http_get_timeout,
             delay_between_requests=self.delay_between_requests,
             headers=self.headers)
@@ -328,14 +326,14 @@ class LyricsScraper:
                 self.logger_p.warning(
                     "The URL {} seems to be down!".format(url))
                 error = e
-            except (connec_exc.HTTP404Error,
-                    files_exc.OverwriteFileError,
-                    scraper_exc.CurrentSessionURLError,
-                    scraper_exc.InvalidURLDomainError,
-                    scraper_exc.InvalidURLCategoryError,
-                    scraper_exc.MultipleLyricsURLError,
-                    scraper_exc.OverwriteSongError,
-                    sql_exc.SQLSanityCheckError) as e:
+            except (FileExistsError,
+                    lyrics_scraping.exceptions.CurrentSessionURLError,
+                    lyrics_scraping.exceptions.InvalidURLDomainError,
+                    lyrics_scraping.exceptions.InvalidURLCategoryError,
+                    lyrics_scraping.exceptions.MultipleLyricsURLError,
+                    lyrics_scraping.exceptions.OverwriteSongError,
+                    pyutils.exceptions.HTTP404Error,
+                    pyutils.exceptions.SQLSanityCheckError) as e:
                 self.logger_p.error(e)
                 error = e
             else:
@@ -422,7 +420,7 @@ class LyricsScraper:
         """
         # First, check if URL already processed during current session
         if url in self.checked_urls:
-            raise scraper_exc.CurrentSessionURLError(
+            raise lyrics_scraping.exceptions.CurrentSessionURLError(
                 "The url {} was already processed during this"
                 " session".format(url))
         elif self.db_conn:
@@ -472,7 +470,7 @@ class LyricsScraper:
             else:
                 # Song can't be updated
                 # TODO: it should be a warning
-                raise scraper_exc.OverwriteSongError(
+                raise lyrics_scraping.exceptions.OverwriteSongError(
                     "Since the 'update_tables' flag is set to False, the URL"
                     " will be ignored")
         elif len(res) == 0:
@@ -481,7 +479,7 @@ class LyricsScraper:
                                 " db".format(url))
         else:
             # Odd case: more than one song was found with the given URL
-            raise scraper_exc.MultipleLyricsURLError(
+            raise lyrics_scraping.exceptions.MultipleLyricsURLError(
                 "The lyrics URL {} was found more than once in the music"
                 " db".format(url))
 
@@ -511,7 +509,7 @@ class LyricsScraper:
             self.logger_p.info("Connecting to db '{}'".format(self.db_filepath))
             conn = connect_db(self.db_filepath, self.autocommit)
         except sqlite3.Error as e:
-            raise sqlite3.Error(e)
+            raise
         else:
             self.logger_p.debug("Db connection established!")
             return conn
@@ -544,34 +542,6 @@ class LyricsScraper:
             self.logger_p.warning("Empty field{}: {}".format(
                 add_plural_ending(count), data))
         return count
-
-    def _get_html(self, webpage_filepath, url):
-        """Get the HTML content for a given URL and save its content if possible.
-
-        The webpage HTML is retrieved for a given URL and if the cache is used,
-        its HTML content is saved.
-
-        Parameters
-        ----------
-        webpage_filepath : str
-            The path to the webpage saved on disk if cache is used.
-        url : str
-            The URL
-
-        Returns
-        -------
-        html : str
-            The HTML content of the webpage.
-
-        """
-        # Save the webpage and retrieve its html content
-        if self.cache_dirpath:
-            # Cache the webpage
-            html = self.saver.save_webpage(webpage_filepath, url)
-        else:
-            # Don't cache the webpage, just retrieve its html content
-            html = self.saver.get_webpage(url)
-        return html
 
     def _process_url(self, url):
         """Process each URL defined in the YAML config file.
@@ -647,14 +617,14 @@ class LyricsScraper:
             if domain in self.valid_domains:
                 self.logger_p.debug("The domain '{}' is valid".format(domain))
             else:
-                raise scraper_exc.InvalidURLDomainError(
+                raise lyrics_scraping.exceptions.InvalidURLDomainError(
                     "The URL's domain '{}' is invalid. Only URLs from"
                     " {} are accepted.".format(domain, self.valid_domains))
 
             # Create directory for caching the webpage
             if self.cache_dirpath:
                 try:
-                    create_directory(webpages_dirpath)
+                    create_dir(webpages_dirpath)
                 except FileExistsError as e:
                     self.logger_p.warning(e)
 
@@ -899,10 +869,10 @@ class LyricsScraper:
             # Duplicate data can't be inserted
             self.logger_p.debug(e)
             return None
-        except sql_exc.SQLSanityCheckError as e:
+        except pyutils.exceptions.SQLSanityCheckError as e:
             # One of the SQL sanity checks failed
             self.logger_p.error(e)
-            raise sql_exc.SQLSanityCheckError(e)
+            raise
         else:
             # Successful SQL expression execution
             if sql.lower().startswith("select"):

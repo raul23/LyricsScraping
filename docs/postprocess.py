@@ -18,7 +18,7 @@ References
 
 """
 import re
-# Third-party modules
+
 from bs4 import BeautifulSoup
 
 

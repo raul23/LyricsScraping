@@ -3,3 +3,4 @@ lxml>=4.4.0
 pyyaml>=5.1.1
 requests>=2.22.0
 requests_cache>=0.5.2
+py-common-utils @ https://github.com/raul23/py-common-utils/tarball/master

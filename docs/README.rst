@@ -9,6 +9,10 @@ README [Work-in-Progress]
    :target: https://lyricsscraping.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 
+.. image:: https://travis-ci.org/raul23/LyricsScraping.svg?branch=master
+   :target: https://travis-ci.org/raul23/LyricsScraping
+   :alt: Build Status
+
 **LyricsScraping** crawls and scraps lyrics from AZLyrics.
 
 .. contents::

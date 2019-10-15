@@ -207,7 +207,7 @@ def start_scraper(color_logs=None):
         scraper = AZLyricsScraper(**main_cfg)
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
-            sqlite3.Error, pyutils.exceptions.LoggingSanityCheckError) as e:
+            sqlite3.Error) as e:
         logger.exception(e)
     else:
         # Success
@@ -252,9 +252,9 @@ def setup_arg_parser():
                     "configuration file which can either be the logging or the "
                     "main config file.")
     # Group arguments that are closely related
-    start_group = parser.add_argument_group('Start the lyrics scraping')
+    start_group = parser.add_argument_group('Start the lyrics scraper')
     start_group.add_argument(
-        "-s", "--start_scraping",
+        "-s", "--start_scraper",
         action="store_true",
         help="Scrape lyrics from webpages and save them locally in a SQLite "
              "database or a dictionary")
@@ -267,20 +267,20 @@ def setup_arg_parser():
         help="Edit a configuration file. Provide 'log' (without the quotes) "
              "for the logging config file or 'main' (without the quotes) for "
              "the main config file.")
-    edit_group.add_argument("-a",
-                            "--app_name",
-                            default=None,
-                            dest="app",
-                            help="Name of the application to use for editing "
-                                 "the file. If no name is given, then the "
-                                 "default application for opening this type of "
-                                 "file will be used.")
+    edit_group.add_argument(
+        "-a", "--app_name",
+        default=None,
+        dest="app",
+        help="Name of the application to use for editing "
+             "the file. If no name is given, then the "
+             "default application for opening this type of "
+             "file will be used.")
     reset_group = parser.add_argument_group('Reset a configuration file')
     reset_group.add_argument(
         "-r", "--reset",
         choices=["log", "main"],
-        help="Reset a configuration file with default values. Provide 'log' "
-             "(without the quotes) for the logging config file or 'main' "
+        help="Reset a configuration file with factory default values. Provide "
+             "'log' (without the quotes) for the logging config file or 'main' "
              "(without the quotes) for the main config file.")
     return parser.parse_args()
 

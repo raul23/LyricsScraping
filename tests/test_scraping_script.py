@@ -5,6 +5,7 @@ command-line options.
 
 """
 
+import os
 import sys
 import unittest
 
@@ -20,6 +21,8 @@ class TestScrapingScript(TestLyricsScraping):
     SHOW_FIRST_CHARS_IN_LOG = 0
 
     # @unittest.skip("test_edit_config_case_1()")
+    # Skip test if on PROD because we are opening an app to edit a file
+    @unittest.skipIf(TestLyricsScraping.ENV_TYPE == "PROD", "Skip if on PROD")
     def test_edit_config_case_1(self):
         """Test that edit_config() opens the default app for editing the log
         config file

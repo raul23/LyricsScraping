@@ -244,7 +244,7 @@ def setup_arg_parser():
        <https://docs.python.org/3.7/library/argparse.html#argparse.Namespace>`_.
 
     """
-    # TODO: add version and verbose/quite options
+    # TODO: add version, verbose and quiet options
     # Setup the parser
     parser = argparse.ArgumentParser(
         description="Scrape lyrics from webpages and save them locally in a "
@@ -258,6 +258,8 @@ def setup_arg_parser():
         action="store_true",
         help="Scrape lyrics from webpages and save them locally in a SQLite "
              "database or a dictionary")
+    start_group.add_argument("-dc", "--disable_color", action="store_true",
+                             default=False, help=argparse.SUPPRESS)
     edit_group = parser.add_argument_group('Edit a configuration file')
     edit_group.add_argument(
         "-e", "--edit",

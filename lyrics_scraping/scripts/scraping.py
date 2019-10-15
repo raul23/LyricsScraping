@@ -95,29 +95,32 @@ def edit_config(cfg_type, app=None):
     """
     # Get path to user-defined config file
     filepath = get_data_filepath(cfg_type)
-    # Command to open the config file with the default application on the
-    # specific OS or by the user-specified app, e.g. `open file_path` in macOS
-    # opens the file with the default app (e.g. atom)
-    default_app_dict = {'Darwin': 'open {path}',
-                        'Windows': 'cmd /c start "" "{path}"'}
-    default_cmd = default_app_dict.get(platform.system(), 'xdg-open {path}')
+    # Command to open the config file with the default application in the
+    # OS or the user-specified app, e.g. `open filepath` in macOS opens the
+    # file with the default app (e.g. atom)
+    default_app_dict = {'Darwin': 'open {filepath}',
+                        'Linux': 'xdg-open {filepath}',
+                        'Windows': 'cmd /c start "" "{filepath}"'}
+    # NOTE: check https://bit.ly/31htaOT (pymotw) for output from
+    # platform.system on three OSes
+    default_cmd = default_app_dict.get(platform.system())
     # NOTES:
     # - `app is None` implies that the default app will be used
     # - Otherwise, the user-specified app will be used
     cmd = default_cmd if app is None else app + " " + filepath
-    retcode = None
+    retcode = 1
     try:
         # IMPORTANT: if the user provided the name of an app, it will be used as
         # a command along with the file path, e.g. `$ atom {filepath}`. However,
         # this case might not work if the user provided an app name that doesn't
         # refer to an executable, e.g. `$ TextEdit {filepath}` won't work. The
-        # failed case is further processed in the `except FileNotFoundError`.
-        retcode = run_cmd(cmd.format(path=filepath))
-    except FileNotFoundError as e:
+        # failed case is further processed in `except FileNotFoundError`.
+        retcode = run_cmd(cmd.format(filepath=filepath))
+    except FileNotFoundError:
         # This happens if the name of the app can't be called as an executable
         # on the terminal
-        # e.g. TextEdit can't be run on the terminal but atom can since it
-        # refers to an executable (script/atom).
+        # e.g. TextEdit can't be run on the terminal but atom can since the
+        # latter refers to an executable.
         # To open TextEdit from the terminal, the command `open -a {app_name}`
         # must be used on macOS.
         if platform.system() == 'Darwin':
@@ -126,11 +129,12 @@ def edit_config(cfg_type, app=None):
             specific_app_dict = {'Darwin': 'open -a {app}'.format(app=app)}
             cmd = specific_app_dict.get(platform.system(), app) + " " + filepath
             retcode = run_cmd(cmd)
-        raise
-    finally:
-        if retcode == 0:
-            print("Opening the {} configuration file ...".format(cfg_type))
-        return retcode
+        else:
+            raise FileNotFoundError("Command not recognized: "
+                                    "{}".format(cmd.split()[0]))
+    if retcode == 0:
+        print("Opening the {} configuration file ...".format(cfg_type))
+    return retcode
 
 
 def reset_config(cfg_type):
@@ -295,20 +299,31 @@ def main():
 
     """
     args = setup_arg_parser()
+    retcode = 1
     try:
         if args.edit:
-            edit_config(args.edit, args.app)
+            retcode = edit_config(args.edit, args.app)
         elif args.reset:
-            reset_config(args.reset)
+            retcode = reset_config(args.reset)
         elif args.start_scraping:
-            start_scraper(args.color_logs)
+            retcode = start_scraper(args.color_logs)
         else:
             # TODO: default when no action given is to start scraping?
             print("No action selected: edit (-e), reset (-r) or start the scraper "
                   "(-s)")
     except (AssertionError, FileNotFoundError):
+        # TODO: explain this line
         traceback.print_exc()
+    finally:
+        return retcode
 
 
 if __name__ == '__main__':
-    main()
+    retcode = main()
+    """
+    msg = "\nScript exited with <color>{}</color>".format(retcode)
+    if retcode == 1:
+        logger.error(msg)
+    else:
+        logger.info(msg)
+    """

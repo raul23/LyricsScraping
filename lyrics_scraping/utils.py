@@ -103,6 +103,8 @@ def get_data_filepath(file_type):
     return os.path.join(data.__path__[0], filename)
 
 
+# TODO: remove this function which can be simplified to
+# ", ".join(list_)
 def list_to_str(list_):
     """Convert a list of strings into a single string.
 
@@ -129,4 +131,5 @@ def list_to_str(list_):
     "SELECT * FROM table WHERE country IN ('CA', 'FR', 'US')"
 
     """
+    # TODO:
     return ", ".join(map(lambda a: "'{}'".format(a), list_))

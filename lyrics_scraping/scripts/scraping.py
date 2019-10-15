@@ -52,7 +52,6 @@ import shutil
 import sqlite3
 import traceback
 
-import pyutils.exceptions
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
 from lyrics_scraping.utils import get_data_filepath
 from pyutils.genutils import load_yaml, run_cmd

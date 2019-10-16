@@ -5,14 +5,14 @@ command-line options.
 
 """
 
-import argparse
 import sys
 import time
 import unittest
 
 from .utils import TestLyricsScraping
 from lyrics_scraping.scripts import scraping
-from pyutils.genutils import get_module_filename, get_qualname
+from lyrics_scraping.utils import get_data_filepath
+from pyutils.genutils import get_module_filename, get_qualname, load_yaml
 
 
 class TestScrapingScript(TestLyricsScraping):
@@ -35,7 +35,7 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         self.log_test_method_name()
-        self._test_edit_config(args=['-e', 'log'])
+        self._test_config_method(args=['-e', 'log'])
 
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
@@ -51,7 +51,7 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         self.log_test_method_name()
-        self._test_edit_config(args=['-e', 'main'])
+        self._test_config_method(args=['-e', 'main'])
 
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
@@ -69,7 +69,7 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         self.log_test_method_name()
-        self._test_edit_config(args=['--edit', 'log', '--app_name', 'TextEdit'])
+        self._test_config_method(args=['--edit', 'log', '--app_name', 'TextEdit'])
 
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
@@ -84,7 +84,7 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         self.log_test_method_name()
-        self._test_edit_config(args=['-e', 'main', '-a', 'TextEdit'])
+        self._test_config_method(args=['-e', 'main', '-a', 'TextEdit'])
 
     # @unittest.skip("test_edit_config_case_5()")
     def test_edit_config_case_5(self):
@@ -96,12 +96,38 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         self.log_test_method_name()
-        self._test_edit_config(args=['-e', 'main', '-a', 'WrongApp'],
-                               expected_retcode=1)
+        self._test_config_method(args=['-e', 'main', '-a', 'WrongApp'],
+                                 expected_retcode=1, seconds=0)
 
-    @unittest.skip("test_reset_config()")
-    def test_reset_config(self):
-        """TODO
+    # @unittest.skip("test_reset_config_case_1()")
+    def test_reset_config_case_1(self):
+        """Test that reset_config() resets the log config file.
+
+        Case 1 tests that :meth:`~lyrics_scraping.scripts.scraper.reset_config`
+        resets the user-defined log config file with factory default values.
+
+        """
+        self.log_test_method_name()
+        self._test_config_method(args=['-r', 'main'], seconds=0)
+
+    @unittest.skip("test_reset_config_case_2()")
+    def test_reset_config_case_2(self):
+        """Test that reset_config() resets the main config file.
+
+        Case 1 tests that :meth:`~lyrics_scraping.scripts.scraper.reset_config`
+        resets the user-defined main config file with factory default values.
+
+        """
+        self.log_test_method_name()
+        self.logger.info("Testing <color>reset_config()</color>...")
+
+    @unittest.skip("test_reset_config_case_3()")
+    def test_reset_config_case_3(self):
+        """Test reset_config() when a non-existing config file is given.
+
+        Case 1 tests that :meth:`~lyrics_scraping.scripts.scraper.reset_config`
+        returns 1 when a non-existing config file is given.
+
         """
         self.log_test_method_name()
         self.logger.info("Testing <color>reset_config()</color>...")
@@ -120,16 +146,9 @@ class TestScrapingScript(TestLyricsScraping):
         self.log_test_method_name()
         self.logger.info("Testing <color>setup_arg_parser()</color>...")
 
-    @unittest.skip("test_main()")
-    def test_main(self):
-        """TODO
-        """
-        self.log_test_method_name()
-        self.logger.info("Testing <color>main()</color>...")
-
-    def _test_edit_config(self, args, expected_retcode=0, seconds=1):
-        """Test that main() and edit_config() can call an external app to edit
-        a config file.
+    def _test_config_method(self, args, expected_retcode=0, seconds=1):
+        """TODO: Test that main() and edit_config() calls an external app to edit a
+        config file.
 
         Depending on `args` given to :meth:`~lyrics_scraping.scripts.main`, a
         default or user-selected app will be called to edit a config file which
@@ -147,38 +166,107 @@ class TestScrapingScript(TestLyricsScraping):
         function. Hence, you can avoid having many consecutively windows being
         opened very quickly.
 
+        TODO: main and setup_arg_parser are also being tested
+
         Parameters
         ----------
-        args : list of str
-        expected_retcode : int
-        seconds : int or float
-            TODO: check the time.sleep doc
+        args
+        expected_retcode
+        seconds
 
         """
         # TODO: explain
         case = self._testMethodName.split("case_")[-1]
-        parser = argparse.ArgumentParser()
-        parser.add_argument("-e", "--edit", choices=["log", "main"])
-        parser.add_argument("-a", "--app_name", default=None, dest="app")
-        p_args = parser.parse_args(args)
-        app_type = "'{}'".format(p_args.app) if p_args.app else "default"
-        info_msg = "Case {} of testing <color>edit_config()" \
-                   "</color> with the <color>{}</color> config file and the " \
-                   "<color>{}</color> app".format(case, p_args.edit, app_type)
-        info_msg += "\n<color>Args:</color> {}".format(args)
-        self.logger.info(info_msg)
+        valid_config_methods = ["edit_config", "reset_config"]
+        config_method = self._testMethodName.split("test_")[1].split("_case")[0]
+        assert config_method in valid_config_methods, \
+            "Wrong config method detected: '{}' (valid methods are {})".format(
+                config_method, ", ".join(config_method))
         sys.argv = [get_module_filename(scraping)]
         sys.argv.extend(args)
+        p_args = scraping.setup_arg_parser()
+        app_type = "'{}'".format(p_args.app) if p_args.app else "default"
+        # Build main message for info logging
+        info_msg = "Case <color>{}</color> of testing <color>{}()</color> " \
+                   "with the <color>{}</color> config file".format(
+                      case,
+                      config_method,
+                      p_args.edit if p_args.edit else p_args.reset)
+        if config_method == "edit_config":
+            info_msg += " and the <color>{}</color> app".format(app_type)
+        info_msg += "\n<color>Args:</color> {}".format(args)
+        self.logger.info(info_msg)
+        if config_method == "edit_config":
+            self._test_edit_config(app_type, expected_retcode, seconds)
+        else:
+            self._test_reset_config(p_args.reset, app_type, expected_retcode,
+                                    seconds)
+
+    def _test_edit_config(self, app_type, expected_retcode, seconds):
+        """TODO
+
+        Parameters
+        ----------
+        app_type
+        expected_retcode
+        seconds
+
+        """
+        # TODO: explain
         # Call the main function with arguments
+        # NOTE: setup_arg_parser() is called again in main()
         retcode = scraping.main()
         if expected_retcode == 0:
-            msg = "The {} app couldn't be open. Return code is " \
-                  "{}".format(app_type, retcode)
-            self.assertTrue(retcode == expected_retcode, msg)
-            self.logger.info("The {} app could be called".format(app_type))
+            assert_msg = "The {} app couldn't be open. Return code is " \
+                         "{}".format(app_type, retcode)
+            info_msg = "The {} app was called <color>as expected</color>"
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            self.logger.info(info_msg.format(app_type))
             time.sleep(seconds)
         else:
-            msg = "Very highly unlikely case. The rules of reality were bent " \
-                  "to get you here! Return code is".format(retcode)
-            self.assertTrue(retcode == expected_retcode, msg)
-            self.logger.info("The {} app couldn't be called".format(app_type))
+            assert_msg = "Very highly unlikely case. The rules of reality " \
+                         "were bent to get you here! Return code " \
+                         "is".format(retcode)
+            info_msg = "The {} app couldn't be called <color>as expected</color>"
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            self.logger.info(info_msg.format(app_type))
+
+    def _test_reset_config(self, cfg_type, app_type, expected_retcode, seconds):
+        """TODO
+
+        Parameters
+        ----------
+        cfg_type
+        app_type
+        expected_retcode
+        seconds
+
+        """
+        # TODO: explain
+        # Call the main function with arguments
+        # NOTE: setup_arg_parser() is called again in main()
+        retcode = scraping.main()
+        if expected_retcode == 0:
+            assert_msg = "The {} config file couldn't be reset. Return code is " \
+                         "{}".format(cfg_type, retcode)
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            # Test that the config file was really reset by checking its content
+            default_cfg_filepath = get_data_filepath(
+                file_type='default_{}'.format(cfg_type))
+            user_cfg_filepath = get_data_filepath(file_type=cfg_type)
+            default_cfg_dict = load_yaml(default_cfg_filepath)
+            user_cfg_dict = load_yaml(user_cfg_filepath)
+            assert_msg = "The {} config file was not reset as " \
+                         "expected".format(cfg_type)
+            self.assertDictEqual(default_cfg_dict, user_cfg_dict, assert_msg)
+            self.logger.info("The {} config file was reset <color>as "
+                             "expected</color>".format(cfg_type))
+            time.sleep(seconds)
+        else:
+            assert_msg = "Very highly unlikely case. The rules of reality " \
+                         "were bent to get you here! Return code " \
+                         "is".format(retcode)
+            info_msg = "The {} config file couldn't be reset <color>as " \
+                       "expected</color>".format(cfg_type)
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            self.logger.info(info_msg.format(app_type))

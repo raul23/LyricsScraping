@@ -158,7 +158,7 @@ def reset_config(cfg_type):
     """
     # Get the path to the default or user-defined config file
     default_cfg_filepath = get_data_filepath(
-        file_type='default_s{}'.format(cfg_type))
+        file_type='default_{}'.format(cfg_type))
     user_cfg_filepath = get_data_filepath(file_type=cfg_type)
     # TODO: use shutils.copyfile
     try:
@@ -171,7 +171,7 @@ def reset_config(cfg_type):
         return 0
 
 
-def start_scraper(color_logs=None):
+def start_scraper():
     """Start the lyrics scraper.
 
     The lyrics scraper is setup based on the main configuration file
@@ -179,14 +179,11 @@ def start_scraper(color_logs=None):
 
         $ scraper -e {log,main}
 
-    Parameters
-    ----------
-    color_logs : None, optional
-        Whether to add color to logs (the default value is False which implies
-        that no color will be added to log messages).
+    TODO: explain more
 
     Returns
     -------
+    TODO
 
     """
     status_code = 1
@@ -220,7 +217,6 @@ def start_scraper(color_logs=None):
             logger.warning("Program will exit")
         else:
             logger.info("End of the lyrics scraping")
-        # ipdb.set_trace()
         return status_code
 
 
@@ -247,6 +243,7 @@ def setup_arg_parser():
 
     """
     # TODO: add version, verbose and quiet options
+    # TODO: add undo option for config file
     # Setup the parser
     parser = argparse.ArgumentParser(
         description="Scrape lyrics from webpages and save them locally in a "
@@ -305,7 +302,7 @@ def main():
         elif args.reset:
             retcode = reset_config(args.reset)
         elif args.start_scraping:
-            retcode = start_scraper(args.color_logs)
+            retcode = start_scraper()
         else:
             # TODO: default when no action given is to start scraping?
             print("No action selected: edit (-e), reset (-r) or start the scraper "

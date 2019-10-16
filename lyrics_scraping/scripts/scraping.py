@@ -156,7 +156,7 @@ def reset_config(cfg_type):
         is 0 if the config was reset successfully.
 
     """
-    # Get the paths to the default and user-defined config files
+    # Get the path to the default or user-defined config file
     default_cfg_filepath = get_data_filepath(
         file_type='default_s{}'.format(cfg_type))
     user_cfg_filepath = get_data_filepath(file_type=cfg_type)

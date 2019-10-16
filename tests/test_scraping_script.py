@@ -24,8 +24,8 @@ class TestScrapingScript(TestLyricsScraping):
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_1(self):
-        """Test that edit_config() opens the default app for editing the
-        logging config file
+        """Test edit_config() when a default app is used for editing the
+        logging config file.
 
         Case 1 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
         opens the default app for editing the logging config file.
@@ -40,8 +40,8 @@ class TestScrapingScript(TestLyricsScraping):
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_2(self):
-        """Test that edit_config() opens the default app for editing the main
-        config file
+        """Test edit_config() when a default app is used for editing the main
+        config file.
 
         Case 2 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
         opens the default app for editing the main config file.
@@ -56,23 +56,26 @@ class TestScrapingScript(TestLyricsScraping):
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_3(self):
-        """Test that edit_config() opens the user-selected app for editing the
-        logging config file
+        """Test edit_config() when a user-selected app is given for editing the
+        logging config file.
 
         Case 3 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
         opens the use-selected app for editing the logging config file.
 
         For example, the app can be TextEdit or atom.
 
+        Also, this test makes use of the long form of the edit and app
+        arguments.
+
         """
         self.log_test_method_name()
-        self._test_edit_config(args=['-e', 'log', '-a', 'TextEdit'])
+        self._test_edit_config(args=['--edit', 'log', '--app_name', 'TextEdit'])
 
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_4(self):
-        """Test that edit_config() opens the user-selected app for editing the
-        main config file
+        """Test edit_config() when a user-selected app is given for editing
+        the main config file.
 
         Case 4 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
         opens the user-selected app for editing the main config file.
@@ -85,10 +88,9 @@ class TestScrapingScript(TestLyricsScraping):
 
     # @unittest.skip("test_edit_config_case_5()")
     def test_edit_config_case_5(self):
-        """Test that edit_config() doesn't open a non-existing app for editing
-        the logging config file
+        """Test edit_config() when a non-existing app is given.
 
-        Case 4 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
+        Case 5 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
         returns 1 when a non-existing app is given for editing the logging
         config file.
 
@@ -126,8 +128,8 @@ class TestScrapingScript(TestLyricsScraping):
         self.logger.info("Testing <color>main()</color>...")
 
     def _test_edit_config(self, args, expected_retcode=0, seconds=1):
-        """Test main() and edit_config() in calling an external app to edit a
-        config file.
+        """Test that main() and edit_config() can call an external app to edit
+        a config file.
 
         Depending on `args` given to :meth:`~lyrics_scraping.scripts.main`, a
         default or user-selected app will be called to edit a config file which
@@ -153,6 +155,7 @@ class TestScrapingScript(TestLyricsScraping):
             TODO: check the time.sleep doc
 
         """
+        # TODO: explain
         case = self._testMethodName.split("case_")[-1]
         parser = argparse.ArgumentParser()
         parser.add_argument("-e", "--edit", choices=["log", "main"])
@@ -161,7 +164,8 @@ class TestScrapingScript(TestLyricsScraping):
         app_type = "'{}'".format(p_args.app) if p_args.app else "default"
         info_msg = "Case {} of testing <color>edit_config()" \
                    "</color> with the <color>{}</color> config file and the " \
-                   "<color>{}</colo> app".format(case, p_args.edit, app_type)
+                   "<color>{}</color> app".format(case, p_args.edit, app_type)
+        info_msg += "\n<color>Args:</color> {}".format(args)
         self.logger.info(info_msg)
         sys.argv = [get_module_filename(scraping)]
         sys.argv.extend(args)

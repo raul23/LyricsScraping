@@ -6,7 +6,7 @@ from pyutils.testutils import TestBase
 
 class TestLyricsScraping(TestBase):
     # TODO
-    TEST_MODULE_QUALNAME = None
+    TEST_MODULE_QUALNAME = "module"
     CREATE_TEST_DATABASE = False
     ADD_FILE_HANDLER = True
     LOGGER_NAME = __name__

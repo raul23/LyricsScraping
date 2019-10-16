@@ -130,8 +130,7 @@ def edit_config(cfg_type, app=None):
             cmd = specific_app_dict.get(platform.system(), app) + " " + filepath
             retcode = run_cmd(cmd)
         else:
-            raise FileNotFoundError("Command not recognized: "
-                                    "{}".format(cmd.split()[0]))
+            print("Unable to find application named '{}'".format(cmd.split()[0]))
     if retcode == 0:
         print("Opening the {} configuration file ...".format(cfg_type))
     return retcode

@@ -7,6 +7,7 @@ command-line options.
 
 import argparse
 import sys
+import time
 import unittest
 
 from .utils import TestLyricsScraping
@@ -34,7 +35,7 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         self.log_test_method_name()
-        self._test_edit_config(case=1, cmd=['-e', 'log'])
+        self._test_edit_config(args=['-e', 'log'])
 
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
@@ -50,7 +51,7 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         self.log_test_method_name()
-        self._test_edit_config(case=2, cmd=['-e', 'main'])
+        self._test_edit_config(args=['-e', 'main'])
 
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
@@ -59,13 +60,42 @@ class TestScrapingScript(TestLyricsScraping):
         logging config file
 
         Case 3 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
-        opens the default app for editing the main config file.
+        opens the use-selected app for editing the logging config file.
 
         For example, the app can be TextEdit or atom.
 
         """
         self.log_test_method_name()
-        self._test_edit_config(case=3, cmd=['-e', 'log', '-a', 'TextEdit'])
+        self._test_edit_config(args=['-e', 'log', '-a', 'TextEdit'])
+
+    # Skip test if on PROD because we are opening an app to edit a file
+    @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
+    def test_edit_config_case_4(self):
+        """Test that edit_config() opens the user-selected app for editing the
+        main config file
+
+        Case 4 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
+        opens the user-selected app for editing the main config file.
+
+        For example, the app can be TextEdit or atom.
+
+        """
+        self.log_test_method_name()
+        self._test_edit_config(args=['-e', 'main', '-a', 'TextEdit'])
+
+    # @unittest.skip("test_edit_config_case_5()")
+    def test_edit_config_case_5(self):
+        """Test that edit_config() doesn't open a non-existing app for editing
+        the logging config file
+
+        Case 4 tests that :meth:`~lyrics_scraping.scripts.scraper.edit_config`
+        returns 1 when a non-existing app is given for editing the logging
+        config file.
+
+        """
+        self.log_test_method_name()
+        self._test_edit_config(args=['-e', 'main', '-a', 'WrongApp'],
+                               expected_retcode=1)
 
     @unittest.skip("test_reset_config()")
     def test_reset_config(self):
@@ -95,32 +125,56 @@ class TestScrapingScript(TestLyricsScraping):
         self.log_test_method_name()
         self.logger.info("Testing <color>main()</color>...")
 
-    def _test_edit_config(self, case, cmd):
-        """TODO
+    def _test_edit_config(self, args, expected_retcode=0, seconds=1):
+        """Test main() and edit_config() in calling an external app to edit a
+        config file.
+
+        Depending on `args` given to :meth:`~lyrics_scraping.scripts.main`, a
+        default or user-selected app will be called to edit a config file which
+        can either be the main or logging config file.
+
+        :meth:`~lyrics_scraping.scripts.main` reads `args` but then it delegates
+        the task of calling the external editing app to
+        :meth:`~lyrics_scraping.scripts.edit_config`.
+
+        `expected_retcode` is used in case you want to test a case where `args`
+        will cause :meth:`~lyrics_scraping.scripts.edit_config` to not
+        be able to call the external app.
+
+        You can insert a certain delay of `seconds` between each call to this
+        function. Hence, you can avoid having many consecutively windows being
+        opened very quickly.
 
         Parameters
         ----------
-        case
-        cmd
+        args : list of str
+        expected_retcode : int
+        seconds : int or float
+            TODO: check the time.sleep doc
 
         """
+        case = self._testMethodName.split("case_")[-1]
         parser = argparse.ArgumentParser()
         parser.add_argument("-e", "--edit", choices=["log", "main"])
         parser.add_argument("-a", "--app_name", default=None, dest="app")
-        args = parser.parse_args(cmd)
-        info_msg = "Case {} of testing <color>edit_config()</color> with the " \
-                   "{} config file".format(case, args.edit)
-        if args.app:
-            info_msg += " and the app '{}'".format(args.app)
-        else:
-            info_msg += " and using the default app"
+        p_args = parser.parse_args(args)
+        app_type = "'{}'".format(p_args.app) if p_args.app else "default"
+        info_msg = "Case {} of testing <color>edit_config()" \
+                   "</color> with the <color>{}</color> config file and the " \
+                   "<color>{}</colo> app".format(case, p_args.edit, app_type)
         self.logger.info(info_msg)
-        sys.argv = []
         sys.argv = [get_module_filename(scraping)]
-        sys.argv.extend(cmd)
+        sys.argv.extend(args)
+        # Call the main function with arguments
         retcode = scraping.main()
-        msg = "The default app couldn't be open. Return code is " \
-              "{}".format(retcode)
-        self.assertTrue(retcode == 0, msg)
-        info_msg = "'{}'".format(args.app) if args.app else "default "
-        self.logger.info("The {} app could be opened".format(info_msg))
+        if expected_retcode == 0:
+            msg = "The {} app couldn't be open. Return code is " \
+                  "{}".format(app_type, retcode)
+            self.assertTrue(retcode == expected_retcode, msg)
+            self.logger.info("The {} app could be called".format(app_type))
+            time.sleep(seconds)
+        else:
+            msg = "Very highly unlikely case. The rules of reality were bent " \
+                  "to get you here! Return code is".format(retcode)
+            self.assertTrue(retcode == expected_retcode, msg)
+            self.logger.info("The {} app couldn't be called".format(app_type))

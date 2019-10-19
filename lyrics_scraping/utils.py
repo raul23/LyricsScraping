@@ -56,6 +56,39 @@ def add_plural_ending(obj, plural_end="s", singular_end=""):
     return plural_end if num > 1 else singular_end
 
 
+def load_cfg(file):
+    pass
+
+
+def get_bkp_cfg_filepath(cfg_type):
+    """TODO
+
+    Parameters
+    ----------
+    cfg_type
+
+    Returns
+    -------
+
+    """
+    valid_cfg_types = ['log', 'main']
+    assert cfg_type in valid_cfg_types, \
+        "Wrong type of data file: '{}' (choose from {})".format(
+            cfg_type, list_to_str(valid_cfg_types))
+    filename = '.backup_{}_cfg.yaml'.format(cfg_type)
+    return os.path.join(get_data_dirpath(), filename)
+
+
+def get_data_dirpath():
+    """TODO
+
+    Returns
+    -------
+
+    """
+    return data.__path__[0]
+
+
 def get_data_filepath(file_type):
     """Return the path to a data file used by the `lyrics_scraping` module.
 
@@ -100,7 +133,7 @@ def get_data_filepath(file_type):
         filename = '{}_cfg.yaml'.format(file_type)
     else:
         filename = 'music.sql'
-    return os.path.join(data.__path__[0], filename)
+    return os.path.join(get_data_dirpath(), filename)
 
 
 # TODO: remove this function which can be simplified to

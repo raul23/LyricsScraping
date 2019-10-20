@@ -8,9 +8,28 @@
 
 """
 
+from collections import namedtuple
 import os
 
 from lyrics_scraping import data
+from pyutils.genutils import load_yaml
+
+# TODO: explain
+_CFG_EXT = "yaml"
+_data_filenames = namedtuple("data_filenames", "user_cfg default_cfg schema")
+
+
+def _add_data_filenames():
+    """TODO
+    """
+    _data_filenames.user_cfg = {'log': 'logging_cfg.' + _CFG_EXT,
+                                'main': 'main_cfg.' + _CFG_EXT}
+    _data_filenames.default_cfg = dict(
+        [(k, "default_" + v) for k, v in _data_filenames.user_cfg.items()])
+    _data_filenames.schema = "music.sql"
+
+
+_add_data_filenames()
 
 
 def add_plural_ending(obj, plural_end="s", singular_end=""):
@@ -56,11 +75,7 @@ def add_plural_ending(obj, plural_end="s", singular_end=""):
     return plural_end if num > 1 else singular_end
 
 
-def load_cfg(file):
-    pass
-
-
-def get_bkp_cfg_filepath(cfg_type):
+def get_bak_cfg_filepath(cfg_type):
     """TODO
 
     Parameters
@@ -71,11 +86,11 @@ def get_bkp_cfg_filepath(cfg_type):
     -------
 
     """
-    valid_cfg_types = ['log', 'main']
+    valid_cfg_types = _data_filenames.user_cfg
     assert cfg_type in valid_cfg_types, \
         "Wrong type of data file: '{}' (choose from {})".format(
             cfg_type, list_to_str(valid_cfg_types))
-    filename = '.backup_{}_cfg.yaml'.format(cfg_type)
+    filename = '.{}_cfg.bak'.format(cfg_type)
     return os.path.join(get_data_dirpath(), filename)
 
 
@@ -123,17 +138,34 @@ def get_data_filepath(file_type):
         for `file_type`.
 
     """
-    valid_file_types = ['default_log', 'default_main', 'log', 'main', 'schema']
+    valid_file_types = _data_filenames.user_cfg + _data_filenames.default_cfg
+    valid_file_types.append(_data_filenames.schema)
     assert file_type in valid_file_types, \
         "Wrong type of data file: '{}' (choose from {})".format(
             file_type, list_to_str(valid_file_types))
-    if file_type.endswith('log'):
-        filename = '{}ging_cfg.yaml'.format(file_type)
-    elif file_type.endswith('main'):
-        filename = '{}_cfg.yaml'.format(file_type)
+    if file_type == 'schema':
+        filename = _data_filenames.schema
+    elif file_type.startswith('default'):
+        filename = _data_filenames.default_cfg[file_type]
     else:
-        filename = 'music.sql'
+        filename = _data_filenames.user_cfg[file_type]
     return os.path.join(get_data_dirpath(), filename)
+
+
+def load_cfg(cfg_type):
+    """TODO
+
+    Parameters
+    ----------
+    cfg_type
+
+    Returns
+    -------
+
+    """
+    valid_file_types = _data_filenames.user_cfg + _data_filenames.default_cfg
+    return load_yaml(get_data_filepath(cfg_type))
+
 
 
 # TODO: remove this function which can be simplified to

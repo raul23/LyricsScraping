@@ -114,3 +114,6 @@ venv.bak/
 
 # Testing files
 genius_scraper.py
+
+# Backup files
+*.bak

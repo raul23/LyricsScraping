@@ -47,13 +47,14 @@ More information is available at:
 
 import argparse
 import logging
+import os
 import platform
 import shutil
 import sqlite3
 import traceback
 
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
-from lyrics_scraping.utils import get_data_filepath
+from lyrics_scraping.utils import get_bak_cfg_filepath, get_data_filepath, load_cfg
 from pyutils.genutils import load_yaml, run_cmd
 from pyutils.logutils import setup_logging_from_cfg
 
@@ -156,19 +157,61 @@ def reset_config(cfg_type):
         is 0 if the config was reset successfully.
 
     """
-    # Get the path to the default or user-defined config file
-    default_cfg_filepath = get_data_filepath(
-        file_type='default_{}'.format(cfg_type))
-    user_cfg_filepath = get_data_filepath(file_type=cfg_type)
-    # TODO: use shutils.copyfile
+    retcode = 1
     try:
-        shutil.copyfile(default_cfg_filepath, user_cfg_filepath)
+        # TODO: explain
+        user_cfg = load_cfg(cfg_type)
+        default_cfg = load_cfg('default_' + cfg_type)
+        if user_cfg == default_cfg:
+            # TODO: warning
+            print("The {} configuration file is already reset".format(cfg_type))
+            retcode = 2
+        else:
+            # Get the paths to the default and user-defined config files
+            default_cfg_filepath = get_data_filepath('default_' + cfg_type)
+            user_cfg_filepath = get_data_filepath(cfg_type)
+            # Backup config file (for undo purposes)
+            shutil.copyfile(user_cfg_filepath, get_bak_cfg_filepath(cfg_type))
+            # Reset config file to factory default values
+            shutil.copyfile(default_cfg_filepath, user_cfg_filepath)
+            print("The {} configuration file is reset".format(cfg_type))
+            retcode = 0
     except OSError as e:
         print(e)
-        return 1
-    else:
-        print("The {} configuration file is reset".format(cfg_type))
-        return 0
+    finally:
+        return retcode
+
+
+def undo_config(cfg_type):
+    """TODO
+
+    Parameters
+    ----------
+    cfg_type
+
+    Returns
+    -------
+
+    """
+    retcode = 1
+    try:
+        if os.path.isfile(get_bak_cfg_filepath(cfg_type)):
+            # Undo config file
+            shutil.copyfile(get_bak_cfg_filepath(cfg_type),
+                            get_data_filepath(cfg_type))
+            print("The {} config file was successfully reverted to what it was"
+                  " before the last RESET".format(cfg_type))
+            # Delete the backup file
+            os.unlink(get_bak_cfg_filepath(cfg_type))
+            retcode = 0
+        else:
+            # TODO: warning
+            print("The last RESET was already undo")
+            retcode = 2
+    except OSError as e:
+        print(e)
+    finally:
+        return retcode
 
 
 def start_scraper():
@@ -188,8 +231,8 @@ def start_scraper():
     """
     status_code = 1
     # Get the filepaths to the user-defined main and logging config files
-    main_cfg_filepath = get_data_filepath(file_type='main')
-    log_cfg_filepath = get_data_filepath(file_type='log')
+    main_cfg_filepath = get_data_filepath('main')
+    log_cfg_filepath = get_data_filepath('log')
     # Load the main config dict from the config file on disk
     main_cfg = load_yaml(main_cfg_filepath)
     # Setup logging if required
@@ -281,6 +324,12 @@ def setup_arg_parser():
         help="Reset a configuration file with factory default values. Provide "
              "'log' (without the quotes) for the logging config file or 'main' "
              "(without the quotes) for the main config file.")
+    reset_group.add_argument(
+        "-u", "--undo",
+        choices=["log", "main"],
+        help="Undo the LAST RESET. Provide 'log' (without the quotes) for the "
+             "logging config file or 'main' (without the quotes) for the main "
+             "config file.")
     return parser.parse_args()
 
 
@@ -301,13 +350,15 @@ def main():
             retcode = edit_config(args.edit, args.app)
         elif args.reset:
             retcode = reset_config(args.reset)
+        elif args.undo:
+            retcode = undo_config(args.undo)
         elif args.start_scraping:
             retcode = start_scraper()
         else:
             # TODO: default when no action given is to start scraping?
             print("No action selected: edit (-e), reset (-r) or start the scraper "
                   "(-s)")
-    except (AssertionError, FileNotFoundError):
+    except (AssertionError, AttributeError, FileNotFoundError):
         # TODO: explain this line
         traceback.print_exc()
     finally:

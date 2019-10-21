@@ -1,4 +1,4 @@
-version: 1
+version: 23
 add_datetime: True
 disable_existing_loggers: False
 formatters:
@@ -21,7 +21,7 @@ handlers:
     formatter: verbose
     delay: True
 loggers:
-  scripts.scraper:
+  scripts.scraping:
     level: DEBUG
     handlers: [console, file]
     propagate: False

@@ -21,7 +21,7 @@ handlers:
     formatter: verbose
     delay: True
 loggers:
-  bin.scraper:
+  scripts.scraping:
     level: DEBUG
     handlers: [console, file]
     propagate: False

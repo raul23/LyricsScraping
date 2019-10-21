@@ -11,25 +11,43 @@
 from collections import namedtuple
 import os
 
+import yaml
+
 from lyrics_scraping import data
 from pyutils.genutils import load_yaml
 
+
 # TODO: explain
 _CFG_EXT = "yaml"
+_LOG_CFG_FILENAME = 'logging_cfg'
+_MAIN_CFG_FILENAME = 'main_cfg'
+_SCHEMA_FILENAME = "music.sql"
 _data_filenames = namedtuple("data_filenames", "user_cfg default_cfg schema")
 
 
 def _add_data_filenames():
     """TODO
     """
-    _data_filenames.user_cfg = {'log': 'logging_cfg.' + _CFG_EXT,
-                                'main': 'main_cfg.' + _CFG_EXT}
+    _data_filenames.user_cfg = {
+        'log': '{}.'.format(_LOG_CFG_FILENAME) + _CFG_EXT,
+        'main': '{}.'.format(_MAIN_CFG_FILENAME) + _CFG_EXT}
     _data_filenames.default_cfg = dict(
-        [(k, "default_" + v) for k, v in _data_filenames.user_cfg.items()])
-    _data_filenames.schema = "music.sql"
+        [("default_" + k, "default_" + v)
+         for k, v in _data_filenames.user_cfg.items()])
+    _data_filenames.schema = _SCHEMA_FILENAME
 
 
 _add_data_filenames()
+
+
+def _get_data_dirpath():
+    """TODO
+
+    Returns
+    -------
+
+    """
+    return data.__path__[0]
 
 
 def add_plural_ending(obj, plural_end="s", singular_end=""):
@@ -86,26 +104,16 @@ def get_bak_cfg_filepath(cfg_type):
     -------
 
     """
-    valid_cfg_types = _data_filenames.user_cfg
+    valid_cfg_types = list(_data_filenames.user_cfg.keys())
     assert cfg_type in valid_cfg_types, \
         "Wrong type of data file: '{}' (choose from {})".format(
-            cfg_type, list_to_str(valid_cfg_types))
+            cfg_type, ", ".join(valid_cfg_types))
     filename = '.{}_cfg.bak'.format(cfg_type)
-    return os.path.join(get_data_dirpath(), filename)
-
-
-def get_data_dirpath():
-    """TODO
-
-    Returns
-    -------
-
-    """
-    return data.__path__[0]
+    return os.path.join(_get_data_dirpath(), filename)
 
 
 def get_data_filepath(file_type):
-    """Return the path to a data file used by the `lyrics_scraping` module.
+    """Return the path to a data file used by :mod:`lyrics_scraping`.
 
     The data file can either be the:
 
@@ -138,18 +146,19 @@ def get_data_filepath(file_type):
         for `file_type`.
 
     """
-    valid_file_types = _data_filenames.user_cfg + _data_filenames.default_cfg
+    valid_file_types = list(_data_filenames.user_cfg.keys()) \
+        + list(_data_filenames.default_cfg.keys())
     valid_file_types.append(_data_filenames.schema)
     assert file_type in valid_file_types, \
         "Wrong type of data file: '{}' (choose from {})".format(
-            file_type, list_to_str(valid_file_types))
+            file_type, ", ".join(valid_file_types))
     if file_type == 'schema':
         filename = _data_filenames.schema
     elif file_type.startswith('default'):
         filename = _data_filenames.default_cfg[file_type]
     else:
         filename = _data_filenames.user_cfg[file_type]
-    return os.path.join(get_data_dirpath(), filename)
+    return os.path.join(_get_data_dirpath(), filename)
 
 
 def load_cfg(cfg_type):
@@ -162,39 +171,38 @@ def load_cfg(cfg_type):
     Returns
     -------
 
+    Raises
+    ------
+
     """
-    valid_file_types = _data_filenames.user_cfg + _data_filenames.default_cfg
-    return load_yaml(get_data_filepath(cfg_type))
+    valid_cfg_types = list(_data_filenames.user_cfg.keys()) + \
+        list(_data_filenames.default_cfg.keys())
+    assert cfg_type in valid_cfg_types, \
+        "Wrong type of data file: '{}' (choose from {})".format(
+            cfg_type, ", ".join(valid_cfg_types))
+    if _CFG_EXT == 'yaml':
+        return load_yaml(get_data_filepath(cfg_type))
+    else:
+        # TODO: raise error
+        print("File EXTENSION '{}' not supported".format(_CFG_EXT))
+        return None
 
 
-
-# TODO: remove this function which can be simplified to
-# ", ".join(list_)
-def list_to_str(list_):
-    """Convert a list of strings into a single string.
+def dump_cfg(filepath, cfg_dict):
+    """TODO
 
     Parameters
     ----------
-    list_ : list of str
-        List of strings to be converted into a single string.
+    filepath
+    cfg_dict
 
-    Returns
-    -------
-    str_ : str
-        The converted string.
-
-    Examples
-    --------
-    >>> list_ = ['CA', 'FR', 'US']
-    >>> list_to_str(list_)
-    "'CA', 'FR', 'US'"
-    # This function can be useful for building the WHERE condition in SQL
-    # expressions:
-    >>> list_countries = ['CA', 'FR', 'US']
-    >>> str_countries = list_to_str(list_countries)
-    >>> "SELECT * FROM table WHERE country IN ({})".format(str_countries)
-    "SELECT * FROM table WHERE country IN ('CA', 'FR', 'US')"
+    Raises
+    ------
 
     """
-    # TODO:
-    return ", ".join(map(lambda a: "'{}'".format(a), list_))
+    if _CFG_EXT == 'yaml':
+        with open(filepath, 'w') as f:
+            yaml.dump(cfg_dict, f)
+    else:
+        # TODO: raise error
+        print("File EXTENSION '{}' not supported".format(_CFG_EXT))

@@ -263,7 +263,7 @@ def start_scraper():
         return status_code
 
 
-def setup_arg_parser():
+def setup_argparser():
     """Setup the argument parser for the command-line script.
 
     Related arguments are grouped according to the three types of actions that
@@ -343,7 +343,7 @@ def main():
     - reset a configuration file.
 
     """
-    args = setup_arg_parser()
+    args = setup_argparser()
     retcode = 1
     try:
         if args.edit:

@@ -44,6 +44,7 @@ More information is available at:
 - https://github.com/raul23/LyricsScraping
 
 """
+# TODO: update docstring
 
 import argparse
 import logging
@@ -51,12 +52,22 @@ import os
 import platform
 import shutil
 import sqlite3
-import traceback
+import subprocess
+from logging import NullHandler
 
+from lyrics_scraping import __version__
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
 from lyrics_scraping.utils import get_bak_cfg_filepath, get_data_filepath, load_cfg
+from pyutils import uninstall_colored_logger
 from pyutils.genutils import load_yaml, run_cmd
-from pyutils.logutils import setup_logging_from_cfg
+from pyutils.logutils import setup_basic_logger, setup_logging_from_cfg
+
+logger = logging.getLogger(__name__)
+logger.addHandler(NullHandler())
+
+
+_QUIET_MODE = False
+_SHOW_STACK = False
 
 
 def edit_config(cfg_type, app=None):
@@ -129,11 +140,16 @@ def edit_config(cfg_type, app=None):
             # TODO: add the open commands for the other OSes
             specific_app_dict = {'Darwin': 'open -a {app}'.format(app=app)}
             cmd = specific_app_dict.get(platform.system(), app) + " " + filepath
-            retcode = run_cmd(cmd)
-        else:
-            print("Unable to find application named '{}'".format(cmd.split()[0]))
+            # TODO: explain DEVNULL, suppress stderr since we will display the
+            # error
+            retcode = run_cmd(cmd, stderr=subprocess.DEVNULL)
     if retcode == 0:
-        print("Opening the {} configuration file ...".format(cfg_type))
+        logger.info("<color>Opening the {} configuration file ..."
+                    "</color>".format(cfg_type))
+    else:
+        err = FileNotFoundError("<color>Unable to find application named "
+                                "'{}'</color>".format(app))
+        logger.error(err)
     return retcode
 
 
@@ -163,8 +179,8 @@ def reset_config(cfg_type):
         user_cfg = load_cfg(cfg_type)
         default_cfg = load_cfg('default_' + cfg_type)
         if user_cfg == default_cfg:
-            # TODO: warning
-            print("The {} configuration file is already reset".format(cfg_type))
+            logger.warning("<color>The {} configuration file is already reset"
+                           "</color>".format(cfg_type))
             retcode = 2
         else:
             # Get the paths to the default and user-defined config files
@@ -174,10 +190,15 @@ def reset_config(cfg_type):
             shutil.copyfile(user_cfg_filepath, get_bak_cfg_filepath(cfg_type))
             # Reset config file to factory default values
             shutil.copyfile(default_cfg_filepath, user_cfg_filepath)
-            print("The {} configuration file is reset".format(cfg_type))
+            logger.info("<color>The {} configuration file is reset"
+                        "</color>".format(cfg_type))
             retcode = 0
     except OSError as e:
-        print(e)
+        e = "<color>{}</color>".format(e)
+        if _SHOW_STACK:
+            logger.exception(e)
+        else:
+            logger.error(e)
     finally:
         return retcode
 
@@ -199,17 +220,21 @@ def undo_config(cfg_type):
             # Undo config file
             shutil.copyfile(get_bak_cfg_filepath(cfg_type),
                             get_data_filepath(cfg_type))
-            print("The {} config file was successfully reverted to what it was"
-                  " before the last RESET".format(cfg_type))
+            logger.info("<color>The {} config file was SUCCESSFULLY reverted "
+                        "to what it was before the last RESET"
+                        "</color>".format(cfg_type))
             # Delete the backup file
             os.unlink(get_bak_cfg_filepath(cfg_type))
             retcode = 0
         else:
-            # TODO: warning
-            print("The last RESET was already undo")
+            logger.warning("<color>The last RESET was already undo</color>")
             retcode = 2
     except OSError as e:
-        print(e)
+        e = "<color>{}</color>".format(e)
+        if _SHOW_STACK:
+            logger.exception(e)
+        else:
+            logger.error(e)
     finally:
         return retcode
 
@@ -240,7 +265,6 @@ def start_scraper():
         # Setup logging from the logging config file: this will setup the
         # logging to all custom modules, including the current script
         setup_logging_from_cfg(log_cfg_filepath)
-    logger = logging.getLogger('scripts.scraper')
     try:
         logger.info("Main config file loaded")
         logger.info("Logging is setup")
@@ -250,28 +274,31 @@ def start_scraper():
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
             sqlite3.Error) as e:
-        logger.exception(e)
+        e = "<color>{}</color>".format(e)
+        if _SHOW_STACK:
+            logger.exception(e)
+        else:
+            logger.error(e)
     else:
         # Success
         status_code = 0
     finally:
         if status_code == 1:
             # Error
-            logger.warning("Program will exit")
+            logger.warning("<color>Program will exit</color>")
         else:
-            logger.info("End of the lyrics scraping")
+            logger.info("<color>End of the lyrics scraping</color>")
         return status_code
 
 
 def setup_argparser():
     """Setup the argument parser for the command-line script.
 
-    Related arguments are grouped according to the three types of actions that
-    can be performed with the script:
+    The important actions that can be performed with the script are:
 
     - start the lyrics scraper,
     - edit a configuration file or
-    - reset a configuration file.
+    - reset/undo a configuration file.
 
     Returns
     -------
@@ -285,92 +312,155 @@ def setup_argparser():
        <https://docs.python.org/3.7/library/argparse.html#argparse.Namespace>`_.
 
     """
-    # TODO: add version, verbose and quiet options
-    # TODO: add undo option for config file
+    # Help message that is used in various arguments
+    common_help = '''Provide 'log' (without the quotes) for the logging config 
+    file or 'main' (without the quotes) for the main config file.'''
     # Setup the parser
     parser = argparse.ArgumentParser(
-        description="Scrape lyrics from webpages and save them locally in a "
-                    "SQLite database. Also, you can edit or reset a "
-                    "configuration file which can either be the logging or the "
-                    "main config file.")
+        # usage="%(prog)s [OPTIONS]",
+        prog=os.path.basename(__file__).split(".")[0],
+        description='''\
+Scrape lyrics from webpages and save them locally in a SQLite database. Also, 
+you can edit or reset a configuration file which can either be the logging or 
+the main config file.\n
+IMPORTANT: these are only some of the most important options. Open the main 
+config file to have access to the complete list of options, i.e. 
+%(prog)s -e main''',
+        formatter_class=argparse.RawDescriptionHelpFormatter)
+    # ===============
+    # General options
+    # ===============
+    parser.add_argument("--version", action='version',
+                        version='%(prog)s {}'.format(__version__))
+    parser.add_argument("-q", "--quiet", action="store_true",
+                        help="Enable quiet mode, i.e. nothing will be print.")
+    parser.add_argument("-v", "--verbose", action="store_true",
+                        help="Print various debugging information, e.g. print "
+                             "traceback when there is an exception.")
+    parser.add_argument("-nc", "--no-color", action="store_true",
+                        help="Don't print color codes in output")
+    # help=argparse.SUPPRESS)
     # Group arguments that are closely related
+    # =============
+    # Cache options
+    # =============
+    cache_group = parser.add_argument_group('Cache options')
+    cache_group.add_argument(
+        "--cache-dir", dest="dir",
+        help='''Location in the filesystem where lyrics_scraping can store 
+        downloaded webpages permanently. By default ~/.cache/lyrics_scraping is 
+        used.''')
+    cache_group.add_argument("--no-cache-dir", action="store_true",
+                             help="Disable caching")
+    cache_group.add_argument("--clr-cache-dir", action="store_true",
+                             help="Delete all cache files")
+    # ======================
+    # Lyrics Scraper options
+    # ======================
     start_group = parser.add_argument_group('Start the lyrics scraper')
     start_group.add_argument(
-        "-s", "--start_scraper",
-        action="store_true",
-        help="Scrape lyrics from webpages and save them locally in a SQLite "
-             "database or a dictionary")
-    start_group.add_argument("-dc", "--disable_color", action="store_true",
-                             default=False, help=argparse.SUPPRESS)
+        "-s", "--start_scraper", action="store_true",
+        help='''Scrape lyrics from webpages and save them locally in a SQLite 
+        database''')
+    # ===========
+    # Edit config
+    # ===========
     edit_group = parser.add_argument_group('Edit a configuration file')
     edit_group.add_argument(
-        "-e", "--edit",
-        choices=["log", "main"],
-        help="Edit a configuration file. Provide 'log' (without the quotes) "
-             "for the logging config file or 'main' (without the quotes) for "
-             "the main config file.")
+        "-e", "--edit", choices=["log", "main"],
+        help="Edit a configuration file. {}".format(common_help))
     edit_group.add_argument(
-        "-a", "--app_name",
-        default=None,
-        dest="app",
-        help="Name of the application to use for editing "
-             "the file. If no name is given, then the "
-             "default application for opening this type of "
-             "file will be used.")
-    reset_group = parser.add_argument_group('Reset a configuration file')
+        "-a", "--app-name", default=None, dest="app",
+        help='''Name of the application to use for editing the file. If no 
+        name is given, then the default application for opening this type of 
+        file will be used.''')
+    # =================
+    # Reset/Undo config
+    # =================
+    reset_group = parser.add_argument_group(
+        'Reset or undo a configuration file')
     reset_group.add_argument(
-        "-r", "--reset",
-        choices=["log", "main"],
-        help="Reset a configuration file with factory default values. Provide "
-             "'log' (without the quotes) for the logging config file or 'main' "
-             "(without the quotes) for the main config file.")
+        "-r", "--reset", choices=["log", "main"],
+        help='''Reset a configuration file with factory default values. 
+        {}'''.format(common_help))
     reset_group.add_argument(
-        "-u", "--undo",
-        choices=["log", "main"],
-        help="Undo the LAST RESET. Provide 'log' (without the quotes) for the "
-             "logging config file or 'main' (without the quotes) for the main "
-             "config file.")
+        "-u", "--undo", choices=["log", "main"],
+        help='''Undo the LAST RESET. Thus, the config file will be restored 
+        to what it was before the LAST reset. {}'''.format(common_help))
     return parser.parse_args()
 
 
 def main():
     """Main entry-point to the script.
 
-    According to the user's choice of action, the script will:
+    According to the user's choice of action, the script might:
 
     - start the scraper,
     - edit a configuration file, or
-    - reset a configuration file.
+    - reset/undo a configuration file.
+
+    Notes
+    -----
+    Only one action at a time can be performed.
 
     """
+    global _QUIET_MODE, _SHOW_STACK, logger
     args = setup_argparser()
+    # ==============
+    # Logging config
+    # ==============
+    # NOTE: if quiet and verbose are both activated, only quiet will have an
+    # effect
+    if args.quiet:  # Logging disabled
+        _QUIET_MODE = True
+        logger = setup_basic_logger(__name__, remove_all_handlers=True)
+        logger.addHandler(NullHandler())
+    else:  # Logging enabled
+        if args.no_color:  # Color disabled
+            uninstall_colored_logger()
+        logger = setup_basic_logger(
+            name=__name__,
+            add_console_handler=True,
+            remove_all_handlers=True)
+        if args.verbose:
+            _SHOW_STACK = True
+            logger.setLevel(logging.DEBUG)
+        else:
+            logger.setLevel(logging.INFO)
+    # =======
+    # Actions
+    # =======
     retcode = 1
     try:
+        # NOTE: only one action at a time can be performed
         if args.edit:
             retcode = edit_config(args.edit, args.app)
         elif args.reset:
             retcode = reset_config(args.reset)
         elif args.undo:
             retcode = undo_config(args.undo)
-        elif args.start_scraping:
+        elif args.start_scraper:
             retcode = start_scraper()
         else:
             # TODO: default when no action given is to start scraping?
             print("No action selected: edit (-e), reset (-r) or start the scraper "
                   "(-s)")
-    except (AssertionError, AttributeError, FileNotFoundError):
+    except (AssertionError, AttributeError, FileNotFoundError) as e:
         # TODO: explain this line
-        traceback.print_exc()
+        # traceback.print_exc()
+        e = "<color>{}</color>".format(e)
+        if _SHOW_STACK:
+            logger.exception(e)
+        else:
+            logger.error(e)
     finally:
         return retcode
 
 
 if __name__ == '__main__':
     retcode = main()
-    """
     msg = "\nScript exited with <color>{}</color>".format(retcode)
     if retcode == 1:
         logger.error(msg)
     else:
-        logger.info(msg)
-    """
+        logger.debug(msg)

@@ -24,7 +24,7 @@ class TestLyricsScraping(TestBase):
 
 
 # Decorator
-def modify_and_restore(cfg_type, reset_first=False, check_modified_cfg=False):
+def modify_and_restore(cfg_type, reset_first=False):
     """TODO
 
     Parameters
@@ -63,7 +63,7 @@ def modify_and_restore(cfg_type, reset_first=False, check_modified_cfg=False):
             """
             # TODO: explain, need to modify cfg file, copy the backup
             # config file
-            cfg_file = _ConfigFile(cfg_type, check_modified_cfg)
+            cfg_file = _ConfigFile(cfg_type)
             backup_cfg_file = _BackupConfigFile(cfg_type)
             # Move the backup config file if it is there
             backup_cfg_file.move()
@@ -144,9 +144,8 @@ def move_and_restore(cfg_type):
 class _ConfigFile:
     """TODO
     """
-    def __init__(self, cfg_type, check_cfg):
+    def __init__(self, cfg_type):
         self._cfg_type = cfg_type
-        self._check_cfg = check_cfg
         self._orig_cfg_dict =  load_cfg(self._cfg_type)
         self._cfg_filepath = get_data_filepath(self._cfg_type)
         self._tmp_cfg_filepath = self._cfg_filepath + ".tmp"
@@ -155,12 +154,11 @@ class _ConfigFile:
         self._new_option = {self._new_opt_key: self._new_opt_val}
 
     def check_cfg(self):
-        if self._check_cfg:
-            cfg_dict = load_cfg(self._cfg_type)
-            assert_msg = "The {} config file was not reverted " \
-                         "correctly".format(self._cfg_type)
-            assert cfg_dict.get(self._new_opt_key) == self._new_opt_val, \
-                assert_msg
+        cfg_dict = load_cfg(self._cfg_type)
+        assert_msg = "The {} config file was not reverted " \
+                     "correctly".format(self._cfg_type)
+        assert cfg_dict.get(self._new_opt_key) == self._new_opt_val, \
+            assert_msg
 
     def modify(self):
         shutil.copy(get_data_filepath(self._cfg_type),

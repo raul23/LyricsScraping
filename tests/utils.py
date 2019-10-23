@@ -24,7 +24,7 @@ class TestLyricsScraping(TestBase):
 
 
 # Decorator
-def modify_and_restore(cfg_type, reset_first=False):
+def modify_and_restore(cfg_type):
     """TODO
 
     Parameters
@@ -63,22 +63,30 @@ def modify_and_restore(cfg_type, reset_first=False):
             """
             # TODO: explain, need to modify cfg file, copy the backup
             # config file
+            # ============
+            # Modification
+            # ============
             cfg_file = _ConfigFile(cfg_type)
             backup_cfg_file = _BackupConfigFile(cfg_type)
-            # Move the backup config file if it is there
+            # Move the backup config file if there is one
             backup_cfg_file.move()
             # Modify the config file
             cfg_file.modify()
-            if reset_first:
-                # TODO: show it is the decorator logging
-                self.logger.info("\n")
-                scraping.reset_config(cfg_type)
-            # Reset or undo config file
+            # ==================
+            # Decorated function
+            # ==================
+            # Perform action on config file
             func(self, *args, **kwargs)
+            # ===========
+            # Restoration
+            # ===========
+            # Check that the file is reverted back to its original modification
+            # TODO: explain that it is our duty to revert the file to what it
+            # was before the call to the decorated function
             cfg_file.check_cfg()
-            # Undo the changes to the config file
+            # Undo the original change to the config file
             cfg_file.restore()
-            # Restore the backup config file
+            # Restore the backup config file if there was one in the beginning
             backup_cfg_file.restore()
 
         return wrapper_modify_and_restore
@@ -123,14 +131,22 @@ def move_and_restore(cfg_type):
 
             """
             # TODO: explain
+            # ================
+            # Move config file
+            # ================
             cfg_file = _ConfigFile(cfg_type)
             backup_cfg_file = _BackupConfigFile(cfg_type)
             # Move the config file so that it seems that it is not found anymore
             cfg_file.move()
             # Move the backup config file if it is there
             backup_cfg_file.move()
-            # Edit, reset, or undo
+            # ==================
+            # Decorated function
+            # ==================
             func(self, *args, **kwargs)
+            # ===========
+            # Restoration
+            # ===========
             # Move the config file back to its original location
             cfg_file.restore()
             # Restore the backup config file

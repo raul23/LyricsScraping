@@ -52,7 +52,6 @@ import os
 import platform
 import shutil
 import sqlite3
-import subprocess
 from logging import NullHandler
 
 from lyrics_scraping import __version__
@@ -66,8 +65,8 @@ logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
 
 
-_QUIET_MODE = False
-_SHOW_STACK = False
+# TODO: explain
+_TESTING = False
 
 
 def edit_config(cfg_type, app=None):
@@ -98,12 +97,6 @@ def edit_config(cfg_type, app=None):
         -related error, the return code is non-zero. Otherwise, it is 0 if the
         file could be successfully opened with an external program.
 
-    Raises
-    ------
-    FileNotFoundError
-        Raised if the command to open the external program fails, e.g. the name
-        of the application doesn't refer to an executable.
-
     """
     # Get path to user-defined config file
     filepath = get_data_filepath(cfg_type)
@@ -121,13 +114,15 @@ def edit_config(cfg_type, app=None):
     # - Otherwise, the user-specified app will be used
     cmd = default_cmd if app is None else app + " " + filepath
     retcode = 1
+    result = None
     try:
         # IMPORTANT: if the user provided the name of an app, it will be used as
         # a command along with the file path, e.g. `$ atom {filepath}`. However,
         # this case might not work if the user provided an app name that doesn't
         # refer to an executable, e.g. `$ TextEdit {filepath}` won't work. The
         # failed case is further processed in `except FileNotFoundError`.
-        retcode = run_cmd(cmd.format(filepath=filepath))
+        result = run_cmd(cmd.format(filepath=filepath))
+        retcode = result.returncode
     except FileNotFoundError:
         # This happens if the name of the app can't be called as an executable
         # on the terminal
@@ -142,14 +137,15 @@ def edit_config(cfg_type, app=None):
             cmd = specific_app_dict.get(platform.system(), app) + " " + filepath
             # TODO: explain DEVNULL, suppress stderr since we will display the
             # error
-            retcode = run_cmd(cmd, stderr=subprocess.DEVNULL)
+            result = run_cmd(cmd)  # stderr=subprocess.DEVNULL)
+            retcode = result.returncode
     if retcode == 0:
         logger.info("<color>Opening the {} configuration file ..."
                     "</color>".format(cfg_type))
     else:
-        err = FileNotFoundError("<color>Unable to find application named "
-                                "'{}'</color>".format(app))
-        logger.error(err)
+        if result:
+            err = "<color>{}</color>".format(result.stderr.decode().strip())
+            logger.error(err)
     return retcode
 
 
@@ -173,7 +169,6 @@ def reset_config(cfg_type):
         is 0 if the config was reset successfully.
 
     """
-    retcode = 1
     try:
         # TODO: explain
         user_cfg = load_cfg(cfg_type)
@@ -194,12 +189,8 @@ def reset_config(cfg_type):
                         "</color>".format(cfg_type))
             retcode = 0
     except OSError as e:
-        e = "<color>{}</color>".format(e)
-        if _SHOW_STACK:
-            logger.exception(e)
-        else:
-            logger.error(e)
-    finally:
+        raise e
+    else:
         return retcode
 
 
@@ -214,7 +205,6 @@ def undo_config(cfg_type):
     -------
 
     """
-    retcode = 1
     try:
         if os.path.isfile(get_bak_cfg_filepath(cfg_type)):
             # Undo config file
@@ -229,13 +219,9 @@ def undo_config(cfg_type):
         else:
             logger.warning("<color>The last RESET was already undo</color>")
             retcode = 2
-    except OSError as e:
-        e = "<color>{}</color>".format(e)
-        if _SHOW_STACK:
-            logger.exception(e)
-        else:
-            logger.error(e)
-    finally:
+    except OSError:
+        raise
+    else:
         return retcode
 
 
@@ -273,22 +259,11 @@ def start_scraper():
         scraper = AZLyricsScraper(**main_cfg)
         scraper.start_scraping()
     except (FileNotFoundError, KeyboardInterrupt, KeyError, OSError,
-            sqlite3.Error) as e:
-        e = "<color>{}</color>".format(e)
-        if _SHOW_STACK:
-            logger.exception(e)
-        else:
-            logger.error(e)
+            sqlite3.Error):
+        raise
     else:
         # Success
-        status_code = 0
-    finally:
-        if status_code == 1:
-            # Error
-            logger.warning("<color>Program will exit</color>")
-        else:
-            logger.info("<color>End of the lyrics scraping</color>")
-        return status_code
+        return 0
 
 
 def setup_argparser():
@@ -404,7 +379,8 @@ def main():
     Only one action at a time can be performed.
 
     """
-    global _QUIET_MODE, _SHOW_STACK, logger
+    # TODO: explain
+    global _TESTING, logger
     args = setup_argparser()
     # ==============
     # Logging config
@@ -412,18 +388,17 @@ def main():
     # NOTE: if quiet and verbose are both activated, only quiet will have an
     # effect
     if args.quiet:  # Logging disabled
-        _QUIET_MODE = True
         logger = setup_basic_logger(__name__, remove_all_handlers=True)
         logger.addHandler(NullHandler())
     else:  # Logging enabled
         if args.no_color:  # Color disabled
             uninstall_colored_logger()
-        logger = setup_basic_logger(
-            name=__name__,
-            add_console_handler=True,
-            remove_all_handlers=True)
+        if not _TESTING:
+            logger = setup_basic_logger(
+                name=__name__,
+                add_console_handler=True,
+                remove_all_handlers=True)
         if args.verbose:
-            _SHOW_STACK = True
             logger.setLevel(logging.DEBUG)
         else:
             logger.setLevel(logging.INFO)
@@ -443,13 +418,14 @@ def main():
             retcode = start_scraper()
         else:
             # TODO: default when no action given is to start scraping?
-            print("No action selected: edit (-e), reset (-r) or start the scraper "
-                  "(-s)")
-    except (AssertionError, AttributeError, FileNotFoundError) as e:
+            print("No action selected: edit (-e), reset (-r) or start the "
+                  "scraper (-s)")
+    except (AssertionError, AttributeError, FileNotFoundError,
+            KeyboardInterrupt, OSError, sqlite3.Error) as e:
         # TODO: explain this line
         # traceback.print_exc()
         e = "<color>{}</color>".format(e)
-        if _SHOW_STACK:
+        if args.verbose:
             logger.exception(e)
         else:
             logger.error(e)
@@ -459,7 +435,7 @@ def main():
 
 if __name__ == '__main__':
     retcode = main()
-    msg = "\nScript exited with <color>{}</color>".format(retcode)
+    msg = "\nProgram exited with <color>{}</color>".format(retcode)
     if retcode == 1:
         logger.error(msg)
     else:

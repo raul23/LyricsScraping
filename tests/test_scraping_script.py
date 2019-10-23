@@ -14,6 +14,7 @@ from .utils import TestLyricsScraping, modify_and_restore, move_and_restore
 from lyrics_scraping.scripts import scraping
 from lyrics_scraping.utils import load_cfg
 from pyutils.genutils import get_module_filename, get_qualname
+from pyutils.logutils import setup_basic_logger
 
 
 class TestScrapingScript(TestLyricsScraping):
@@ -22,6 +23,19 @@ class TestScrapingScript(TestLyricsScraping):
     LOGGER_NAME = __name__
     SHOW_FIRST_CHARS_IN_LOG = 0
 
+    @classmethod
+    def setUpClass(cls):
+        """TODO
+        """
+        super().setUpClass()
+        # Setup logging for scraping module
+        import ipdb
+        ipdb.set_trace()
+        scraping.logger = setup_basic_logger(name=scraping.logger.name,
+                                             add_console_handler=True,
+                                             remove_all_handlers=True)
+
+    # @unittest.skip("test_edit_config_case_1()")
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_1(self):
@@ -37,6 +51,7 @@ class TestScrapingScript(TestLyricsScraping):
         """
         self._test_edit_config(args=['-e', 'log'])
 
+    @unittest.skip("test_edit_config_case_2()")
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_2(self):
@@ -52,6 +67,7 @@ class TestScrapingScript(TestLyricsScraping):
         """
         self._test_edit_config(args=['-e', 'main'])
 
+    @unittest.skip("test_edit_config_case_3()")
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_3(self):
@@ -69,6 +85,7 @@ class TestScrapingScript(TestLyricsScraping):
         """
         self._test_edit_config(args=['--edit', 'log', '-a', 'TextEdit'])
 
+    @unittest.skip("test_edit_config_case_4()")
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_4(self):

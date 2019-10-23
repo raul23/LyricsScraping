@@ -30,11 +30,15 @@ class TestScrapingScript(TestLyricsScraping):
         super().setUpClass()
         scraping._TESTING = True
         # Setup logging for scraping module
+        format_ = "%(name)-35s: %(levelname)-8s %(message)s"
         setup_basic_logger(
             name=scraping.logger.name,
             add_console_handler=True,
+            add_file_handler=True,
+            log_filepath=cls.log_filepath,
             remove_all_handlers=True,
-            console_formatter="%(name)-35s: %(levelname)-8s %(message)s")
+            console_format=format_,
+            file_format=format_)
 
     # @unittest.skip("test_edit_config_case_1()")
     # Skip test if on PROD because we are opening an app to edit a file
@@ -112,8 +116,10 @@ class TestScrapingScript(TestLyricsScraping):
         config file.
 
         """
+        extra_msg = "Case where an <color>invalid app</color> is given"
         self._test_edit_config(args=['-e', 'main', '-a', 'WrongApp'],
-                               expected_retcode=1, seconds=0)
+                               expected_retcode=1, seconds=0,
+                               extra_main_msg=extra_msg)
 
     # @unittest.skip("test_edit_config_case_6()")
     @move_and_restore("log")
@@ -126,10 +132,14 @@ class TestScrapingScript(TestLyricsScraping):
         returns 1 when the log config file is not found.
 
         """
-        self._test_edit_config(args=['-e', 'log', '-a', 'TextEdit'],
-                               expected_retcode=1, seconds=0)
+        cfg_type = "log"
+        extra_msg = "Case where the <color>{}</color> config file is " \
+                    "<color>not found</color>".format(cfg_type)
+        self._test_edit_config(args=['-e', cfg_type, '-a', 'TextEdit'],
+                               expected_retcode=1, seconds=0,
+                               extra_main_msg=extra_msg)
 
-    @unittest.skip("test_reset_config_case_1()")
+    # @unittest.skip("test_reset_config_case_1()")
     @modify_and_restore(cfg_type="log")
     def test_reset_config_case_1(self):
         """Test that reset_config() resets the log config file.
@@ -140,9 +150,12 @@ class TestScrapingScript(TestLyricsScraping):
         resets the user-defined log config file with factory default values.
 
         """
-        self._test_reset_config(args=['-r', 'log'])
+        cfg_type = "log"
+        self._test_reset_config(args=['-r', cfg_type])
+        # TODO: explain
+        self.undo_reset(cfg_type)
 
-    @unittest.skip("test_reset_config_case_2()")
+    # @unittest.skip("test_reset_config_case_2()")
     @modify_and_restore(cfg_type="main")
     def test_reset_config_case_2(self):
         """Test that reset_config() resets the main config file.
@@ -153,9 +166,12 @@ class TestScrapingScript(TestLyricsScraping):
         resets the user-defined main config file with factory default values.
 
         """
-        self._test_reset_config(args=['-r', 'main'])
+        cfg_type = "main"
+        self._test_reset_config(args=['-r', cfg_type])
+        # TODO: explain
+        self.undo_reset(cfg_type)
 
-    @unittest.skip("test_reset_config_case_3()")
+    # @unittest.skip("test_reset_config_case_3()")
     @move_and_restore("main")
     def test_reset_config_case_3(self):
         """Test reset_config() when the main config file is not found.
@@ -175,7 +191,7 @@ class TestScrapingScript(TestLyricsScraping):
                                 expected_retcode=1,
                                 extra_main_msg=extra_msg)
 
-    @unittest.skip("test_reset_config_case_4()")
+    # @unittest.skip("test_reset_config_case_4()")
     @modify_and_restore(cfg_type="main")
     def test_reset_config_case_4(self):
         """Test reset_config() when the main config file is reset twice in a
@@ -193,20 +209,21 @@ class TestScrapingScript(TestLyricsScraping):
         extra_msg = "Case where the <color>{}</color> config file is <color>" \
                     "reset twice</color> in a row\n".format(cfg_type)
         extra_msg += "<color>RESET #1</color>"
+        # TODO: explain undo_reset=False here but True in Second Reset
         self._test_reset_config(args=['-r', cfg_type],
                                 expected_retcode=0,
-                                extra_main_msg=extra_msg,
-                                undo_reset=False)
+                                extra_main_msg=extra_msg)
         # Second RESET
         extra_msg = "<color>RESET #2</color>"
         self._start_newline = False
         self._test_reset_config(args=['-r', cfg_type],
                                 expected_retcode=2,
                                 extra_main_msg=extra_msg)
+        self.undo_reset(cfg_type)
         self._start_newline = True
 
-    @unittest.skip("test_undo_config_case_1()")
-    @modify_and_restore(cfg_type="log", reset_first=True)
+    # @unittest.skip("test_undo_config_case_1()")
+    @modify_and_restore(cfg_type="log")
     def test_undo_config_case_1(self):
         """Test that undo_config() restores the log config file.
 
@@ -217,11 +234,14 @@ class TestScrapingScript(TestLyricsScraping):
         last reset.
 
         """
+        cfg_type = "log"
+        # TODO: explain
+        self.reset_config(cfg_type)
         # Undo the config file
-        self._test_undo_config(args=['-u', 'log'])
+        self._test_undo_config(args=['-u', cfg_type])
 
-    @unittest.skip("test_undo_config_case_2()")
-    @modify_and_restore(cfg_type="main", reset_first=True)
+    # @unittest.skip("test_undo_config_case_2()")
+    @modify_and_restore(cfg_type="main")
     def test_undo_config_case_2(self):
         """Test that undo_config() restores the main config file.
 
@@ -232,43 +252,27 @@ class TestScrapingScript(TestLyricsScraping):
         last reset.
 
         """
+        cfg_type = "main"
+        # TODO: explain
+        self.reset_config(cfg_type)
         # Undo the config file
         self._test_undo_config(args=['-u', 'main'])
 
-    @unittest.skip("test_undo_config_case_3()")
-    @move_and_restore("main")
+    # @unittest.skip("test_undo_config_case_3()")
+    @modify_and_restore(cfg_type="main")
     def test_undo_config_case_3(self):
-        """Test undo_config() when the main config file is not found.
-
-        TODO: check description, difficult to simulate this case
-
-        Case 3 tests that :meth:`~lyrics_scraping.scripts.scraper.undo_config`
-        returns 1 when the main config file is not found.
-
-        """
-        # TODO: explain
-        cfg_type = "main"
-        extra_msg = "Case where the <color>{}</color> config file is " \
-                    "<color>not found</color>".format(cfg_type)
-        # Undo the config file which is not to be found
-        self._test_undo_config(args=['-u', cfg_type],
-                               expected_retcode=1,
-                               extra_main_msg=extra_msg)
-
-    @unittest.skip("test_undo_config_case_4()")
-    @modify_and_restore(cfg_type="main", reset_first=True)
-    def test_undo_config_case_4(self):
         """Test undo_config() when the main config file is undo twice in a
         row.
 
         TODO: check description
 
-        Case 4 tests that :meth:`~lyrics_scraping.scripts.scraper.reset_config`
+        Case 3 tests that :meth:`~lyrics_scraping.scripts.scraper.reset_config`
         returns 2 when the main config file is undo (restored) twice in a row.
 
         """
-        # TODO: explain
         cfg_type = "main"
+        # TODO: explain
+        self.reset_config(cfg_type)
         # First UNDO
         extra_msg = "Case where the <color>{}</color> config file is <color>" \
                     "undo twice</color> in a row\n".format(cfg_type)
@@ -278,37 +282,35 @@ class TestScrapingScript(TestLyricsScraping):
                                extra_main_msg=extra_msg)
         # Second UNDO
         extra_msg = "<color>UNDO #2</color>"
-        self._start_newline = False
         self._test_undo_config(args=['-u', cfg_type],
                                expected_retcode=2,
                                extra_main_msg=extra_msg)
-        self._start_newline = True
 
-    @unittest.skip("test_setup_argparser_case_1()")
+    # @unittest.skip("test_setup_argparser_case_1()")
     def test_setup_argparser_case_1(self):
         """TODO
         """
         self._test_setup_argparser(['-e', 'log'], "edit")
 
-    @unittest.skip("test_setup_argparser_case_2()")
+    # @unittest.skip("test_setup_argparser_case_2()")
     def test_setup_argparser_case_2(self):
         """TODO
         """
         self._test_setup_argparser(['-r', 'main'], "reset")
 
-    @unittest.skip("test_setup_argparser_case_3()")
+    # @unittest.skip("test_setup_argparser_case_3()")
     def test_setup_argparser_case_3(self):
         """TODO
         """
         self._test_setup_argparser(['-s'], "start_scraper")
 
-    @unittest.skip("test_setup_argparser_case_4()")
+    # @unittest.skip("test_setup_argparser_case_4()")
     def test_setup_argparser_case_4(self):
         """TODO
         """
         self._test_setup_argparser(['-u', 'log'], "undo")
 
-    @unittest.skip("test_setup_argparser_case_5()")
+    # @unittest.skip("test_setup_argparser_case_5()")
     def test_setup_argparser_case_5(self):
         """TODO
         """
@@ -337,7 +339,7 @@ class TestScrapingScript(TestLyricsScraping):
         results = self.parse_args(args, extra_main_msg)
         app_type = results.app_type
         # Call main() with the given arguments
-        retcode = self.call_main()
+        retcode = self.call_scraping_main()
         if expected_retcode == 0:
             assert_msg = "The {} app couldn't be opened. Return code is " \
                          "{}".format(app_type, retcode)
@@ -352,8 +354,7 @@ class TestScrapingScript(TestLyricsScraping):
             self.logger.info("The {} app couldn't be opened <color>as "
                              "expected</color>".format(app_type))
 
-    def _test_reset_config(self, args, expected_retcode=0, extra_main_msg=None,
-                           undo_reset=True):
+    def _test_reset_config(self, args, expected_retcode=0, extra_main_msg=None):
         """TODO
 
         Parameters
@@ -368,7 +369,7 @@ class TestScrapingScript(TestLyricsScraping):
         results = self.parse_args(args, extra_main_msg)
         cfg_type = results.cfg_type
         # Call main() with the given arguments
-        retcode = self.call_main()
+        retcode = self.call_scraping_main()
         if expected_retcode == 0:  # Success: config file reset
             assert_msg = "The {} config file couldn't be reset. Return code " \
                          "is {}".format(cfg_type, retcode)
@@ -381,13 +382,6 @@ class TestScrapingScript(TestLyricsScraping):
             self.assertDictEqual(default_cfg_dict, user_cfg_dict, assert_msg)
             self.logger.info("The {} config file was reset <color>as "
                              "expected</color>".format(cfg_type))
-            if undo_reset:
-                # Undo the reset
-                retcode = scraping.undo_config(cfg_type)
-                assert_msg = "The last RESET couldn't be undo"
-                self.assertTrue(retcode == 0, assert_msg)
-                self.logger.info("The {} config file was successfully reverted "
-                                 "<color>as expected</color>".format(cfg_type))
         elif expected_retcode == 1:  # ERROR
             self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
                                           "reset")
@@ -420,6 +414,7 @@ class TestScrapingScript(TestLyricsScraping):
         sys.argv.extend(args)
         try:
             # Parse args
+            self.logger.info("<color>Output:</color>")
             p_args = scraping.setup_argparser()
             assert_msg = "The parsed arguments doesn't contain the expected " \
                          "action '{}'".format(expected_action)
@@ -427,6 +422,7 @@ class TestScrapingScript(TestLyricsScraping):
             self.logger.info("Parsed arguments <color>as expected</color>")
         except SystemExit:
             if expected_action == "invalid_argument":
+                self.log_signs(sign="-", times=72)
                 self.logger.info("Invalid argument {} <color>as expected"
                                  "</color>".format(args[0]))
             else:
@@ -442,10 +438,11 @@ class TestScrapingScript(TestLyricsScraping):
         extra_main_msg
 
         """
+        self._start_newline = False
         results = self.parse_args(args, extra_main_msg)
         cfg_type = results.cfg_type
         # Call main() with the given arguments
-        retcode = self.call_main()
+        retcode = self.call_scraping_main()
         if expected_retcode == 0:  # Success: config file restored
             assert_msg = "The {} config file couldn't be restored. Return " \
                          "code is {}".format(cfg_type, retcode)
@@ -461,6 +458,7 @@ class TestScrapingScript(TestLyricsScraping):
         else:
             self.fail("Very odd! Return code ({}) not as expected "
                       "({})".format(retcode, expected_retcode))
+        self._start_newline = True
 
     def assert_retcode_when_fail(self, cfg_type, retcode, expected_retcode, action):
         """TODO
@@ -484,7 +482,7 @@ class TestScrapingScript(TestLyricsScraping):
         self.logger.info("The {} config file couldn't be {} <color>"
                          "as expected</color>".format(cfg_type, action))
 
-    def call_main(self):
+    def call_scraping_main(self):
         """TODO
 
         Returns
@@ -492,10 +490,10 @@ class TestScrapingScript(TestLyricsScraping):
         retcode : int
 
         """
-        self.log_num_signs()
+        self.log_signs()
         # NOTE: setup_arg_parser() is called in main()
         retcode = scraping.main()
-        self.log_num_signs()
+        self.log_signs()
         return retcode
 
     def parse_args(self, args, extra_main_msg):
@@ -551,3 +549,32 @@ class TestScrapingScript(TestLyricsScraping):
         results.cfg_func = cfg_func
         results.cfg_type = cfg_type
         return results
+
+    def reset_config(self, cfg_type):
+        """TODO
+
+        Parameters
+        ----------
+        cfg_type
+
+        """
+        self.logger.warning("\n\n<color>Preparation for {}</color>".format(self._testMethodName))
+        self.log_signs()
+        scraping.reset_config(cfg_type)
+        self.log_signs()
+
+    def undo_reset(self, cfg_type):
+        """TODO
+
+        Parameters
+        ----------
+        cfg_type
+
+        """
+        self.log_signs()
+        retcode = scraping.undo_config(cfg_type)
+        self.log_signs()
+        assert_msg = "The last RESET couldn't be undo"
+        self.assertTrue(retcode == 0, assert_msg)
+        self.logger.info("The {} config file was successfully reverted "
+                         "<color>as expected</color>".format(cfg_type))

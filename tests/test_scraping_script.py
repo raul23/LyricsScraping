@@ -28,12 +28,13 @@ class TestScrapingScript(TestLyricsScraping):
         """TODO
         """
         super().setUpClass()
+        scraping._TESTING = True
         # Setup logging for scraping module
-        import ipdb
-        ipdb.set_trace()
-        scraping.logger = setup_basic_logger(name=scraping.logger.name,
-                                             add_console_handler=True,
-                                             remove_all_handlers=True)
+        setup_basic_logger(
+            name=scraping.logger.name,
+            add_console_handler=True,
+            remove_all_handlers=True,
+            console_formatter="%(name)-35s: %(levelname)-8s %(message)s")
 
     # @unittest.skip("test_edit_config_case_1()")
     # Skip test if on PROD because we are opening an app to edit a file
@@ -51,7 +52,7 @@ class TestScrapingScript(TestLyricsScraping):
         """
         self._test_edit_config(args=['-e', 'log'])
 
-    @unittest.skip("test_edit_config_case_2()")
+    # @unittest.skip("test_edit_config_case_2()")
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_2(self):
@@ -67,7 +68,7 @@ class TestScrapingScript(TestLyricsScraping):
         """
         self._test_edit_config(args=['-e', 'main'])
 
-    @unittest.skip("test_edit_config_case_3()")
+    # @unittest.skip("test_edit_config_case_3()")
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_3(self):
@@ -83,9 +84,9 @@ class TestScrapingScript(TestLyricsScraping):
         arguments.
 
         """
-        self._test_edit_config(args=['--edit', 'log', '-a', 'TextEdit'])
+        self._test_edit_config(args=['--edit', 'log', '--app-name', 'TextEdit'])
 
-    @unittest.skip("test_edit_config_case_4()")
+    # @unittest.skip("test_edit_config_case_4()")
     # Skip test if on PROD because we are opening an app to edit a file
     @unittest.skipIf(TestLyricsScraping.env_type == "PROD", "Skip if on PROD")
     def test_edit_config_case_4(self):
@@ -97,10 +98,12 @@ class TestScrapingScript(TestLyricsScraping):
 
         For example, the app can be TextEdit or atom.
 
-        """
-        self._test_edit_config(args=['-e', 'main', '--app_name', 'TextEdit'])
+        Also, this test makes use of the long form of the app argument.
 
-    @unittest.skip("test_edit_config_case_5()")
+        """
+        self._test_edit_config(args=['-e', 'main', '--app-name', 'TextEdit'])
+
+    # @unittest.skip("test_edit_config_case_5()")
     def test_edit_config_case_5(self):
         """Test edit_config() when a non-existing app is given.
 
@@ -112,7 +115,7 @@ class TestScrapingScript(TestLyricsScraping):
         self._test_edit_config(args=['-e', 'main', '-a', 'WrongApp'],
                                expected_retcode=1, seconds=0)
 
-    @unittest.skip("test_edit_config_case_6()")
+    # @unittest.skip("test_edit_config_case_6()")
     @move_and_restore("log")
     def test_edit_config_case_6(self):
         """Test edit_config() when the log config file is not found.
@@ -203,8 +206,7 @@ class TestScrapingScript(TestLyricsScraping):
         self._start_newline = True
 
     @unittest.skip("test_undo_config_case_1()")
-    @modify_and_restore(cfg_type="log", reset_first=True,
-                        check_modified_cfg=True)
+    @modify_and_restore(cfg_type="log", reset_first=True)
     def test_undo_config_case_1(self):
         """Test that undo_config() restores the log config file.
 
@@ -219,8 +221,7 @@ class TestScrapingScript(TestLyricsScraping):
         self._test_undo_config(args=['-u', 'log'])
 
     @unittest.skip("test_undo_config_case_2()")
-    @modify_and_restore(cfg_type="main", reset_first=True,
-                        check_modified_cfg=True)
+    @modify_and_restore(cfg_type="main", reset_first=True)
     def test_undo_config_case_2(self):
         """Test that undo_config() restores the main config file.
 
@@ -320,7 +321,93 @@ class TestScrapingScript(TestLyricsScraping):
         self.log_test_method_name()
         self.logger.info("Testing <color>start_scraper()</color>...")
 
+    def _test_edit_config(self, args, expected_retcode=0, seconds=1,
+                          extra_main_msg=None):
+        """TODO
+
+        Parameters
+        ----------
+        args
+        expected_retcode
+        seconds
+        extra_main_msg
+
+        """
+        # TODO: explain
+        results = self.parse_args(args, extra_main_msg)
+        app_type = results.app_type
+        # Call main() with the given arguments
+        retcode = self.call_main()
+        if expected_retcode == 0:
+            assert_msg = "The {} app couldn't be opened. Return code is " \
+                         "{}".format(app_type, retcode)
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            self.logger.info("The {} app was called <color>as expected"
+                             "</color>".format(app_type))
+            time.sleep(seconds)
+        else:
+            assert_msg = "Very highly unlikely case. Return code " \
+                         "is".format(retcode)
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            self.logger.info("The {} app couldn't be opened <color>as "
+                             "expected</color>".format(app_type))
+
+    def _test_reset_config(self, args, expected_retcode=0, extra_main_msg=None,
+                           undo_reset=True):
+        """TODO
+
+        Parameters
+        ----------
+        args
+        expected_retcode
+        extra_main_msg
+        undo_reset
+
+        """
+        # TODO: explain
+        results = self.parse_args(args, extra_main_msg)
+        cfg_type = results.cfg_type
+        # Call main() with the given arguments
+        retcode = self.call_main()
+        if expected_retcode == 0:  # Success: config file reset
+            assert_msg = "The {} config file couldn't be reset. Return code " \
+                         "is {}".format(cfg_type, retcode)
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            # Test that the config file was really reset by checking its content
+            default_cfg_dict = load_cfg('default_' + cfg_type)
+            user_cfg_dict = load_cfg(cfg_type)
+            assert_msg = "The {} config file was not reset as " \
+                         "expected".format(cfg_type)
+            self.assertDictEqual(default_cfg_dict, user_cfg_dict, assert_msg)
+            self.logger.info("The {} config file was reset <color>as "
+                             "expected</color>".format(cfg_type))
+            if undo_reset:
+                # Undo the reset
+                retcode = scraping.undo_config(cfg_type)
+                assert_msg = "The last RESET couldn't be undo"
+                self.assertTrue(retcode == 0, assert_msg)
+                self.logger.info("The {} config file was successfully reverted "
+                                 "<color>as expected</color>".format(cfg_type))
+        elif expected_retcode == 1:  # ERROR
+            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
+                                          "reset")
+        elif expected_retcode == 2:  # Config file ALREADY reset
+            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
+                                          "reset")
+        else:
+            self.fail("Very odd! Return code ({}) not as expected "
+                      "({})".format(retcode, expected_retcode))
+
     def _test_setup_argparser(self, args, expected_action, extra_msg=None):
+        """TODO
+
+        Parameters
+        ----------
+        args
+        expected_action
+        extra_msg
+
+        """
         self.log_test_method_name()
         case, cfg_func = self.process_test_method_name()
         info_msg = "Case <color>{}</color> of testing <color>{}()" \
@@ -344,6 +431,72 @@ class TestScrapingScript(TestLyricsScraping):
                                  "</color>".format(args[0]))
             else:
                 self.fail("Extremely odd case!")
+
+    def _test_undo_config(self, args, expected_retcode=0, extra_main_msg=None):
+        """TODO
+
+        Parameters
+        ----------
+        args
+        expected_retcode
+        extra_main_msg
+
+        """
+        results = self.parse_args(args, extra_main_msg)
+        cfg_type = results.cfg_type
+        # Call main() with the given arguments
+        retcode = self.call_main()
+        if expected_retcode == 0:  # Success: config file restored
+            assert_msg = "The {} config file couldn't be restored. Return " \
+                         "code is {}".format(cfg_type, retcode)
+            self.assertTrue(retcode == expected_retcode, assert_msg)
+            self.logger.info("The {} config file was successfully restored "
+                             "<color>as expected</color>".format(cfg_type))
+        elif expected_retcode == 1:  # ERROR
+            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
+                                           "restored")
+        elif expected_retcode == 2:  # Config file already restored
+            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
+                                           "restored")
+        else:
+            self.fail("Very odd! Return code ({}) not as expected "
+                      "({})".format(retcode, expected_retcode))
+
+    def assert_retcode_when_fail(self, cfg_type, retcode, expected_retcode, action):
+        """TODO
+
+        Parameters
+        ----------
+        cfg_type
+        retcode
+        expected_retcode
+        action
+
+        """
+        valid_expected_retcodes = [1, 2]
+        valid_as_str = ", ".join(map(str, valid_expected_retcodes))
+        assert expected_retcode in valid_expected_retcodes, \
+            "Wrong expected rectcode: '{}' (valid expected rectcodes are " \
+            "{})".format(expected_retcode, valid_as_str)
+        assert_msg = "Return code ({}) not as expected " \
+                     "({})".format(retcode, expected_retcode)
+        self.assertTrue(retcode == expected_retcode, assert_msg)
+        self.logger.info("The {} config file couldn't be {} <color>"
+                         "as expected</color>".format(cfg_type, action))
+
+    def call_main(self):
+        """TODO
+
+        Returns
+        -------
+        retcode : int
+
+        """
+        self.log_num_signs()
+        # NOTE: setup_arg_parser() is called in main()
+        retcode = scraping.main()
+        self.log_num_signs()
+        return retcode
 
     def parse_args(self, args, extra_main_msg):
         """TODO
@@ -392,139 +545,9 @@ class TestScrapingScript(TestLyricsScraping):
         if extra_main_msg:
             info_msg += "\n{}".format(extra_main_msg)
         self.logger.info(info_msg)
-        results = namedtuple("results", "app_type cfg_type")
+        results = namedtuple("results", "app_type case cfg_func cfg_type")
         results.app_type = app_type
+        results.case = case
+        results.cfg_func = cfg_func
         results.cfg_type = cfg_type
         return results
-
-    def _test_edit_config(self, args, expected_retcode=0, seconds=2,
-                          extra_main_msg=None):
-        """TODO
-
-        Parameters
-        ----------
-        args
-        expected_retcode
-        seconds
-        extra_main_msg
-
-        """
-        # TODO: explain
-        results = self.parse_args(args, extra_main_msg)
-        app_type = results.app_type
-        # Call main() with the given arguments
-        # NOTE: setup_arg_parser() is called in main()
-        retcode = scraping.main()
-        if expected_retcode == 0:
-            assert_msg = "The {} app couldn't be open. Return code is " \
-                         "{}".format(app_type, retcode)
-            self.assertTrue(retcode == expected_retcode, assert_msg)
-            self.logger.info("The {} app was called <color>as expected"
-                             "</color>".format(app_type))
-            time.sleep(seconds)
-        else:
-            assert_msg = "Very highly unlikely case. Return code " \
-                         "is".format(retcode)
-            self.assertTrue(retcode == expected_retcode, assert_msg)
-            self.logger.info("The {} app couldn't be called <color>as "
-                             "expected</color>".format(app_type))
-
-    def _test_reset_config(self, args, expected_retcode=0, extra_main_msg=None,
-                           undo_reset=True):
-        """TODO
-
-        Parameters
-        ----------
-        args
-        expected_retcode
-        extra_main_msg
-        undo_reset
-
-        """
-        # TODO: explain
-        results = self.parse_args(args, extra_main_msg)
-        cfg_type = results.cfg_type
-        # Call main() with the given arguments
-        # NOTE: setup_arg_parser() is called within main()
-        retcode = scraping.main()
-        if expected_retcode == 0:  # Success: config file reset
-            assert_msg = "The {} config file couldn't be reset. Return code " \
-                         "is {}".format(cfg_type, retcode)
-            self.assertTrue(retcode == expected_retcode, assert_msg)
-            # Test that the config file was really reset by checking its content
-            default_cfg_dict = load_cfg('default_' + cfg_type)
-            user_cfg_dict = load_cfg(cfg_type)
-            assert_msg = "The {} config file was not reset as " \
-                         "expected".format(cfg_type)
-            self.assertDictEqual(default_cfg_dict, user_cfg_dict, assert_msg)
-            self.logger.info("The {} config file was reset <color>as "
-                             "expected</color>".format(cfg_type))
-            if undo_reset:
-                # Undo the reset
-                retcode = scraping.undo_config(cfg_type)
-                assert_msg = "The last RESET couldn't be undo"
-                self.assertTrue(retcode == 0, assert_msg)
-                self.logger.info("The {} config file was successfully reverted "
-                                 "<color>as expected</color>".format(cfg_type))
-        elif expected_retcode == 1:  # ERROR
-            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
-                                           "reset")
-        elif expected_retcode == 2:  # Config file ALREADY reset
-            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
-                                           "reset")
-        else:
-            self.fail("Very odd! Return code ({}) not as expected "
-                      "({})".format(retcode, expected_retcode))
-
-    def _test_undo_config(self, args, expected_retcode=0, extra_main_msg=None):
-        """TODO
-
-        Parameters
-        ----------
-        args
-        expected_retcode
-        extra_main_msg
-
-        """
-        results = self.parse_args(args, extra_main_msg)
-        cfg_type = results.cfg_type
-        # Call main() with the given arguments
-        # NOTE: setup_arg_parser() is called within main()
-        retcode = scraping.main()
-        if expected_retcode == 0:  # Success: config file restored
-            assert_msg = "The {} config file couldn't be restored. Return " \
-                         "code is {}".format(cfg_type, retcode)
-            self.assertTrue(retcode == expected_retcode, assert_msg)
-            self.logger.info("The {} config file was successfully restored "
-                             "<color>as expected</color>".format(cfg_type))
-        elif expected_retcode == 1:  # ERROR
-            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
-                                           "restored")
-        elif expected_retcode == 2:  # Config file already restored
-            self.assert_retcode_when_fail(cfg_type, retcode, expected_retcode,
-                                           "restored")
-        else:
-            self.fail("Very odd! Return code ({}) not as expected "
-                      "({})".format(retcode, expected_retcode))
-
-    def assert_retcode_when_fail(self, cfg_type, retcode, expected_retcode, action):
-        """TODO
-
-        Parameters
-        ----------
-        cfg_type
-        retcode
-        expected_retcode
-        action
-
-        """
-        valid_expected_retcodes = [1, 2]
-        valid_as_str = ", ".join(map(str, valid_expected_retcodes))
-        assert expected_retcode in valid_expected_retcodes, \
-            "Wrong expected rectcode: '{}' (valid expected rectcodes are " \
-            "{})".format(expected_retcode, valid_as_str)
-        assert_msg = "Return code ({}) not as expected " \
-                     "({})".format(retcode, expected_retcode)
-        self.assertTrue(retcode == expected_retcode, assert_msg)
-        self.logger.info("The {} config file couldn't be {} <color>"
-                         "as expected</color>".format(cfg_type, action))

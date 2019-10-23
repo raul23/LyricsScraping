@@ -18,23 +18,23 @@ The configuration file can also be reset with default values.
 
 Usage
 -----
-    ``$ scraper [-h] [-s] [-c [{u,p}]] [-e {log,main}] [-a APP] [-r {log,main}]``
+    ``$ scraping [-h] [-s] [-c [{u,p}]] [-e {log,main}] [-a APP] [-r {log,main}]``
 
 Start the lyrics scraper::
 
-    $ scraper -s
+    $ scraping -s
 
 Edit the main config file with TextEdit (macOS)::
 
-    $ scraper -e main -a TextEdit
+    $ scraping -e main -a TextEdit
 
 Edit the logging config file with the default application (e.g. atom)::
 
-    $ scraper -e log
+    $ scraping -e log
 
 Reset the main config file to default values::
 
-    $ scraper -r main
+    $ scraping -r main
 
 Notes
 -----

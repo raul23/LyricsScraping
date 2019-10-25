@@ -5,9 +5,8 @@ import functools
 import os
 import shutil
 
-from lyrics_scraping.scripts import scraping
 from lyrics_scraping.utils import (
-    dump_cfg, get_bak_cfg_filepath, get_data_filepath, load_cfg)
+    dump_cfg, get_backup_cfg_filepath, get_data_filepath, load_cfg)
 from pyutils.testutils import TestBase
 
 
@@ -208,19 +207,19 @@ class _BackupConfigFile:
     def move(self):
         """TODO
         """
-        if os.path.isfile(get_bak_cfg_filepath(self._cfg_type)):
+        if os.path.isfile(get_backup_cfg_filepath(self._cfg_type)):
             self._found_backup_cfg = True
             # TODO: move (instead of copy) backup file?
-            shutil.move(get_bak_cfg_filepath(self._cfg_type),
-                        get_bak_cfg_filepath(self._cfg_type) + ".tmp")
+            shutil.move(get_backup_cfg_filepath(self._cfg_type),
+                        get_backup_cfg_filepath(self._cfg_type) + ".tmp")
 
     def restore(self):
         """TODO
         """
         if self._found_backup_cfg:
-            shutil.move(get_bak_cfg_filepath(self._cfg_type) + ".tmp",
-                        get_bak_cfg_filepath(self._cfg_type))
-        elif os.path.isfile(get_bak_cfg_filepath(self._cfg_type)):
+            shutil.move(get_backup_cfg_filepath(self._cfg_type) + ".tmp",
+                        get_backup_cfg_filepath(self._cfg_type))
+        elif os.path.isfile(get_backup_cfg_filepath(self._cfg_type)):
             # Remove backup config file since it wasn't there in the
             # beginning
-            os.unlink(get_bak_cfg_filepath(self._cfg_type))
+            os.unlink(get_backup_cfg_filepath(self._cfg_type))

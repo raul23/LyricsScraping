@@ -12,7 +12,7 @@ handlers:
   console:
     level: INFO
     class: logging.StreamHandler
-    formatter: console
+    formatter: simple
   file:
     level: DEBUG
     class: logging.FileHandler
@@ -23,23 +23,23 @@ handlers:
 loggers:
   scripts.scraping:
     level: DEBUG
-    handlers: [console, file]
+    handlers: [console]
     propagate: False
   lyrics_scraping.scrapers.azlyrics_scraper:
     level: DEBUG
-    handlers: [console, file]
+    handlers: [console]
     propagate: False
   lyrics_scraping.scrapers.lyrics_scraper:
     level: DEBUG
-    handlers: [console, file]
+    handlers: [console]
     propagate: False
   pyutils.dbutils:
     level: DEBUG
-    handlers: [console, file]
+    handlers: [console]
     propagate: False
   pyutils.save_utils:
     level: DEBUG
-    handlers: [console, file]
+    handlers: [console]
     propagate: False
 root:
   level: DEBUG

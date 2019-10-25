@@ -1,9 +1,11 @@
 """Module that defines tests for :mod:`~lyrics_scraping.scrapers.azlyrics_scraper`
 """
 
+import logging
 import os
 import sqlite3
 import unittest
+from logging import NullHandler
 
 from .utils import TestLyricsScraping
 from lyrics_scraping.scrapers import lyrics_scraper
@@ -12,6 +14,9 @@ from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
 from lyrics_scraping.utils import load_cfg
 from pyutils.genutils import get_qualname
 from pyutils.logutils import setup_logging_from_cfg
+
+logger = logging.getLogger(__name__)
+logger.addHandler(NullHandler())
 
 
 class TestScrapingScript(TestLyricsScraping):
@@ -65,13 +70,15 @@ class TestScrapingScript(TestLyricsScraping):
         since it was already done in :meth:`setUpClass`.
 
         """
-        self._test_init()
+        extra_msg = "Case where <color>__init__()</color> is called without " \
+                    "arguments, i.e. <color>default values used</color>"
+        self._test_init(extra_msg=extra_msg)
         self.log_signs()
         AZLyricsScraper()
         self.log_signs()
-        self.logger.info("The constructor was successfully called")
+        logger.info("The constructor was successfully called")
 
-    @unittest.skip("test_init_case_2()")
+    # @unittest.skip("test_init_case_2()")
     def test_init_case_2(self):
         """Test that __init__() can create a SQLite database and connect to it.
 
@@ -79,7 +86,9 @@ class TestScrapingScript(TestLyricsScraping):
         :meth:`~lyrics_scraping.scrapers.AZLyricsScraper.__init__` TODO:...
 
         """
-        self.log_test_method_name()
+        extra_msg = "Case where <color>__init__()</color> is called with " \
+                    "<color>db_filepath</color>"
+        self._test_init(extra_msg=extra_msg)
         db_filepath = os.path.join(self.sandbox_tmpdir, "music.sqlite")
         try:
             self.log_signs()
@@ -87,11 +96,10 @@ class TestScrapingScript(TestLyricsScraping):
             self.log_signs()
         except (IOError, sqlite3.OperationalError) as e:
             self.log_signs()
-            self.logger.exception("<color>{}</color>".format(e))
+            logger.exception("<color>{}</color>".format(e))
             self.fail("Couldn't connect to the database")
         else:
-            self.logger.info("Connection to the SQLite database could be "
-                             "established")
+            logger.info("Connection to the SQLite database could be established")
 
     @unittest.skip("test_init_case_3()")
     def test_init_case_3(self):
@@ -115,4 +123,4 @@ class TestScrapingScript(TestLyricsScraping):
         info_msg = "Case <color>{}</color> of testing <color>{}()" \
                    "</color>".format(case, cfg_func)
         info_msg += "\n{}".format(extra_msg) if extra_msg else ""
-        self.logger.info(info_msg)
+        logger.info(info_msg)

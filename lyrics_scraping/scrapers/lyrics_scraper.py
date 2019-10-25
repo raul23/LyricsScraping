@@ -44,8 +44,11 @@ from pyutils.genutils import create_dir
 from pyutils.logutils import get_error_msg, setup_logging_from_cfg
 from pyutils.webcache import WebCache
 
+logger = logging.getLogger(__name__)
+logger.addHandler(NullHandler())
 
-logging.getLogger(__name__).addHandler(NullHandler())
+
+_SETUP_LOGGING = True
 
 
 class LyricsScraper:
@@ -212,7 +215,7 @@ class LyricsScraper:
     """
     # TODO: add example of data.
 
-    def __init__(self, lyrics_urls, db_filepath=None, autocommit=False,
+    def __init2__(self, lyrics_urls, db_filepath=None, autocommit=False,
                  overwrite_db=False, update_tables=False, cache_dirpath=None,
                  overwrite_webpages=False, http_get_timeout=5,
                  delay_between_requests=8, headers=WebCache.HEADERS,
@@ -288,6 +291,74 @@ class LyricsScraper:
             delay_between_requests=self.delay_between_requests,
             headers=self.headers)
 
+    def __init__(self, db_filepath="", overwrite_db=False, use_cache=True,
+                 expire_after=300, http_get_timeout=5, delay_between_requests=8,
+                 headers=WebCache.HEADERS):
+        # TODO: AssertionError are raised in both lines
+        self.logging_cfg_filepath = get_data_filepath(file_type='log')
+        self.schema_filepath = get_data_filepath(file_type='schema')
+        # ==============
+        # Logging config
+        # ==============
+        if _SETUP_LOGGING:
+            # Setup logging for all custom modules based on the default logging
+            # config file
+            setup_logging_from_cfg(self.logging_cfg_filepath)
+            logger.info("<color>Logging is setup</color>")
+        else:
+            logger.warning("<color>Logging was already setup</color>")
+        # ===============
+        # Database config
+        # ===============
+        self.overwrite_db = overwrite_db
+        self.db_filepath = os.path.expanduser(db_filepath)
+        if self.db_filepath:
+            # Create music db if necessary
+            # TODO: IOError and sqlite3.OperationalError are raised
+            create_db(self.db_filepath,
+                      self.schema_filepath,
+                      self.overwrite_db)
+            # Connect to the music database
+            # TODO: sqlite3.Error is raised
+            self.db_conn = self._connect_db()
+        else:
+            # No database to be used
+            self.db_conn = None
+        # ==================
+        # Web caching config
+        # ==================
+        self.use_cache = use_cache
+        self.cache_name = os.path.expanduser("~/.cache/lyric_scraping/")
+        # TODO: FileExistsError and PermissionError are raised
+        try:
+            create_dir(self.cache_name, overwrite=False)
+        except FileExistsError as e:
+            logger.debug("<color>{}</color>".format(e))
+        self.expire_after = expire_after
+        self.http_get_timeout = http_get_timeout
+        self.delay_between_requests = delay_between_requests
+        self.headers = headers
+        self.webcache = WebCache(
+            cache_name=self.cache_name,
+            expire_after=self.expire_after,
+            http_get_timeout=self.http_get_timeout,
+            delay_between_requests=self.delay_between_requests,
+            headers=self.headers)
+        logger.info("<color>Webcache is setup</color>")
+
+    def get_lyrics(self, song_title=None, artist_name=None, album_title=None,
+                   url=None, max_songs=None):
+        pass
+
+    def get_lyrics_from_album(self, album_title, artist_name=None, max_songs=None):
+        pass
+
+    def get_lyrics_from_url(self, url, max_songs=None):
+        pass
+
+    def search_lyrics(self, song_title, artist_name=None):
+        pass
+
     def start_scraping(self):
         """Start the web scraping of lyrics websites.
 
@@ -314,12 +385,11 @@ class LyricsScraper:
                 webpage_filename = self._process_url(url)
                 self._scrape_webpage(url, webpage_filename)
             except OSError as e:
-                self.logger_p.exception(e)
+                logger.exception(e)
                 error = e
             except urllib.error.URLError as e:
-                self.logger_p.exception(e)
-                self.logger_p.warning(
-                    "The URL {} seems to be down!".format(url))
+                logger.exception(e)
+                logger.warning("The URL {} seems to be down!".format(url))
                 error = e
             except (FileExistsError,
                     lyrics_scraping.exceptions.CurrentSessionURLError,
@@ -329,7 +399,7 @@ class LyricsScraper:
                     lyrics_scraping.exceptions.OverwriteSongError,
                     pyutils.exceptions.HTTP404Error,
                     pyutils.exceptions.SQLSanityCheckError) as e:
-                self.logger_p.error(e)
+                logger.error(e)
                 error = e
             else:
                 skip_url = False
@@ -340,8 +410,8 @@ class LyricsScraper:
                 if skip_url:
                     self._add_skipped_url(url, get_error_msg(error))
                 else:
-                    self.logger_p.debug("URL successfully processed:"
-                                        " {}".format(url))
+                    logger.debug("URL successfully processed: "
+                                 "{}".format(url))
                     self.good_urls.add(url)
 
     def get_scraped_data(self):
@@ -365,8 +435,8 @@ class LyricsScraper:
         # If a db was used, inform the user that the scraped data is also to be
         # found in the SQLite database that was initially configured.
         if self.db_conn:
-            self.logger_p.info("The scraped data is also saved in the database"
-                               " '{}'".format(self.db_filepath))
+            logger.info("The scraped data is also saved in the database "
+                        "'{}'".format(self.db_filepath))
         return self.scraped_data
 
     def _add_skipped_url(self, url, error):
@@ -386,7 +456,7 @@ class LyricsScraper:
             its corresponding URL.
 
         """
-        self.logger_p.warning("Skipping the URL {}".format(url))
+        logger.warning("Skipping the URL {}".format(url))
         self.skipped_urls.setdefault(url, [])
         self.skipped_urls[url].append(str(error))
 
@@ -423,8 +493,7 @@ class LyricsScraper:
             self._check_url_in_db(url)
         else:
             # URL is brand new! Thus, it can be further processed.
-            self.logger_p.debug("The url {} was not previously"
-                                " processed".format(url))
+            logger.debug("The url {} was not previously processed".format(url))
             self.checked_urls.add(url)
 
     def _check_url_in_db(self, url):
@@ -453,15 +522,15 @@ class LyricsScraper:
         res = self._select_song(url)
         if len(res) == 1:
             # Only one song found with the given URL
-            self.logger_p.debug("There is already a song with the same URL"
-                                " {}".format(url))
+            logger.debug("There is already a song with the same URL "
+                         "{}".format(url))
             # Check if the song found with the given URL can be updated
             # (overwritten) in the table
             if self.update_tables:
                 # Song can be updated
-                self.logger_p.debug("Since the 'update_tables' flag is set to"
-                                    " True, the URL will be processed and the"
-                                    " music db will be updated as a consequence")
+                logger.debug("Since the 'update_tables' flag is set to True, "
+                             "the URL will be processed and the music db will "
+                             "be updated as a consequence")
             else:
                 # Song can't be updated
                 # TODO: it should be a warning
@@ -470,8 +539,8 @@ class LyricsScraper:
                     " will be ignored")
         elif len(res) == 0:
             # No song found with the given URL
-            self.logger_p.debug("The lyrics URL {} was not found in the music"
-                                " db".format(url))
+            logger.debug("The lyrics URL {} was not found in the music "
+                         "db".format(url))
         else:
             # Odd case: more than one song was found with the given URL
             raise lyrics_scraping.exceptions.MultipleLyricsURLError(
@@ -501,12 +570,13 @@ class LyricsScraper:
         """
         # Connect to the music database
         try:
-            self.logger_p.info("Connecting to db '{}'".format(self.db_filepath))
-            conn = connect_db(self.db_filepath, self.autocommit)
-        except sqlite3.Error as e:
+            logger.info("<color>Connecting to db '{}'"
+                        "</color>".format(self.db_filepath))
+            conn = connect_db(self.db_filepath)
+        except sqlite3.Error:
             raise
         else:
-            self.logger_p.debug("Db connection established!")
+            logger.debug("<color>Db connection established!</color>")
             return conn
 
     def _count_empty_items(self, data):
@@ -534,7 +604,7 @@ class LyricsScraper:
         count = sum([1 for f in data if not f])
         if count:
             # At least one empty item found
-            self.logger_p.warning("Empty field{}: {}".format(
+            logger.warning("Empty field{}: {}".format(
                 add_plural_ending(count), data))
         return count
 
@@ -570,7 +640,7 @@ class LyricsScraper:
         will output 'cnn' which is correct.
 
         """
-        self.logger_p.info("Processing the URL {}".format(url))
+        logger.info("Processing the URL {}".format(url))
         # Check first if the URL was already processed, e.g. is found in the db
         self._check_url_if_processed(url)
         domain = urlparse(url).netloc
@@ -593,24 +663,22 @@ class LyricsScraper:
             # error:
             # TypeError: stat: path should be string, bytes, os.PathLike or integer,
             # not NoneType
-            self.logger_p.info("The webpage {} was found in cache @ '{}'".format(
-                url, webpage_filepath))
+            logger.info("The webpage {} was found in cache @ "
+                        "'{}'".format(url, webpage_filepath))
         else:
             # The given webpage is brand new!
-            self.logger_p.info("We will retrieve the webpage {}".format(url))
+            logger.info("We will retrieve the webpage {}".format(url))
             # Check if the URL is available
             # NOTE: it can also be done with requests which is not
             # installed by default on Python.
-            self.logger_p.debug("Checking if the URL {} is"
-                                " available".format(url))
+            logger.debug("Checking if the URL {} is available".format(url))
             code = urlopen(url).getcode()
-            self.logger_p.debug("The URL {} is up. Status code:"
-                                " {}".format(url, code))
+            logger.debug("The URL {} is up. Status code: {}".format(url, code))
             self.logger_p.debug("Validating the URL's domain")
 
             # Validate URL's domain
             if domain in self.valid_domains:
-                self.logger_p.debug("The domain '{}' is valid".format(domain))
+                logger.debug("The domain '{}' is valid".format(domain))
             else:
                 raise lyrics_scraping.exceptions.InvalidURLDomainError(
                     "The URL's domain '{}' is invalid. Only URLs from"
@@ -621,7 +689,7 @@ class LyricsScraper:
                 try:
                     create_dir(webpages_dirpath)
                 except FileExistsError as e:
-                    self.logger_p.warning(e)
+                    logger.warning(e)
 
         return webpage_filepath
 
@@ -672,7 +740,7 @@ class LyricsScraper:
 
         """
         album_tuple = (album_title, artist_name, year,)
-        self.logger_p.debug("Saving the album {}".format(album_tuple))
+        logger.debug("Saving the album {}".format(album_tuple))
         # Save album only if album and artist name are not missing
         if not self._count_empty_items(album_tuple[0:2]):
             if self.db_conn:
@@ -682,7 +750,7 @@ class LyricsScraper:
             self._update_scraped_data(
                 album_tuple, self.scraped_data['albums']['data'])
         else:
-            self.logger_p.warning("Album couldn't be saved!")
+            logger.warning("Album couldn't be saved!")
 
     def _save_artist(self, artist_name):
         """Save the scraped data about an artist.
@@ -702,7 +770,7 @@ class LyricsScraper:
 
         """
         artist_tuple = (artist_name,)
-        self.logger_p.debug("Saving the artist {}".format(artist_tuple))
+        logger.debug("Saving the artist {}".format(artist_tuple))
         # Save album only if artist name is not missing
         if not self._count_empty_items(artist_tuple):
             if self.db_conn:
@@ -712,7 +780,7 @@ class LyricsScraper:
             self._update_scraped_data(
                 artist_tuple, self.scraped_data['artists']['data'])
         else:
-            self.logger_p.warning("Artist couldn't be saved!")
+            logger.warning("Artist couldn't be saved!")
 
     def _save_song(self, song_title, artist_name, album_title, lyrics_url,
                    lyrics, year):
@@ -744,7 +812,7 @@ class LyricsScraper:
         """
         song_tuple = (song_title, artist_name, album_title, lyrics_url, lyrics,
                       year)
-        self.logger_p.debug("Saving the song {}".format(song_tuple))
+        logger.debug("Saving the song {}".format(song_tuple))
         # Save album only if the song title is not missing
         if not self._count_empty_items(song_tuple[0:1]):
             if self.db_conn:
@@ -754,7 +822,7 @@ class LyricsScraper:
             self._update_scraped_data(
                 song_tuple, self.scraped_data['songs']['data'])
         else:
-            self.logger_p.warning("Song couldn't be saved!")
+            logger.warning("Song couldn't be saved!")
 
     def _update_scraped_data(self, data_tuple, scraped_data):
         """Update scraped data.
@@ -775,13 +843,13 @@ class LyricsScraper:
         # Check if tuple of data is unique
         if data_tuple in scraped_data:
             # Tuple of data is not unique
-            self.logger_p.debug("Scraped data already previously saved:"
-                                " {}".format(data_tuple))
+            logger.debug("Scraped data already previously saved: "
+                         "{}".format(data_tuple))
         else:
             # Tuple of data is unique. Thus, save it.
             scraped_data.append(data_tuple)
-            self.logger_p.debug("Scraped data successfully saved:"
-                                " {}".format(data_tuple))
+            logger.debug("Scraped data successfully saved: "
+                         "{}".format(data_tuple))
 
     def _execute_sql(self, sql, values):
         """Execute an SQL expression.
@@ -862,11 +930,11 @@ class LyricsScraper:
             cur.execute(sql, values)
         except sqlite3.IntegrityError as e:
             # Duplicate data can't be inserted
-            self.logger_p.debug(e)
+            logger_p.debug(e)
             return None
         except pyutils.exceptions.SQLSanityCheckError as e:
             # One of the SQL sanity checks failed
-            self.logger_p.error(e)
+            logger_p.error(e)
             raise
         else:
             # Successful SQL expression execution
@@ -879,8 +947,8 @@ class LyricsScraper:
                     # Since autocommit is disabled, we must manually commit
                     # all pending changes to the database
                     self.db_conn.commit()
-                self.logger_p.debug("Query execution successful!"
-                                    " lastrowid={}".format(cur.lastrowid))
+                logger.debug("Query execution successful! "
+                             "lastrowid={}".format(cur.lastrowid))
                 return cur.lastrowid
 
     def _insert_album(self, album):
@@ -960,7 +1028,7 @@ class LyricsScraper:
             represents one row entry.
 
         """
-        self.logger_p.debug("Selecting the song where"
-                            " lyrics_url={}".format(lyrics_url))
+        logger.debug("Selecting the song where "
+                     "lyrics_url={}".format(lyrics_url))
         sql = "SELECT * FROM songs WHERE lyrics_url=?"
         return self._execute_sql(sql, (lyrics_url,))

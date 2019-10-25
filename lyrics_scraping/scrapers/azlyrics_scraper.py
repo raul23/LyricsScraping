@@ -33,8 +33,8 @@ from lyrics_scraping.scrapers.lyrics_scraper import LyricsScraper
 from lyrics_scraping.utils import add_plural_ending
 from pyutils.logutils import get_error_msg
 
-
-logging.getLogger(__name__).addHandler(NullHandler())
+logger = logging.getLogger(__name__)
+logger.addHandler(NullHandler())
 
 
 class AZLyricsScraper(LyricsScraper):
@@ -71,7 +71,6 @@ class AZLyricsScraper(LyricsScraper):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.logger = logging.getLogger(__name__)
 
     def _scrape_webpage(self, url, webpage_filepath):
         """Scrape a given webpage and save the scraped data.
@@ -104,8 +103,7 @@ class AZLyricsScraper(LyricsScraper):
         # and start the scraping of the actual webpage with BeautifulSoup
         if urlparse(url).path.startswith('/lyrics/'):
             # Lyrics URL
-            self.logger.debug("The URL {} refers to a lyrics "
-                              "webpage".format(url))
+            logger.debug("The URL {} refers to a lyrics webpage".format(url))
             self._scrape_lyrics_page(webpage_filepath, url)
         elif urlparse(url).path.startswith('/19/') or \
                 urlparse(url).path[1].isalpha():
@@ -113,8 +111,7 @@ class AZLyricsScraper(LyricsScraper):
             # NOTE: artists' names that start with a number have their webpages
             # placed within the directory /19/
             # e.g. https://www.azlyrics.com/19/50cent.html
-            self.logger.debug("The URL {} refers to an artist's "
-                              "webpage".format(url))
+            logger.debug("The URL {} refers to an artist's webpage".format(url))
             self._scrape_artist_page(webpage_filepath, url)
         else:
             # Bad URL
@@ -156,7 +153,7 @@ class AZLyricsScraper(LyricsScraper):
         _scrape_lyrics_page : Scrapes a lyrics webpage instead.
 
         """
-        self.logger.debug("Scraping the artist webpage {}".format(artist_url))
+        logger.debug("Scraping the artist webpage {}".format(artist_url))
         # Load the webpage or save the webpage and retrieve its html
         html = None
         try:
@@ -178,19 +175,18 @@ class AZLyricsScraper(LyricsScraper):
         # e.g. <a href="../lyrics/artist_name/song_title.html" ... >
         anchors = bs_obj.find_all("a", href=re.compile("^../lyrics"))
         # Process each lyrics' url
-        self.logger.info("There are {} lyrics URLs to process for the given "
-                         "artist".format(len(anchors)))
+        logger.info("There are {} lyrics URLs to process for the given "
+                    "artist".format(len(anchors)))
         for i, a in enumerate(anchors):
             # Get URL from the anchor's href attribute
             lyrics_url = a.attrs['href']
-            self.logger.info("#{} Processing the lyrics URL "
-                             "{}".format(i+1, lyrics_url))
-            self.logger.debug("Processing the anchor '{}'".format(a))
+            logger.info("#{} Processing the lyrics URL "
+                        "{}".format(i+1, lyrics_url))
+            logger.debug("Processing the anchor '{}'".format(a))
             # Check if the lyrics' URL is relative to the current artist's URL
-            self.logger.debug("Checking if the URL {} is "
-                              "relative".format(lyrics_url))
+            logger.debug("Checking if the URL {} is relative".format(lyrics_url))
             if lyrics_url.startswith('../'):
-                self.logger.debug("The URL {} is relative".format(lyrics_url))
+                logger.debug("The URL {} is relative".format(lyrics_url))
                 # Complete the relative URL by adding the scheme and hostname
                 # [scheme]://[hostname][path]
                 # NOTE: lyrics_url[2:] results in removing the two dots at the
@@ -207,7 +203,7 @@ class AZLyricsScraper(LyricsScraper):
             try:
                 self._scrape_lyrics_page(lyrics_filename, lyrics_url)
             except OSError as e:
-                self.logger.exception(e)
+                logger.exception(e)
                 error = e
             except (FileExistsError,
                     pyutils.exceptions.HTTP404Error,
@@ -218,7 +214,7 @@ class AZLyricsScraper(LyricsScraper):
                     lyrics_scraping.exceptions.NonUniqueAlbumYearError,
                     lyrics_scraping.exceptions.OverwriteSongError,
                     lyrics_scraping.exceptions.WrongAlbumYearError) as e:
-                self.logger.error(e)
+                logger.error(e)
                 error = e
             else:
                 skip_url = False
@@ -226,8 +222,8 @@ class AZLyricsScraper(LyricsScraper):
                 if skip_url:
                     self._add_skipped_url(lyrics_url, get_error_msg(error))
                 else:
-                    self.logger.debug("Lyrics URL successfully processed: "
-                                      "{}".format(lyrics_url))
+                    logger.debug("Lyrics URL successfully processed: "
+                                 "{}".format(lyrics_url))
                     self.good_urls.add(lyrics_url)
 
     def _scrape_lyrics_page(self, lyrics_url):
@@ -260,7 +256,7 @@ class AZLyricsScraper(LyricsScraper):
         _scrape_artist_page : Scrapes an artist webpage instead.
 
         """
-        self.logger.debug("Scraping the lyrics webpage {}".format(lyrics_url))
+        logger.debug("Scraping the lyrics webpage {}".format(lyrics_url))
         # Check first if the URL was already processed, e.g. is found in the db
         self._check_url_if_processed(lyrics_url)
         # Cache the webpage and retrieve its html content
@@ -285,12 +281,12 @@ class AZLyricsScraper(LyricsScraper):
         lyrics_text = lyrics_result[0].text.strip()
         album_result = bs_obj.find_all("div",
                                        class_="panel songlist-panel noprint")
-        self.logger.debug("{} album{} found".format(
+        logger.debug("{} album{} found".format(
             len(album_result), add_plural_ending(album_result)))
         if len(album_result) == 0:
             # No album found
-            self.logger.debug("No album found in the lyrics webpage "
-                              "{}".format(lyrics_url))
+            logger.debug("No album found in the lyrics webpage "
+                         "{}".format(lyrics_url))
             # Add empty string to the album result to notify that no album
             # was found when processing each album in the result
             album_result.append("")

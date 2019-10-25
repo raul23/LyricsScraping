@@ -40,16 +40,6 @@ def _add_data_filenames():
 _add_data_filenames()
 
 
-def _get_data_dirpath():
-    """TODO
-
-    Returns
-    -------
-
-    """
-    return data.__path__[0]
-
-
 def add_plural_ending(obj, plural_end="s", singular_end=""):
     """Add plural ending if a number is greater than 1 or there are many
     values in a list.
@@ -84,6 +74,7 @@ def add_plural_ending(obj, plural_end="s", singular_end=""):
         TODO
 
     """
+    # TODO: explain
     if isinstance(obj, list):
         num = len(obj)
     else:
@@ -93,7 +84,7 @@ def add_plural_ending(obj, plural_end="s", singular_end=""):
     return plural_end if num > 1 else singular_end
 
 
-def get_bak_cfg_filepath(cfg_type):
+def get_backup_cfg_filepath(cfg_type):
     """TODO
 
     Parameters
@@ -104,12 +95,23 @@ def get_bak_cfg_filepath(cfg_type):
     -------
 
     """
+    # TODO: explain
     valid_cfg_types = list(_data_filenames.user_cfg.keys())
     assert cfg_type in valid_cfg_types, \
         "Wrong type of data file: '{}' (choose from {})".format(
             cfg_type, ", ".join(valid_cfg_types))
     filename = '.{}_cfg.bak'.format(cfg_type)
-    return os.path.join(_get_data_dirpath(), filename)
+    return os.path.join(get_data_dirpath(), filename)
+
+
+def get_data_dirpath():
+    """TODO
+
+    Returns
+    -------
+
+    """
+    return data.__path__[0]
 
 
 def get_data_filepath(file_type):
@@ -146,9 +148,10 @@ def get_data_filepath(file_type):
         for `file_type`.
 
     """
+    # TODO: explain
     valid_file_types = list(_data_filenames.user_cfg.keys()) \
         + list(_data_filenames.default_cfg.keys())
-    valid_file_types.append(_data_filenames.schema)
+    valid_file_types.append("schema")
     assert file_type in valid_file_types, \
         "Wrong type of data file: '{}' (choose from {})".format(
             file_type, ", ".join(valid_file_types))
@@ -158,7 +161,7 @@ def get_data_filepath(file_type):
         filename = _data_filenames.default_cfg[file_type]
     else:
         filename = _data_filenames.user_cfg[file_type]
-    return os.path.join(_get_data_dirpath(), filename)
+    return os.path.join(get_data_dirpath(), filename)
 
 
 def load_cfg(cfg_type):
@@ -175,6 +178,7 @@ def load_cfg(cfg_type):
     ------
 
     """
+    # TODO: explain
     valid_cfg_types = list(_data_filenames.user_cfg.keys()) + \
         list(_data_filenames.default_cfg.keys())
     assert cfg_type in valid_cfg_types, \
@@ -200,6 +204,7 @@ def dump_cfg(filepath, cfg_dict):
     ------
 
     """
+    # TODO: explain
     if _CFG_EXT == 'yaml':
         with open(filepath, 'w') as f:
             yaml.dump(cfg_dict, f)

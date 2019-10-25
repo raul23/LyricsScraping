@@ -1,18 +1,20 @@
 # =============================
 #      LOGGING CONFIG
 # =============================
-use_logging: True
+# use_logging: True
 # =============================
 #      DATABASE CONFIG
 # =============================
 db_filepath: ~/data/lyrics_scraping/music.sqlite
-autocommit: False
+# autocommit: False
 overwrite_db: True
-update_tables: False
+# update_tables: False
 # =============================
 #       SCRAPER CONFIG
 # =============================
 interactive: True
+date_after: 1980
+date_before:  2019
 max_songs_per_artist: 10
 lyrics_urls:
 - https://www.azlyrics.com/d/depeche.html

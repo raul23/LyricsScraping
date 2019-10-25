@@ -56,7 +56,8 @@ from logging import NullHandler
 
 from lyrics_scraping import __version__
 from lyrics_scraping.scrapers.azlyrics_scraper import AZLyricsScraper
-from lyrics_scraping.utils import get_bak_cfg_filepath, get_data_filepath, load_cfg
+from lyrics_scraping.utils import (
+    get_backup_cfg_filepath, get_data_filepath, load_cfg)
 from pyutils import uninstall_colored_logger
 from pyutils.genutils import load_yaml, run_cmd
 from pyutils.logutils import setup_basic_logger, setup_logging_from_cfg
@@ -182,7 +183,8 @@ def reset_config(cfg_type):
             default_cfg_filepath = get_data_filepath('default_' + cfg_type)
             user_cfg_filepath = get_data_filepath(cfg_type)
             # Backup config file (for undo purposes)
-            shutil.copyfile(user_cfg_filepath, get_bak_cfg_filepath(cfg_type))
+            shutil.copyfile(user_cfg_filepath,
+                            get_backup_cfg_filepath(cfg_type))
             # Reset config file to factory default values
             shutil.copyfile(default_cfg_filepath, user_cfg_filepath)
             logger.info("<color>The {} configuration file is reset"
@@ -206,15 +208,15 @@ def undo_config(cfg_type):
 
     """
     try:
-        if os.path.isfile(get_bak_cfg_filepath(cfg_type)):
+        if os.path.isfile(get_backup_cfg_filepath(cfg_type)):
             # Undo config file
-            shutil.copyfile(get_bak_cfg_filepath(cfg_type),
+            shutil.copyfile(get_backup_cfg_filepath(cfg_type),
                             get_data_filepath(cfg_type))
             logger.info("<color>The {} config file was SUCCESSFULLY reverted "
                         "to what it was before the last RESET"
                         "</color>".format(cfg_type))
             # Delete the backup file
-            os.unlink(get_bak_cfg_filepath(cfg_type))
+            os.unlink(get_backup_cfg_filepath(cfg_type))
             retcode = 0
         else:
             logger.warning("<color>The last RESET was already undo</color>")
@@ -323,7 +325,7 @@ config file to have access to the complete list of options, i.e.
     cache_group.add_argument(
         "--cache-dir", dest="dir",
         help='''Location in the filesystem where lyrics_scraping can store 
-        downloaded webpages permanently. By default ~/.cache/lyrics_scraping is 
+        downloaded webpages permanently. By default ~/.cache/lyrics_scraping is
         used.''')
     cache_group.add_argument("--no-cache-dir", action="store_true",
                              help="Disable caching")

@@ -1,7 +1,7 @@
 """Module that defines functions used when `build-finished` is emitted.
 
 `build-finished` event is emitted by Sphinx after the build has finished,
-before Sphinx exits.
+before Sphinx exits [1]_.
 
 These functions are called in :meth:`setup` from conf.py
 
@@ -182,7 +182,7 @@ def _copy_dd_tag():
     # Get the <dd> tag associated with the `scraped_data` definition where its
     # detailed structure is shown. This <dd> tag is to be found in the
     # LyricsScraper section. This <dd> tag will then be copied into the
-    # AZLyricsScraper section
+    # AZLyricsScraper section.
     whole_soup, source_dd_tag_soup = _find_dd_tag(source_id,
                                                   filepath=API_HTML_FILEPATH)
     # I need to make a copy of the <dd> tag from the LyricsScraper because if I

@@ -3,7 +3,8 @@ add_datetime: True
 disable_existing_loggers: False
 formatters:
   console:
-    format: "%(name)-42s: %(levelname)-8s %(message)s"
+    # format: "%(name)-42s: %(levelname)-8s %(message)s"
+    format: "[%(name)s] %(message)s"
   simple:
     format: "%(levelname)-8s %(message)s"
   verbose:
@@ -21,6 +22,10 @@ handlers:
     formatter: verbose
     delay: True
 loggers:
+  scraper:
+    level: DEBUG
+    handlers: [console]
+    propagate: False
   scripts.scraping:
     level: DEBUG
     handlers: [console]
@@ -38,6 +43,10 @@ loggers:
     handlers: [console]
     propagate: False
   pyutils.save_utils:
+    level: DEBUG
+    handlers: [console]
+    propagate: False
+  pyutils.webcache:
     level: DEBUG
     handlers: [console]
     propagate: False

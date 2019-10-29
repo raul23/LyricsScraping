@@ -1,45 +1,14 @@
 # =============================
-#      LOGGING CONFIG
-# =============================
-# use_logging: True
-# =============================
-#      DATABASE CONFIG
+#         DATABASE CONFIG
 # =============================
 db_filepath: ~/data/lyrics_scraping/music.sqlite
-# autocommit: False
 overwrite_db: True
-# update_tables: False
 # =============================
-#       SCRAPER CONFIG
-# =============================
-interactive: True
-date_after: 1980
-date_before:  2019
-max_songs_per_artist: 10
-lyrics_urls:
-- https://www.azlyrics.com/d/depeche.html
-- https://www.azlyrics.com/b/bowie.html
-- https://www.azlyrics.com/19/50cent.html
-songs:
-- New life by Depeche Mode
-- Space Oddity by David Bowie
-albums:
-- Speak and Spell by Depeche Mode
-- Space Oddity by David Bowie
-artists:
-- Depeche Mode
-- David Bowie
-# =============================
-#       LYRICS URLS
-# =============================
-# Lyrics websites supported: azlyrics.com
-lyrics_urls:
-- https://www.azlyrics.com/d/depeche.html
-# =============================
-#       SAVING CONFIG
+#         CACHE CONFIG
 # =============================
 cache_dirpath: ~/data/lyrics_scraping/cache
-overwrite_webpages: False
+use_cache: False
+expire_after: 300
 # =============================
 #     HTTP REQUEST CONFIG
 # =============================
@@ -49,3 +18,39 @@ delay_between_requests: 8
 headers:
   User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36c"
   Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+# =============================
+#        SCRAPER CONFIG
+# =============================
+interactive: False
+best_match: False
+simulate: False
+max_songs: 100
+# SONGS
+songs_config:
+  skip: False
+  # Max songs in total
+  max_songs:
+  songs:
+    - title: New life
+      artist: Depeche Mode
+    - title: Space Oddity by David Bowie
+# ALBUMS
+albums_config:
+  skip: False
+  # Max songs per album
+  max_songs:
+  albums:
+    - title: Speak and Spell by Depeche Mode
+      max_songs: 5
+    - title: Space Oddity by David Bowie
+# ARTISTS
+artists_config:
+  skip: False
+  # Max songs per artist
+  max_songs:
+  date_after:
+  date_before:
+  artists:
+    - name: Depeche Mode
+      max_songs: 15
+    - name: David Bowie

@@ -13,7 +13,7 @@ expire_after: 300
 #     HTTP REQUEST CONFIG
 # =============================
 # All in seconds
-http_get_timeout: 5
+http_get_timeout: 10
 delay_between_requests: 8
 headers:
   User-Agent: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.157 Safari/537.36c"
@@ -22,6 +22,7 @@ headers:
 #        SCRAPER CONFIG
 # =============================
 interactive: False
+delay_interactive: 30
 best_match: False
 simulate: False
 max_songs: 100

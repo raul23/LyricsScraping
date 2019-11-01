@@ -25,12 +25,9 @@ interactive: False
 delay_interactive: 30
 best_match: False
 simulate: False
-max_songs: 100
 # SONGS
 songs_config:
   skip: False
-  # Max songs in total
-  max_songs:
   songs:
     - title: New life
       artist: Depeche Mode
@@ -38,8 +35,6 @@ songs_config:
 # ALBUMS
 albums_config:
   skip: False
-  # Max songs per album
-  max_songs:
   albums:
     - title: Speak and Spell by Depeche Mode
       max_songs: 5
@@ -47,11 +42,9 @@ albums_config:
 # ARTISTS
 artists_config:
   skip: False
-  # Max songs per artist
-  max_songs:
-  date_after:
-  date_before:
   artists:
     - name: Depeche Mode
       max_songs: 15
+      year_after:
+      year_before:
     - name: David Bowie

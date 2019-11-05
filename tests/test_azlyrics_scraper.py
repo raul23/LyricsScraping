@@ -55,7 +55,7 @@ class TestScrapingScript(TestLyricsScraping):
         # dict
         setup_logging_from_cfg(logging_cfg)
 
-    # @unittest.skip("test_get_lyrics_from_album_case_1()")
+    @unittest.skip("test_get_lyrics_from_album_case_1()")
     def test_get_lyrics_from_album_case_1(self):
         """TODO
         Good album title only
@@ -69,7 +69,7 @@ class TestScrapingScript(TestLyricsScraping):
         bulk_lyrics = self._test_get_lyrics(init_params, meth_params, extra_msg)
         self.check_bulk_lyrics(bulk_lyrics, meth_params, expected_nb_songs)
 
-    # @unittest.skip("test_get_lyrics_from_album_case_2()")
+    @unittest.skip("test_get_lyrics_from_album_case_2()")
     def test_get_lyrics_from_album_case_2(self):
         """TODO
         Good album title only and max_songs=5
@@ -85,7 +85,7 @@ class TestScrapingScript(TestLyricsScraping):
         self.check_bulk_lyrics(bulk_lyrics, meth_params,
                                meth_params['max_songs'])
 
-    # @unittest.skip("test_get_lyrics_from_album_case_3()")
+    @unittest.skip("test_get_lyrics_from_album_case_3()")
     def test_get_lyrics_from_album_case_3(self):
         """TODO
         Both good album title and artist name
@@ -100,15 +100,16 @@ class TestScrapingScript(TestLyricsScraping):
                        "artist_name": "Depeche Mode"}
         extra_msg = "- <color>Both valid</color> album title and artist name " \
                     "are given"
-        extra_msg += "\n- <color>Incorrect search result selected</color>"
+        extra_msg += "\n- <color>Incorrect search result will be selected" \
+                     "</color>"
         bulk_lyrics = self._test_get_lyrics(init_params, meth_params, extra_msg)
         # Only the album should be the same but the artist different
         self.check_bulk_lyrics(bulk_lyrics, {"album_title": "Spirit"},
-                               assert_true=True, log_msg=False)
+                               which_assert="assertTrue", log_final_msg=False)
         self.check_bulk_lyrics(bulk_lyrics, {"artist_name": "Depeche Mode"},
-                               assert_true=False)
+                               which_assert="assertFalse")
 
-    # @unittest.skip("test_get_lyrics_from_album_case_4()")
+    @unittest.skip("test_get_lyrics_from_album_case_4()")
     def test_get_lyrics_from_album_case_4(self):
         """TODO
         Both good album title and artist name, and best_match=True
@@ -124,7 +125,22 @@ class TestScrapingScript(TestLyricsScraping):
         extra_msg = "- <color>Both valid</color> album title and artist name " \
                     "are given"
         bulk_lyrics = self._test_get_lyrics(init_params, meth_params, extra_msg)
-        self.check_bulk_lyrics(bulk_lyrics, meth_params, expected_nb_songs)
+        self.check_bulk_lyrics(bulk_lyrics, meth_params, expected_nb_songs,
+                               log_lyrics_msg=True)
+
+    # @unittest.skip("test_get_lyrics_from_artist_case_1()")
+    def test_get_lyrics_from_artist_case_1(self):
+        """Test get_lyrics_from_album() TODO: ...
+        """
+        # TODO: explain
+        init_params = {}
+        meth_params = {"artist_name": "Depeche Mode",
+                       "max_songs": 25,
+                       "year_after": 1985,
+                       "year_before": 2005}
+        extra_msg = "- Only a <color>valid artist name</color> is given"
+        lyrics = self._test_get_lyrics(init_params, meth_params, extra_msg)
+        self.check_lyrics_attrs(lyrics)
 
     @unittest.skip("test_get_song_lyrics_case_1()")
     def test_get_song_lyrics_case_1(self):
@@ -135,11 +151,8 @@ class TestScrapingScript(TestLyricsScraping):
         init_params = {}
         get_song_params = {"song_title": "Dreaming of Me"}
         extra_msg = "- Only a <color>valid song title</color> is given"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
-                                            extra_msg)
+        lyrics = self._test_get_lyrics(init_params, get_song_params, extra_msg)
         self.check_lyrics_attrs(lyrics)
-        logger.info("The <color>lyrics</color> was <color>successfully retrieved"
-                    "</color>")
 
     @unittest.skip("test_get_song_lyrics_case_2()")
     def test_get_song_lyrics_case_2(self):
@@ -152,11 +165,8 @@ class TestScrapingScript(TestLyricsScraping):
                            "artist_name": "Depeche Mode"}
         extra_msg = "- <color>Both valid</color> song title and artist name " \
                     "are given"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
-                                            extra_msg)
+        lyrics = self._test_get_lyrics(init_params, get_song_params, extra_msg)
         self.check_lyrics_attrs(lyrics)
-        logger.info("The <color>lyrics</color> was <color>successfully retrieved"
-                    "</color>")
 
     @unittest.skip("test_get_song_lyrics_case_3()")
     def test_get_song_lyrics_case_3(self):
@@ -169,10 +179,8 @@ class TestScrapingScript(TestLyricsScraping):
                            "artist_name": "Allison Crauss"}
         extra_msg = "- Good song title but <color>misspelled artist " \
                     "name</color>"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
-                                            extra_msg)
+        lyrics = self._test_get_lyrics(init_params, get_song_params, extra_msg)
         self.check_lyrics_attrs(lyrics)
-        logger.info("The song lyrics was <color>successfully retrieved</color>")
 
     @unittest.skip("test_get_song_lyrics_case_4()")
     def test_get_song_lyrics_case_4(self):
@@ -180,18 +188,13 @@ class TestScrapingScript(TestLyricsScraping):
         Misspelling song title but good artist name and best_match=True
         """
         # TODO: explain
-        _, func_name = self.parse_test_method_name()
         init_params = {"best_match": True}
         get_song_params = {"song_title": "Dreming of Me",
                            "artist_name": "Depeche Mode"}
         extra_msg = "- <color>Misspelled song title</color> and good " \
                     "artist name"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
-                                            extra_msg)
-        assert_msg = "{}() should return None".format(func_name)
-        self.assertIsNone(lyrics, assert_msg)
-        logger.info("The <color>lyrics</color> couldn't be retrieved <color>as "
-                    "expected</color>")
+        lyrics = self._test_get_lyrics(init_params, get_song_params, extra_msg)
+        self.check_lyrics_attrs(lyrics, which_assert="assertIsNone")
 
     @unittest.skip("test_get_song_lyrics_case_5()")
     def test_get_song_lyrics_case_5(self):
@@ -199,18 +202,14 @@ class TestScrapingScript(TestLyricsScraping):
         Misspelling song title but good artist name and best_match=True
         """
         # TODO: explain
-        _, func_name = self.parse_test_method_name()
         init_params = {"best_match": True}
         get_song_params = {"song_title": "Deaming of Me",
                            "artist_name": "Depache Mode"}
         extra_msg = "- <color>Misspelled both</color> song title and " \
                     "artist name"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
+        lyrics = self._test_get_lyrics(init_params, get_song_params,
                                             extra_msg)
-        assert_msg = "{}() should return None".format(func_name)
-        self.assertIsNone(lyrics, assert_msg)
-        logger.info("The <color>lyrics</color> couldn't be retrieved <color>as "
-                    "expected</color>")
+        self.check_lyrics_attrs(lyrics, which_assert="assertIsNone")
 
     @unittest.skip("test_get_song_lyrics_case_6()")
     def test_get_song_lyrics_case_6(self):
@@ -224,16 +223,9 @@ class TestScrapingScript(TestLyricsScraping):
                            "artist_name": "Allison Crauss"}
         extra_msg = "- Good song title but <color>misspelled artist " \
                     "name</color>"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
-                                            extra_msg)
-        self.check_lyrics_attrs(lyrics)
-        assert_msg = "The extracted artist name ({}) should be different than " \
-                     "the given one ({})".format(lyrics.artist_name,
-                                                 get_song_params['artist_name'])
-        self.assertTrue(lyrics.artist_name != get_song_params['artist_name'],
-                        assert_msg)
-        logger.info("The <color>wrong</color> song lyrics was retrieved <color>"
-                    "as expected</color>")
+        lyrics = self._test_get_lyrics(init_params, get_song_params, extra_msg)
+        self.check_lyrics_attrs(lyrics, get_song_params,
+                                which_assert="assertFalse")
 
     @unittest.skip("test_get_song_lyrics_case_7()")
     def test_get_song_lyrics_case_7(self):
@@ -242,17 +234,14 @@ class TestScrapingScript(TestLyricsScraping):
         Similar to case 4 but best_match=False
         """
         # TODO: explain
-        _, func_name = self.parse_test_method_name()
         init_params = {"best_match": False}
         get_song_params = {"song_title": "Dreming of Me",
                            "artist_name": "Depeche Mode"}
         extra_msg = "- <color>Misspelled song title</color> and good " \
                     "artist name"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
-                                            extra_msg)
-        self.check_lyrics_attrs(lyrics)
-        logger.info("The <color>wrong</color> song lyrics was retrieved <color>"
-                    "as expected</color>")
+        lyrics = self._test_get_lyrics(init_params, get_song_params, extra_msg)
+        self.check_lyrics_attrs(lyrics, get_song_params,
+                                which_assert="assertFalse")
 
     @unittest.skip("test_get_song_lyrics_case_8()")
     def test_get_song_lyrics_case_8(self):
@@ -261,18 +250,13 @@ class TestScrapingScript(TestLyricsScraping):
         Similar to case 5 but best_match=False
         """
         # TODO: explain
-        _, func_name = self.parse_test_method_name()
         init_params = {"best_match": False}
         get_song_params = {"song_title": "Deaming of Me",
                            "artist_name": "Depache Mode"}
         extra_msg = "- <color>Misspelled both</color> song title and " \
                     "artist name"
-        lyrics = self._test_get_song_lyrics(init_params, get_song_params,
-                                            extra_msg)
-        assert_msg = "{}() should return None".format(func_name)
-        self.assertIsNone(lyrics, assert_msg)
-        logger.info("The <color>lyrics</color> couldn't be retrieved <color>as "
-                    "expected</color>")
+        lyrics = self._test_get_lyrics(init_params, get_song_params, extra_msg)
+        self.check_lyrics_attrs(lyrics, which_assert="assertIsNone")
 
     @unittest.skip("test_init_case_1()")
     def test_init_case_1(self):
@@ -286,12 +270,10 @@ class TestScrapingScript(TestLyricsScraping):
         since it was already done in :meth:`setUpClass`.
 
         """
-        extra_msg = "Case where <color>__init__()</color> is called without " \
-                    "arguments, i.e. <color>default values used</color>"
-        self.log_main_message(extra_msg)
-        self.call_func(func=AZLyricsScraper)
-        # TODO: next line can be added in call_func()
-        logger.info("<color>__init__()</color> was successfully called")
+        init_params = {}
+        extra_msg = "- <color>Default values used</color>"
+        self._test_init(init_params, extra_msg)
+        _, meth_name = self.parse_test_method_name()
 
     @unittest.skip("test_init_case_2()")
     def test_init_case_2(self):
@@ -302,18 +284,18 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         # TODO: explain
-        extra_msg = "Case where <color>__init__()</color> is called with " \
-                    "<color>db_filepath</color>"
-        self.log_main_message(extra_msg)
+        extra_msg = "- Database creation"
         db_filepath = os.path.join(self.sandbox_tmpdir, "music.sqlite")
+        init_params = {"db_filepath": db_filepath}
         try:
-            self.call_func(func=AZLyricsScraper, db_filepath=db_filepath)
+            self._test_init(init_params, extra_msg)
         except (IOError, sqlite3.OperationalError) as e:
             self.log_signs()
             logger.exception("<color>{}</color>".format(e))
             self.fail("Couldn't connect to the database")
         else:
-            logger.info("Connection to the SQLite database could be established")
+            logger.info("<color>Connection</color> to the SQLite database could "
+                        "be <color>established</color>")
 
     @unittest.skip("test_init_case_3()")
     def test_init_case_3(self):
@@ -323,21 +305,13 @@ class TestScrapingScript(TestLyricsScraping):
         :meth:`~lyrics_scraping.scrapers.AZLyricsScraper.__init__` ...
 
         """
-        extra_msg = "Case where <color>__init__()</color> is tested that the " \
-                    "<color>webcache</color> was installed correctly"
-        self.log_main_message(extra_msg)
-        scraper = self.call_func(func=AZLyricsScraper,
-                                 cache_dirpath=self.sandbox_tmpdir)
-        # TODO: next line can be added in call_func()
-        logger.info("<color>__init__(cache_dirpath)</color> was successfully "
-                    "called")
+        extra_msg = "- Testing webcase"
+        init_params = {"cache_dirpath": self.sandbox_tmpdir}
+        scraper = self._test_init(init_params, extra_msg)
         logger.info("Sending two successive HTTP requests with the same URL ...")
         # Send fist HTTP request
         test_url = "https://en.wikipedia.org/wiki/Computer_programming"
         self.call_func(scraper.webcache.get_webpage, test_url)
-        # TODO: uncomment next line which should be in call_func() like the others
-        # Take into account the case where no param name is given to call_func()
-        # logger.info("<color>scraper.webcache.get_webpage()</color> was successfully called")
         # Check that the URL was not taken from cache
         assert_msg = "The first request used cache"
         self.assertFalse(scraper.webcache.response.from_cache, assert_msg)
@@ -350,50 +324,9 @@ class TestScrapingScript(TestLyricsScraping):
         self.assertTrue(scraper.webcache.response.from_cache, assert_msg)
         logger.info("Second HTTP request used cache <color>as expected</color>")
 
-    def _test_get_lyrics(self, init_params, meth_params, extra_msg=None):
-        """TODO
-
-        Parameters
-        ----------
-        init_params
-        meth_name
-        meth_params
-        extra_msg
-
-        Returns
-        -------
-
-        """
-        # TODO: explain
-        _, meth_name = self.parse_test_method_name()
-        funcs_and_params = [(AZLyricsScraper.__name__, init_params),
-                            (meth_name, meth_params)]
-        self.prepare_call_func(funcs_and_params, extra_msg)
-        scraper = self.call_func(AZLyricsScraper, **init_params)
-        bound_method = scraper.__getattribute__(meth_name)
-        return self.call_func(func=bound_method, **meth_params)
-
-    def _test_get_song_lyrics(self, init_params, get_song_params, extra_msg=None):
-        """TODO
-
-        Parameters
-        ----------
-        init_params
-        get_song_params
-        extra_msg
-
-        Returns
-        -------
-
-        """
-        # TODO: explain
-        self.prepare_call_func(get_song_params, extra_msg)
-        scraper = self.call_func(AZLyricsScraper, **init_params)
-        return self.call_func(func=scraper.get_song_lyrics, **get_song_params)
-
     def check_bulk_lyrics(self, bulk_lyrics, meth_params,
-                          expected_nb_songs=None, assert_true=True,
-                          log_msg=True):
+                          expected_nb_songs=None, which_assert="assertTrue",
+                          log_lyrics_msg=False, log_final_msg=True):
         """TODO
 
         Parameters
@@ -401,8 +334,9 @@ class TestScrapingScript(TestLyricsScraping):
         bulk_lyrics
         meth_params
         expected_nb_songs
-        assert_true
-        log_msg
+        which_assert
+        log_lyrics_msg
+        log_final_msg
 
         """
         # TODO: explain
@@ -411,37 +345,104 @@ class TestScrapingScript(TestLyricsScraping):
                          "album: {} songs found instead".format(
                           expected_nb_songs, len(bulk_lyrics))
             self.assertTrue(len(bulk_lyrics) == expected_nb_songs, assert_msg)
-        for lyrics in bulk_lyrics:
-            self.check_lyrics_attrs(lyrics, meth_params, assert_true)
-        if log_msg:
+        for i, lyrics in enumerate(bulk_lyrics, start=1):
+            if log_lyrics_msg:
+                logger.info("Checking lyrics #{}".format(i))
+            self.check_lyrics_attrs(lyrics, meth_params, which_assert,
+                                    log_lyrics_msg)
+            if log_lyrics_msg:
+                logger.info("")
+        if log_final_msg:
             logger.info(
                 "<color>All {}lyrics</color> were <color>successfully extracted"
                 "</color> from the album".format(
                  str(expected_nb_songs) + " " if expected_nb_songs else ""))
 
-    def check_lyrics_attrs(self, lyrics, attrs_to_check=None, assert_true=True):
+    def check_lyrics_attrs(self, lyrics, attrs_to_check=None,
+                           which_assert="assertTrue", log_lyrics_msg=True):
         """TODO
 
         Parameters
         ----------
         lyrics
         attrs_to_check
-        assert_true
+        which_assert
+        log_lyrics_msg
 
         Returns
         -------
 
         """
-        assert_method = self.assertTrue if assert_true else self.assertFalse
-        for attr_name, attr_value in lyrics.__dict__.items():
-            assert_msg = "{} not found".format(attr_name)
-            self.assertTrue(attr_value, assert_msg)
-            if attrs_to_check and attrs_to_check.get(attr_name):
-                if assert_true:
-                    assert_msg = "{} should be '{}' (not '{}')".format(
-                        attr_name, attrs_to_check.get(attr_name), attr_value)
-                else:
-                    assert_msg = "{} shouldn't be '{}'".format(
-                        attr_name, attrs_to_check.get(attr_name))
-                assert_method(attr_value == attrs_to_check.get(attr_name),
-                              assert_msg)
+        assert which_assert in ["assertTrue", "assertFalse", "assertIsNone"]
+        if which_assert == "assertIsNone":
+            assert_msg = "The returned value should be None"
+            self.assertIsNone(lyrics, assert_msg)
+            logger.info("The <color>lyrics</color> couldn't be retrieved "
+                        "<color>as expected</color>")
+        else:
+            assert_method = self.__getattribute__(which_assert)
+            for attr_name, attr_value in lyrics.__dict__.items():
+                assert_msg = "{} not found".format(attr_name)
+                self.assertTrue(attr_value, assert_msg)
+                if attrs_to_check and attrs_to_check.get(attr_name):
+                    if which_assert == "assertTrue":
+                        assert_msg = "{} should be '{}' (not '{}')".format(
+                            attr_name, attrs_to_check.get(attr_name), attr_value)
+                    else:
+                        assert_msg = "{} shouldn't be '{}'".format(
+                            attr_name, attrs_to_check.get(attr_name))
+                    assert_method(attr_value == attrs_to_check.get(attr_name),
+                                  assert_msg)
+            if log_lyrics_msg:
+                logger.info("The <color>lyrics</color> for <color>'{}' (by {})"
+                            "</color> was <color>successfully extracted"
+                            "</color>".format(lyrics.song_title, lyrics.artist_name))
+
+    def _test_get_lyrics(self, init_params, meth_params, extra_msg=None):
+        """TODO
+
+        Parameters
+        ----------
+        init_params
+        meth_params
+        extra_msg
+
+        Returns
+        -------
+
+        """
+        # TODO: explain
+        if init_params.get('best_match'):
+            extra_msg += "\n- The <color>best search result</color> will be " \
+                         "selected"
+        else:
+            extra_msg += "\n- The <color>first search result</color> will be " \
+                         "selected"
+        _, meth_name = self.parse_test_method_name()
+        funcs_and_params = [(AZLyricsScraper.__name__, init_params),
+                            (meth_name, meth_params)]
+        self.prepare_call_func(funcs_and_params, extra_msg)
+        scraper = self.call_func(AZLyricsScraper, **init_params)
+        bound_method = scraper.__getattribute__(meth_name)
+        return self.call_func(func=bound_method, **meth_params)
+
+    def _test_init(self, init_params, extra_msg=None):
+        """TODO
+
+        Parameters
+        ----------
+        init_params
+        extra_msg
+
+        Returns
+        -------
+
+        """
+        # TODO: explain
+        _, meth_name = self.parse_test_method_name()
+        funcs_and_params = [(AZLyricsScraper.__name__, init_params)]
+        self.prepare_call_func(funcs_and_params, extra_msg)
+        scraper = self.call_func(AZLyricsScraper, **init_params)
+        logger.info("<color>{}()</color> was called <color>successfully"
+                    "</color>".format(AZLyricsScraper.__name__))
+        return scraper

@@ -220,7 +220,7 @@ class LyricsScraper:
                  expire_after=25920000, http_get_timeout=5,
                  delay_between_requests=8, headers=WebCache.HEADERS,
                  interactive=False, delay_interactive=30, best_match=False,
-                 simulate=False, max_songs=None):
+                 simulate=False, max_songs=None, include_unknown_year=False):
         self.skipped_urls = {}
         self.good_urls = set()
         self.checked_urls = set()
@@ -284,6 +284,7 @@ class LyricsScraper:
         self.best_match = best_match
         self.simulate = simulate
         self.max_songs = max_songs
+        self.include_unknown_year = include_unknown_year
 
     def get_song_lyrics(self, song_title, artist_name=None):
         """TODO
@@ -292,7 +293,6 @@ class LyricsScraper:
         ----------
         song_title
         artist_name
-        album_title
 
         Returns
         -------
@@ -308,7 +308,6 @@ class LyricsScraper:
         Parameters
         ----------
         album_title
-        song_title
         artist_name
         max_songs
 
@@ -320,17 +319,15 @@ class LyricsScraper:
         raise NotImplementedError("")
 
     def get_lyrics_from_artist(self, artist_name, max_songs=None,
-                               date_after=None, date_before=None):
+                               year_after=None, year_before=None):
         """TODO
 
         Parameters
         ----------
         artist_name
-        song_titles
-        album_titles
         max_songs
-        date_after
-        date_before
+        year_after
+        year_before
 
         Returns
         -------
@@ -1074,3 +1071,35 @@ class Lyrics:
         self.lyrics_url = lyrics_url
         self.lyrics_text = lyrics_text
         self.year = year
+
+
+class Song:
+    """TODO
+    """
+    def __init__(self, song_title, artist_name, album_title, lyrics_url,
+                 lyrics_text, year):
+        self.song_title = song_title
+        self.artist_name = artist_name
+        self.album_title = album_title
+        self.lyrics_url = lyrics_url
+        self.lyrics_text = lyrics_text
+        self.year = year
+
+
+class Album:
+    """TODO
+    """
+    def __init__(self, album_title, artist_name, album_url, year):
+        self.artist_name = artist_name
+        self.album_title = album_title
+        self.album_url = album_url
+        self.year = year
+
+
+class Artist:
+    """TODO
+    """
+    def __init__(self, song_title, artist_name, artist_url):
+        self.song_title = song_title
+        self.artist_name = artist_name
+        self.artist_url = artist_url

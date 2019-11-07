@@ -1,14 +1,20 @@
 # =============================
-#         DATABASE CONFIG
+#        DATABASE CONFIG
 # =============================
 db_filepath: ~/data/lyrics_scraping/music.sqlite
 overwrite_db: True
 # =============================
-#         CACHE CONFIG
+#       WEB CACHE CONFIG
 # =============================
 cache_dirpath: ~/data/lyrics_scraping/cache
-use_cache: False
+use_webcache: True
 expire_after: 300
+# =============================
+#      COMPUTE CACHE CONFIG
+# =============================
+use_compute_cache: True
+# In MB
+ram_size: 100
 # =============================
 #     HTTP REQUEST CONFIG
 # =============================
@@ -21,6 +27,7 @@ headers:
 # =============================
 #        SCRAPER CONFIG
 # =============================
+see: 123456
 interactive: False
 delay_interactive: 30
 best_match: False
@@ -39,6 +46,7 @@ albums_config:
   albums:
     - title: Speak and Spell by Depeche Mode
       max_songs: 5
+      choose_random: True
     - title: Space Oddity by David Bowie
 # ARTISTS
 artists_config:
@@ -47,6 +55,7 @@ artists_config:
   artists:
     - name: Depeche Mode
       max_songs: 15
+      choose_random: True
       year_after:
       year_before:
     - name: David Bowie

@@ -128,19 +128,39 @@ class TestScrapingScript(TestLyricsScraping):
         self.check_bulk_lyrics(bulk_lyrics, meth_params, expected_nb_songs,
                                log_lyrics_msg=True)
 
-    # @unittest.skip("test_get_lyrics_from_artist_case_1()")
+    @unittest.skip("test_get_lyrics_from_artist_case_1()")
     def test_get_lyrics_from_artist_case_1(self):
         """Test get_lyrics_from_album() TODO: ...
+        max_songs
+        random
+        year_after and year_before
         """
         # TODO: explain
         init_params = {}
         meth_params = {"artist_name": "Depeche Mode",
-                       "max_songs": 25,
+                       "max_songs": 50,
                        "year_after": 1985,
-                       "year_before": 2005}
-        extra_msg = "- Only a <color>valid artist name</color> is given"
-        lyrics = self._test_get_lyrics(init_params, meth_params, extra_msg)
-        self.check_lyrics_attrs(lyrics)
+                       "year_before": 2005,
+                       "choose_random": True}
+        extra_msg = "- A <color>valid artist name</color> is given"
+        songs = self._test_get_lyrics(init_params, meth_params, extra_msg)
+        self.check_bulk_lyrics(songs, meth_params,
+                               expected_nb_songs=meth_params['max_songs'])
+
+    # @unittest.skip("test_get_lyrics_from_artist_case_2()")
+    def test_get_lyrics_from_artist_case_2(self):
+        """Test get_lyrics_from_album() TODO: ...
+        max_songs > number of songs from artist
+        max_songs first songs
+        No year_before and year_after
+        """
+        # TODO: explain
+        init_params = {}
+        meth_params = {"artist_name": "Depeche Mode",
+                       "max_songs": 5000}
+        extra_msg = "- A <color>valid artist name</color> is given"
+        songs = self._test_get_lyrics(init_params, meth_params, extra_msg)
+        self.check_bulk_lyrics(songs, meth_params)
 
     @unittest.skip("test_get_song_lyrics_case_1()")
     def test_get_song_lyrics_case_1(self):
@@ -324,7 +344,7 @@ class TestScrapingScript(TestLyricsScraping):
         self.assertTrue(scraper.webcache.response.from_cache, assert_msg)
         logger.info("Second HTTP request used cache <color>as expected</color>")
 
-    def check_bulk_lyrics(self, bulk_lyrics, meth_params,
+    def check_bulk_lyrics(self, bulk_lyrics, meth_params=None,
                           expected_nb_songs=None, which_assert="assertTrue",
                           log_lyrics_msg=False, log_final_msg=True):
         """TODO
@@ -340,9 +360,10 @@ class TestScrapingScript(TestLyricsScraping):
 
         """
         # TODO: explain
+        # NOTE: songs can be extracted from artists or albums
         if expected_nb_songs:
-            assert_msg = "There are supposed to be {} songs in the " \
-                         "album: {} songs found instead".format(
+            assert_msg = "There are supposed to be {} songs extracted: {} songs " \
+                         "found instead".format(
                           expected_nb_songs, len(bulk_lyrics))
             self.assertTrue(len(bulk_lyrics) == expected_nb_songs, assert_msg)
         for i, lyrics in enumerate(bulk_lyrics, start=1):
@@ -354,8 +375,8 @@ class TestScrapingScript(TestLyricsScraping):
                 logger.info("")
         if log_final_msg:
             logger.info(
-                "<color>All {}lyrics</color> were <color>successfully extracted"
-                "</color> from the album".format(
+                "<color>All {}songs</color> were <color>successfully extracted"
+                "</color>".format(
                  str(expected_nb_songs) + " " if expected_nb_songs else ""))
 
     def check_lyrics_attrs(self, lyrics, attrs_to_check=None,
@@ -377,7 +398,7 @@ class TestScrapingScript(TestLyricsScraping):
         if which_assert == "assertIsNone":
             assert_msg = "The returned value should be None"
             self.assertIsNone(lyrics, assert_msg)
-            logger.info("The <color>lyrics</color> couldn't be retrieved "
+            logger.info("The <color>song</color> couldn't be processed "
                         "<color>as expected</color>")
         else:
             assert_method = self.__getattribute__(which_assert)
@@ -394,8 +415,8 @@ class TestScrapingScript(TestLyricsScraping):
                     assert_method(attr_value == attrs_to_check.get(attr_name),
                                   assert_msg)
             if log_lyrics_msg:
-                logger.info("The <color>lyrics</color> for <color>'{}' (by {})"
-                            "</color> was <color>successfully extracted"
+                logger.info("The <color>song</color> for <color>'{}' (by {})"
+                            "</color> was <color>successfully processed"
                             "</color>".format(lyrics.song_title, lyrics.artist_name))
 
     def _test_get_lyrics(self, init_params, meth_params, extra_msg=None):

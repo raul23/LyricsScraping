@@ -40,7 +40,8 @@ def _add_data_filenames():
 _add_data_filenames()
 
 
-def add_plural_ending(obj, plural_end="s", singular_end=""):
+# TODO: change it to plural
+def plural(obj, plural_end="s", singular_end=""):
     """Add plural ending if a number is greater than 1 or there are many
     values in a list.
 

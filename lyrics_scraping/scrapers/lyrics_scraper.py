@@ -27,6 +27,7 @@ See the structure of the music database as defined in the `music.sql schema`_.
 
 import logging
 import os
+import random
 import sqlite3
 # NOTE:
 # For urllib with Python 2, it is
@@ -38,7 +39,7 @@ from urllib.parse import urlparse
 
 import lyrics_scraping.exceptions
 import pyutils.exceptions
-from lyrics_scraping.utils import add_plural_ending, get_data_filepath
+from lyrics_scraping.utils import plural, get_data_filepath
 from pyutils.dbutils import connect_db, create_db, sql_sanity_check
 from pyutils.genutils import create_dir
 from pyutils.logutils import get_error_msg, setup_logging_from_cfg
@@ -126,8 +127,6 @@ class LyricsScraper:
         Stores the unique URLs that were processed (whether successfully or
         unsuccessfully) during the current session.  Thus, `checked_urls` should
         equal to `skipped_urls` + `good_urls`.
-    logger_p : logging.Logger
-        Logger for logging to console and file.
     db_conn : sqlite3.Connection
         SQLite database connection.
     saver : :class:`saveutils.SaveWebpages`
@@ -160,12 +159,6 @@ class LyricsScraper:
     The scraped webpages can also be cached in order to reduce the number of
     HTTP requests to the server (See :ref:`db_filepath
     <LyricsScraperParametersLabel>`).
-
-    `logger_p` is a logger that is associated with the base class
-    :class:`LyricsScraper`. The derive classes, such as
-    :class:`~scrapers.azlyrics_scraper.AZLyricsScraper`, have their own logger.
-    Hence, we can differentiate whose logs belong to what module, when reading
-    the log file.
 
     """
 
@@ -216,11 +209,12 @@ class LyricsScraper:
     # TODO: add example of data.
 
     def __init__(self, db_filepath="", overwrite_db=False,
-                 cache_dirpath="~/.cache/lyric_scraping/", use_cache=False,
-                 expire_after=25920000, http_get_timeout=5,
-                 delay_between_requests=8, headers=WebCache.HEADERS,
-                 interactive=False, delay_interactive=30, best_match=False,
-                 simulate=False, max_songs=None, include_unknown_year=False):
+                 cache_dirpath="~/.cache/lyric_scraping/", use_webcache=True,
+                 expire_after=25920000, use_compute_cache=True, ram_size=100,
+                 http_get_timeout=5, delay_between_requests=8,
+                 headers=WebCache.HEADERS, seed=123456, interactive=False,
+                 delay_interactive=30, best_match=False, simulate=False,
+                 ignore_errors=False):
         self.skipped_urls = {}
         self.good_urls = set()
         self.checked_urls = set()
@@ -254,12 +248,13 @@ class LyricsScraper:
         else:
             # No database to be used
             self.db_conn = None
-        # ==================
-        # Web caching config
-        # ==================
+            logger.debug("<color>No database used</color>")
+        # ================
+        # Web cache config
+        # ================
         self.cache_dirpath = os.path.expanduser(cache_dirpath)
         self.cache_name = os.path.join(self.cache_dirpath, "cache")
-        self.use_cache = use_cache
+        self.use_webcache = use_webcache
         # TODO: FileExistsError and PermissionError are raised
         try:
             create_dir(self.cache_dirpath, overwrite=False)
@@ -276,15 +271,24 @@ class LyricsScraper:
             delay_between_requests=self.delay_between_requests,
             headers=self.headers)
         logger.info("Webcache is setup")
+        # ====================
+        # Compute cache config
+        # ====================
+        self.use_compute_cache = use_compute_cache
+        self.ram_size = ram_size
+        self.compute_cache = ComputeCache(self.ram_size)
         # ==============
         # Scraper config
         # ==============
+        self.seed = seed
+        random.seed(self.seed)
+        logger.info("Random number generator initialized with "
+                    "seed={}".format(self.seed))
         self.interactive = interactive
         self.delay_interactive = delay_interactive
         self.best_match = best_match
         self.simulate = simulate
-        self.max_songs = max_songs
-        self.include_unknown_year = include_unknown_year
+        self.ignore_errors = ignore_errors
 
     def get_song_lyrics(self, song_title, artist_name=None):
         """TODO
@@ -632,8 +636,7 @@ class LyricsScraper:
         count = sum([1 for f in data if not f])
         if count:
             # At least one empty item found
-            logger.warning("Empty field{}: {}".format(
-                add_plural_ending(count), data))
+            logger.warning("Empty field{}: {}".format(plural(count), data))
         return count
 
     def _process_url(self, url):
@@ -702,7 +705,7 @@ class LyricsScraper:
             logger.debug("Checking if the URL {} is available".format(url))
             code = urlopen(url).getcode()
             logger.debug("The URL {} is up. Status code: {}".format(url, code))
-            self.logger_p.debug("Validating the URL's domain")
+            self.logger.debug("Validating the URL's domain")
 
             # Validate URL's domain
             if domain in self.valid_domains:
@@ -958,11 +961,11 @@ class LyricsScraper:
             cur.execute(sql, values)
         except sqlite3.IntegrityError as e:
             # Duplicate data can't be inserted
-            logger_p.debug(e)
+            logger.debug(e)
             return None
         except pyutils.exceptions.SQLSanityCheckError as e:
             # One of the SQL sanity checks failed
-            logger_p.error(e)
+            logger.error(e)
             raise
         else:
             # Successful SQL expression execution
@@ -1103,3 +1106,9 @@ class Artist:
         self.song_title = song_title
         self.artist_name = artist_name
         self.artist_url = artist_url
+
+
+class ComputeCache:
+    def __init__(self, ram_size):
+        self.ram_size = ram_size
+        self.data = {}

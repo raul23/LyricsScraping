@@ -20,6 +20,7 @@ See the structure of the music database as defined in the `music.sql schema`_.
 """
 
 import logging
+import random
 import re
 import signal
 import time
@@ -34,8 +35,10 @@ from bs4 import BeautifulSoup
 import lyrics_scraping.exceptions
 import pyutils.exceptions
 from lyrics_scraping.scrapers.lyrics_scraper import Lyrics, LyricsScraper
-from lyrics_scraping.utils import add_plural_ending
+from lyrics_scraping.utils import plural
 from pyutils.logutils import get_error_msg
+
+import ipdb
 
 logger = logging.getLogger(__name__)
 logger.addHandler(NullHandler())
@@ -84,8 +87,9 @@ class AZLyricsScraper(LyricsScraper):
                                   "results</color>. Try to compose less " \
                                   "restrictive search query or check spelling."
 
+    # TODO: change name to get_songs_from_album
     def get_lyrics_from_album(self, album_title, artist_name=None,
-                              max_songs=None):
+                              max_songs=None, choose_random=False):
         """TODO
 
         Parameters
@@ -93,17 +97,21 @@ class AZLyricsScraper(LyricsScraper):
         album_title
         artist_name
         max_songs
+        choose_random
 
         Returns
         -------
+        TODO
 
         """
         # TODO: explain
-        return self._get_lyrics("album", album_title, artist_name, max_songs)
+        return self._get_lyrics("album", album_title, artist_name, max_songs,
+                                choose_random)
 
+    # TODO: change name to get_songs_from_artist()
     def get_lyrics_from_artist(self, artist_name, max_songs=None,
                                year_after=None, year_before=None,
-                               include_unknown_year=False):
+                               include_unknown_year=False, choose_random=False):
         """TODO
 
         Parameters
@@ -113,16 +121,31 @@ class AZLyricsScraper(LyricsScraper):
         year_after
         year_before
         include_unknown_year
+        choose_random
 
         Returns
         -------
+        TODO
+
+        Raises
+        ------
+        ValueError
+            TODO
 
         """
         # TODO: explain
-        return self._get_lyrics("artist", None, artist_name, max_songs,
-                                year_after=None, year_before=None,
-                                include_unknown_year=False)
+        try:
+            ipdb.set_trace()
+            years = self._check_years(year_after, year_before)
+            return self._get_lyrics("artist", None, artist_name, max_songs,
+                                    year_after=years.year_after,
+                                    year_before=years.year_before,
+                                    include_unknown_year=include_unknown_year,
+                                    choose_random=choose_random)
+        except ValueError:
+            raise
 
+    # TODO: change name to get_song
     def get_song_lyrics(self, song_title, artist_name=None):
         """TODO
 
@@ -190,6 +213,81 @@ class AZLyricsScraper(LyricsScraper):
         search_results.search_results_str = search_results_str
         search_results.search_results_list = search_results_list
         return search_results
+
+    @staticmethod
+    def _check_album_year(year_result):
+        """TODO
+
+        Parameters
+        ----------
+        year_result : list
+
+        Returns
+        -------
+
+        """
+        if len(year_result) != 1:
+            raise lyrics_scraping.exceptions.NonUniqueAlbumYearError(
+                "The album's year extraction doesn't result in a "
+                "UNIQUE number")
+        elif not (len(year_result[0]) == 4 and
+                  year_result[0].isdecimal()):
+            raise lyrics_scraping.exceptions.WrongAlbumYearError(
+                "The Album's year extraction scheme broke: the year "
+                "'{}' is not a number with four digits".format(
+                    year_result[0]))
+
+    @staticmethod
+    def _check_years(year_after, year_before):
+        """TODO
+
+        Parameters
+        ----------
+        year_after
+        year_before
+
+        Raises
+        ------
+        ValueError
+            TODO
+
+        """
+
+        def _check_year(year, lower_limit, upper_limit):
+            """TODO
+
+            Parameters
+            ----------
+            year
+            lower_limit
+            upper_limit
+
+            Returns
+            -------
+            TODO
+
+            """
+            return lower_limit <= year <= upper_limit
+
+        # TODO: explain
+        year_after = 1000 if year_after is None else year_after
+        current_year = int(time.strftime("%Y"))
+        year_before = current_year if year_before is None else year_before
+        years = namedtuple("years", "year_after year_before current_year")
+        years.year_after = year_after
+        years.year_before = year_before
+        years.current_year = current_year
+        for name in years._fields:
+            year = years.__dict__[name]
+            if not _check_year(year, 1000, current_year):
+                error_msg = "{} should be a number with four digits and " \
+                            "equal or less than {}".format(name, current_year)
+                raise ValueError(error_msg)
+        if year_before < year_after:
+            error_msg = "year_before ({}) should be equal or greater than " \
+                        "year_after {{}}".format(year_after, year_before)
+            raise ValueError(error_msg)
+        return years
 
     def _ask_user_for_search_result(self, which, search_results_str,
                                     search_results_list):
@@ -278,7 +376,6 @@ class AZLyricsScraper(LyricsScraper):
         Parameters
         ----------
         msg
-        search_results
 
         Returns
         -------
@@ -335,7 +432,7 @@ class AZLyricsScraper(LyricsScraper):
             logger.debug(
                 "<color>Found {} match{} for '{}':</color> {}".format(
                     len(matches),
-                    add_plural_ending(matches, "es"),
+                    plural(matches, "es"),
                     word,
                     ", ".join(matches)))
             result_index = possibilities.index(matches[0])
@@ -356,8 +453,8 @@ class AZLyricsScraper(LyricsScraper):
 
         Parameters
         ----------
-        query
         which
+        search_query
 
         Returns
         -------
@@ -375,9 +472,10 @@ class AZLyricsScraper(LyricsScraper):
         tags = soup.select("td.visitedlyr")
         return tags
 
+    # TODO: change name to _get_songs
     def _get_lyrics(self, which, which_title=None, artist_name=None,
                     max_songs=None, year_after=None, year_before=None,
-                    include_unknown_year=False):
+                    include_unknown_year=False, choose_random=False):
         """TODO
 
         Parameters
@@ -389,15 +487,15 @@ class AZLyricsScraper(LyricsScraper):
         year_after
         year_before
         include_unknown_year
+        choose_random
 
         Returns
         -------
+        TODO
 
         """
         # TODO: explain
-        # TODO: add assert msg and in othe places too
-        import ipdb
-        ipdb.set_trace()
+        # TODO: add assert msg and in other places too
         assert which in ['album', 'artist', 'song']
         if artist_name and which_title:
             query = "{} by {}".format(which_title, artist_name)
@@ -407,15 +505,14 @@ class AZLyricsScraper(LyricsScraper):
         else:
             query = artist_name
         tags = self._send_search_request(which, query)
-        logger.debug("<color>Found {} {} results (page 1)"
-                     "</color>".format(len(tags), which))
         if not tags and artist_name:
+            logger.debug("<color>Found 0 {} result</color>".format(which))
             logger.debug("<color>We will try to send the {} request with the "
                          "{} title only</color>".format(which, which))
             tags = self._send_search_request(which, which_title)
-            logger.debug("<color>Found {} {} results (page 1)"
-                         "</color>".format(len(tags), which))
         if tags:
+            logger.debug("<color>Found {} {} result{} (page 1)"
+                         "</color>".format(len(tags), which, plural(tags)))
             search_results = self._get_search_results(which, tags)
             search_results_str = search_results.search_results_str
             search_results_list = search_results.search_results_list
@@ -433,7 +530,8 @@ class AZLyricsScraper(LyricsScraper):
                     tag = tags[num - 1]
             else:
                 # No interaction
-                logger.debug(search_results_str[:-1])
+                logger.debug("<color>{} result{}:</color>{}".format(
+                    which.upper(), plural(tags), search_results_str[:-1]))
                 if self.best_match:  # Select best match
                     if artist_name:
                         # Album and song search results are displayed differently
@@ -456,19 +554,22 @@ class AZLyricsScraper(LyricsScraper):
                     tag = tags[0]
             url = tag.find("a").attrs['href']
             logger.debug("{}'s URL: {}".format(which, url))
-            logger.debug("Getting lyrics from {}'s webpage ...".format(which))
+            logger.debug("Getting lyrics from the {}'s webpage ...".format(which))
             return self._get_lyrics_from_url(
                 url,
                 max_songs,
                 year_after=year_after,
                 year_before=year_before,
-                include_unknown_year=include_unknown_year)
+                include_unknown_year=include_unknown_year,
+                choose_random=choose_random)
         else:  # tags is empty
             logger.warning(self.no_results_warning)
             return None
 
+    # TODO: change name to _get_songs_from_url
     def _get_lyrics_from_url(self, url, max_songs=None, year_after=None,
-                             year_before=None, include_unknown_year=False):
+                             year_before=None, include_unknown_year=False,
+                             choose_random=False):
         """TODO
 
         Different scraping methods are called depending on the type of webpage:
@@ -483,9 +584,11 @@ class AZLyricsScraper(LyricsScraper):
         year_after
         year_before
         include_unknown_year
+        choose_random
 
         Returns
         -------
+        TODO
 
         Raises
         ------
@@ -519,7 +622,8 @@ class AZLyricsScraper(LyricsScraper):
                 max_songs,
                 year_after=year_after,
                 year_before=year_before,
-                include_unknown_year=include_unknown_year)
+                include_unknown_year=include_unknown_year,
+                choose_random=choose_random)
         else:
             # Bad URL
             raise lyrics_scraping.exceptions.InvalidURLCategoryError(
@@ -527,7 +631,8 @@ class AZLyricsScraper(LyricsScraper):
                 "an artist's or a lyrics webpage".format(url))
 
     def _scrape_artist_page(self, artist_url, max_songs=None, year_after=None,
-                             year_before=None,include_unknown_year=False):
+                            year_before=None, include_unknown_year=False,
+                            choose_random=False):
         """Scrape the artist webpage.
 
         It crawls the artist webpage and scrapes any useful info to be saved,
@@ -544,6 +649,7 @@ class AZLyricsScraper(LyricsScraper):
         year_after
         year_before
         include_unknown_year
+        choose_random
 
         Raises
         ------
@@ -559,13 +665,8 @@ class AZLyricsScraper(LyricsScraper):
 
         """
         # TODO: explain
-        if max_songs:
-            logger.debug("<color>Per album's max_songs(={}) used"
-                         "</color>".format(max_songs))
-            logger.info("The <color>first {} songs</color> from the album will "
-                        "be processed".format(max_songs))
-        else:
-            logger.info("<color>All songs</color> from the album will be processed")
+        y = self._check_years(year_after, year_before)
+        year_after, year_before = y.year_after, y.year_before
         # Retrieve the webpage's HTML
         html = None
         try:
@@ -575,14 +676,69 @@ class AZLyricsScraper(LyricsScraper):
                 pyutils.exceptions.HTTP404Error):
             raise
         logger.debug("Scraping the artist's webpage {}".format(artist_url))
+        # Parse HTML webpage
         soup = BeautifulSoup(html, 'lxml')
-        # Get the name of the artist
-        # The name of the artist is found in the title of the artist's webpage
-        # as "Artist name Lyrics"
+        # Get the name of the artist:
+        # the name of the artist is found in the title of the artist's webpage
+        # as "ArtistName Lyrics"
         artist_name = soup.title.text.split(' Lyrics')[0]
         # TODO: Save artist data
         # self._save_artist(artist_name)
+        ipdb.set_trace()
+        # Get all the <div> tags associated with albums
+        # NOTE: even the section "other songs" is included even though it is for
+        # songs without albums
+        div_album_tags = soup.find_all("div", class_="album")
+        # Process each <div> tag in order to extract useful info, e.g. album's
+        # title, its related songs, ...
+        for div in div_album_tags:
+            if div.text.count("other songs"):
+                pass
+            else:
+                # Get the album's title
+                album_title = div.contents[1].text.strip('"')
+                # Get the album's year
+                year_result = re.findall(r'\((\d+)\)', div.text)
+                # Sanity check the extracted year
+                try:
+                    self._check_album_year(year_result)
+                except (lyrics_scraping.exceptions.NonUniqueAlbumYearError,
+                        lyrics_scraping.exceptions.WrongAlbumYearError) as e:
+                    if self.ignore_errors:
+                        logger.error(e)
+                        logger.warning("Skipping the album '{}'".format(
+                                        album_title))
+                    else:
+                        raise e
+                if not (year_before >= int(year_result[0]) >= year_after):
+                    logger.debug("The album <color>'{}'</color> will be "
+                                 "<color>rejected</color> because its year "
+                                 "<color>{}</color> isn't not within <color>"
+                                 "[{}, {}]</color>".format(
+                                  album_title,
+                                  int(year_result[0]),
+                                  year_after,
+                                  year_before))
+                else:  # Valid year found
+                    album_year = int(year_result[0])
+                    logger.debug("The album <color>'{}'</color> ({}) will "
+                                 "be <color>processed</color>".format(
+                                  album_title, album_year))
+                    # Get all the songs from the given album
+                    # Only get those siblings (songs) that are related to the
+                    # given album
+                    siblings = div.find_next_siblings()
+                    for sibling in siblings:
+                        if sibling.get('href'):
+                            # anchors.append(sibling)
+                            ipdb.set_trace()
+                        elif sibling.get('class') and \
+                                'album' in sibling.get('class'):
+                            break
+                        else:
+                            continue
         # Get list of anchors
+        ipdb.set_trace()
         if ".html#" in artist_url:
             # Case where the URL points to a specific album within the artist's
             # webpage
@@ -602,49 +758,135 @@ class AZLyricsScraper(LyricsScraper):
                     break
                 else:
                     continue
-        elif year_after or year_before:
-            # Case where it is an artist's webpage
-            # NOTE: this happens when calling get_lyrics_from_artist()
-            div_tags = soup.find_all("div", class_="album")
-            anchors = []
-            for div in div_tags:
-                logger.debug("")
-
-                year_result = re.findall(r'\((\d+)\)', div.text)
-                if len(year_result) != 1:
-                    raise lyrics_scraping.exceptions.NonUniqueAlbumYearError(
-                        "The album's year extraction doesn't result in a "
-                        "UNIQUE number")
-                elif not (len(year_result[0]) == 4 and
-                          year_result[0].isdecimal()):
-                    raise lyrics_scraping.exceptions.WrongAlbumYearError(
-                        "The Album's year extraction scheme broke: the year "
-                        "'{}' is not a number with four digits".format(
-                            year_result[0]))
-                else:  # Valid year found
-                    song_year = year_result[0]
-        else:
-            # Case where the URL refers to all albums from the given artist
+        elif year_after is None and year_before is None:
+            # Case where the URL refers to all songs from the given artist even
+            # those songs that are not associated to any album
             # Get the list of lyrics URLs from the given artist
             # The URLs will be found as values to anchor's href attributes
             # e.g. <a href="../lyrics/artist_name/song_title.html" ... >
             anchors = soup.find_all("a", href=re.compile("^../lyrics"))
-        logger.debug("<color>There are in total {} lyrics URLs"
-                     "</color>".format(len(anchors)))
-        if max_songs:
-            anchors = anchors[:max_songs]
-        # Process each lyrics' url
-        logger.info("There are <color>{} lyrics URLs</color> to process for "
-                    "the given artist".format(len(anchors)))
+        else:
+            # TODO: refactor next three lines, already in get_lyrics_from_artist()
+            year_after = 1000 if year_after is None else year_after
+            current_year = int(time.strftime("%Y"))
+            year_before = current_year if year_before is None else year_before
+            if year_after == 1000 and year_before == current_year:
+                logger.debug("<color>No filtering based on year_after ({}) and "
+                             "year_before ({})</color>".format(year_after,
+                                                               year_before))
+                anchors = soup.find_all("a", href=re.compile("^../lyrics"))
+            else:
+                logger.debug("Only albums from <color>{} to {}</color> will be "
+                             "processed".format(year_after, year_before))
+                # Case where it is an artist's webpage
+                # NOTE: this happens when calling get_lyrics_from_artist()
+                div_tags = soup.find_all("div", class_="album")
+                anchors = []
+                for div in div_tags:
+                    if div.text.count("other songs"):
+                        logger.debug("<color>Processing the section 'other "
+                                     "songs'...</color>")
+                        if include_unknown_year:
+                            # Get all the songs without album and year
+                            # Only get those siblings (songs) that are related
+                            # to the "other songs" section
+                            siblings = div.find_next_siblings()
+                            for sibling in siblings:
+                                if sibling.get('href'):
+                                    anchors.append(sibling)
+                        else:
+                            logger.debug("<color>No songs from the section "
+                                         "'other songs' will be added</color>")
+                        continue
+                    # Get the album's title
+                    album_title = div.contents[1].text.strip('"')
+                    # Get the album's year
+                    year_result = re.findall(r'\((\d+)\)', div.text)
+                    if len(year_result) != 1:
+                        raise lyrics_scraping.exceptions.NonUniqueAlbumYearError(
+                            "The album's year extraction doesn't result in a "
+                            "UNIQUE number")
+                    elif not (len(year_result[0]) == 4 and
+                              year_result[0].isdecimal()):
+                        raise lyrics_scraping.exceptions.WrongAlbumYearError(
+                            "The Album's year extraction scheme broke: the year "
+                            "'{}' is not a number with four digits".format(
+                                year_result[0]))
+                    elif not (year_before >= int(year_result[0]) >= year_after):
+                        logger.debug("The album <color>'{}'</color> will be "
+                                     "<color>rejected</color> because its year "
+                                     "<color>{}</color> isn't not within <color>"
+                                     "[{}, {}]</color>".format(
+                                      album_title,
+                                      int(year_result[0]),
+                                      year_after,
+                                      year_before))
+                    else:  # Valid year found
+                        album_year = int(year_result[0])
+                        logger.debug("The album <color>'{}'</color> ({}) will "
+                                     "be <color>processed</color>".format(
+                                      album_title, album_year))
+                        # Get all the songs from the given album
+                        # Only get those siblings (songs) that are related to the
+                        # given album
+                        siblings = div.find_next_siblings()
+                        for sibling in siblings:
+                            if sibling.get('href'):
+                                anchors.append(sibling)
+                            elif sibling.get('class') and \
+                                    'album' in sibling.get('class'):
+                                break
+                            else:
+                                continue
+        # Process each song's url
+        logger.debug("<color>There are a total of {} songs</color>".format(
+                      len(anchors)))
+        if max_songs is not None:
+            if max_songs > len(anchors):
+                logger.warning("<color>max_songs ({}) is greater than the "
+                               "number of songs ({})</color>".format(
+                                max_songs, len(anchors)))
+                logger.warning("<color>Therefore, all songs will be chosen and "
+                               "processed</color>")
+            elif max_songs == 0:
+                logger.warning("<color>max_songs is 0. Thus, no songs will be "
+                               "chosen</color>")
+                return None
+            else:
+                if choose_random:
+                    if max_songs < 0:
+                        logger.warning("<color>max_songs ({}) is negative and "
+                                       "choose_random is True. Thus, we can't "
+                                       "randomly choose a negative number of "
+                                       "songs from the population."
+                                       "</color>".format(max_songs))
+                        logger.warning("<color>No songs will be chosen</color>")
+                        # TODO: raise ValueError?
+                        return None
+                    else:
+                        logger.debug("<color>But {} songs will be chosen "
+                                     "randomly and processed</color>".format(
+                                      max_songs))
+                        anchors = random.sample(anchors, max_songs)
+                else:
+                    logger.debug("<color>But only the first {} songs will be "
+                                 "processed</color>".format(max_songs))
+                    anchors = anchors[:max_songs]
+        else:
+            logger.debug("<color>All songs will be processed</color>")
+        logger.info("There are <color>{} songs</color> to process for the given "
+                    "artist <color>{}</color>".format(len(anchors), artist_name))
         all_lyrics = []
         for i, a in enumerate(anchors):
             # Get URL from the anchor's href attribute
             lyrics_url = a.attrs['href']
             logger.debug("<color>{}</color>".format("-"*100))
-            logger.debug("<color>#{} Processing the lyrics URL "
+            logger.debug("<color>#{} Processing the song's URL "
                          "{}</color>".format(i+1, lyrics_url))
-            logger.debug("<color>Processing the anchor '{}'</color>".format(a))
-            # Check if the lyrics' URL is relative to the current artist's URL
+            # TODO: problem in logger if
+            # "Processing the anchor <a href="../lyrics/depechemode/judas.html" target="_blank">Judas</a>"
+            logger.debug("<color>Processing the anchor {}</color>".format(a))
+            # Check if the song's URL is relative to the current artist's URL
             logger.debug("<color>Checking if the URL {} is relative"
                          "</color>".format(lyrics_url))
             if lyrics_url.startswith('../'):
@@ -678,7 +920,7 @@ class AZLyricsScraper(LyricsScraper):
                 error = e
                 skip_url = True
             else:
-                logger.debug("Lyrics URL successfully processed: "
+                logger.debug("Song's URL successfully processed: "
                              "{}".format(lyrics_url))
                 self.good_urls.add(lyrics_url)
                 all_lyrics.append(lyrics)
@@ -721,13 +963,13 @@ class AZLyricsScraper(LyricsScraper):
         if self._url_already_processed(lyrics_url) in [0, 2]:
             # Cache the webpage and retrieve its html content
             html = self.webcache.get_webpage(lyrics_url)
-            logger.debug("Scraping the lyrics webpage @ {}".format(lyrics_url))
+            logger.debug("Scraping the song's webpage @ {}".format(lyrics_url))
             soup = BeautifulSoup(html, 'lxml')
             # Get the following data from the lyrics webpage:
             # - the title of the song
             # - the name of the artist
             # - the text of the song
-            # - the album title the song comes from
+            # - the album title
             # - the year the album was released
             # TODO: explain
             song_title = soup.title.text.split('- ')[1].split(' Lyrics')[0]
@@ -748,7 +990,7 @@ class AZLyricsScraper(LyricsScraper):
             album_result = soup.find_all("div",
                                          class_="panel songlist-panel noprint")
             logger.debug("<color>{} album{} found</color>".format(
-                len(album_result), add_plural_ending(album_result)))
+                len(album_result), plural(album_result)))
             if len(album_result) == 0:
                 # No album found
                 logger.debug("No album found in the lyrics webpage: "

@@ -6,8 +6,8 @@ overwrite_db: True
 # =============================
 #       WEB CACHE CONFIG
 # =============================
-cache_dirpath: ~/data/lyrics_scraping/cache
 use_webcache: True
+webcache_dirpath: ~/.cache/lyric_scraping/
 expire_after: 300
 # =============================
 #      COMPUTE CACHE CONFIG
@@ -27,7 +27,7 @@ headers:
 # =============================
 #        SCRAPER CONFIG
 # =============================
-see: 123456
+seed: 123456
 interactive: False
 delay_interactive: 30
 best_match: False

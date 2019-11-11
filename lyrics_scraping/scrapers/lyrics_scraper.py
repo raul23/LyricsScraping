@@ -40,7 +40,7 @@ from urllib.parse import urlparse
 import lyrics_scraping.exceptions
 import pyutils.exceptions
 from lyrics_scraping.utils import plural, get_data_filepath
-from pyutils.dbutils import connect_db, create_db, sql_sanity_check
+from pyutils.dbutils import connect_db, create_db, sql_sanity_checks
 from pyutils.genutils import create_dir
 from pyutils.logutils import get_error_msg, setup_logging_from_cfg
 from pyutils.webcache import WebCache
@@ -209,7 +209,7 @@ class LyricsScraper:
     # TODO: add example of data.
 
     def __init__(self, db_filepath="", overwrite_db=False,
-                 cache_dirpath="~/.cache/lyric_scraping/", use_webcache=True,
+                 use_webcache=True, webcache_dirpath="~/.cache/lyric_scraping/",
                  expire_after=25920000, use_compute_cache=True, ram_size=100,
                  http_get_timeout=5, delay_between_requests=8,
                  headers=WebCache.HEADERS, seed=123456, interactive=False,
@@ -227,6 +227,7 @@ class LyricsScraper:
         if _SETUP_LOGGING:
             # Setup logging for all custom modules based on the default logging
             # config file
+            logger.debug("<color>Setting up logging ...</color>")
             setup_logging_from_cfg(self.logging_cfg_filepath)
             logger.info("<color>Logging is setup</color>")
         else:
@@ -236,59 +237,76 @@ class LyricsScraper:
         # ===============
         self.overwrite_db = overwrite_db
         self.db_filepath = os.path.expanduser(db_filepath)
+        # TODO: remove db_conn from everywhere
+        self.db_conn = None
         if self.db_filepath:
+            logger.debug("<color>Setting up the music database ...</color>")
             # Create music db if necessary
             # TODO: IOError and sqlite3.OperationalError are raised
             create_db(self.db_filepath,
                       self.schema_filepath,
                       self.overwrite_db)
-            # Connect to the music database
-            # TODO: sqlite3.Error is raised
-            self.db_conn = self._connect_db()
+            logger.info("<color>Music database is setup</color>")
         else:
-            # No database to be used
-            self.db_conn = None
-            logger.debug("<color>No database used</color>")
+            # No database to fbe used
+            logger.debug("<color>No music database used</color>")
         # ================
         # Web cache config
         # ================
-        self.cache_dirpath = os.path.expanduser(cache_dirpath)
-        self.cache_name = os.path.join(self.cache_dirpath, "cache")
+        self.webcache_dirpath = os.path.expanduser(webcache_dirpath)
+        self.cache_name = os.path.join(self.webcache_dirpath, "cache")
         self.use_webcache = use_webcache
-        # TODO: FileExistsError and PermissionError are raised
-        try:
-            create_dir(self.cache_dirpath, overwrite=False)
-        except FileExistsError as e:
-            logger.debug("<color>{}</color>".format(e))
         self.expire_after = expire_after
         self.http_get_timeout = http_get_timeout
         self.delay_between_requests = delay_between_requests
         self.headers = headers
-        self.webcache = WebCache(
-            cache_name=self.cache_name,
-            expire_after=self.expire_after,
-            http_get_timeout=self.http_get_timeout,
-            delay_between_requests=self.delay_between_requests,
-            headers=self.headers)
-        logger.info("Webcache is setup")
+        if self.use_webcache:
+            logger.debug("<color>Setting up web-cache ...</color>")
+            logger.debug("<color>Creating the webcache directory:</color> "
+                         "{}".format(self.webcache_dirpath))
+            try:
+                # TODO: FileExistsError and PermissionError are raised
+                create_dir(self.webcache_dirpath, overwrite=False)
+            except FileExistsError as e:
+                logger.debug("<color>{}</color>".format(e))
+                logger.debug("<color>The webcache directory already exists:"
+                             "</color> {}".format(self.webcache_dirpath))
+            self.webcache = WebCache(
+                cache_name=self.cache_name,
+                expire_after=self.expire_after,
+                http_get_timeout=self.http_get_timeout,
+                delay_between_requests=self.delay_between_requests,
+                headers=self.headers)
+            logger.info("<color>web-cache is setup</color>")
+        else:
+            self.webcache = None
+            logger.debug("<color>No web-cache used</color>")
         # ====================
         # Compute cache config
         # ====================
         self.use_compute_cache = use_compute_cache
         self.ram_size = ram_size
-        self.compute_cache = ComputeCache(self.ram_size)
+        if self.use_compute_cache:
+            logger.debug("<color>Setting up compute-cache ...</color>")
+            self.compute_cache = ComputeCache(self.schema_filepath,
+                                              self.ram_size)
+            logger.info("<color>compute-cache is setup</color>")
+        else:
+            self.compute_cache = None
+            logger.debug("<color>No compute-cache used</color>")
         # ==============
         # Scraper config
         # ==============
         self.seed = seed
         random.seed(self.seed)
-        logger.info("Random number generator initialized with "
-                    "seed={}".format(self.seed))
+        logger.info("<color>Random number generator</color> initialized with "
+                    "<color>seed={}</color>".format(self.seed))
         self.interactive = interactive
         self.delay_interactive = delay_interactive
         self.best_match = best_match
         self.simulate = simulate
         self.ignore_errors = ignore_errors
+        self.min_year = 1000
 
     def get_song_lyrics(self, song_title, artist_name=None):
         """TODO
@@ -492,7 +510,7 @@ class LyricsScraper:
         session.
 
         Then, the URL is checked if is already present in the database (if a
-        database was used of course).
+        database is used).
 
         By doing these checks, we reduce a lot of computations that would have
         been unnecessary, like scraping and saving an already processed webpage.
@@ -512,8 +530,8 @@ class LyricsScraper:
         if url in self.checked_urls:
             logger.warning("The URL was already processed during this "
                            "session: {}".format(url))
-        elif self.db_conn and self._url_in_db(url) == 2:
-            # The URL was found in the db but it will be processed again"
+        elif self.db_filepath and self._url_in_db(url) == 2:
+            # The URL was found in the db
             retcode = 2
         else:
             # URL is brand new! Thus, it can be further processed.
@@ -549,7 +567,7 @@ class LyricsScraper:
         """
         retcode = 1
         # Select all songs with the given URL from the music db
-        res = self._select_song(url)
+        res = self._select_song_from_url(url)
         if len(res) == 1:
             # Only one song found with the given URL
             logger.debug("There is already a song with the same URL: "
@@ -570,48 +588,17 @@ class LyricsScraper:
         elif len(res) == 0:
             # No song found with the given URL
             retcode = 0
-            logger.debug("The lyrics URL was not found in the music "
+            logger.debug("The song URL was not found in the music "
                          "db: {}".format(url))
         else:
             # Odd case: more than one song was found with the given URL
             raise lyrics_scraping.exceptions.MultipleLyricsURLError(
-                "The lyrics URL was found more than once in the music "
+                "The song URL was found more than once in the music "
                 "db: {}".format(url))
         return retcode
 
-    def _connect_db(self):
-        """Connect to the SQLite music database.
-
-        The SQLite music database is used for saving any relevant data from the
-        scraped webpages.
-
-        See the structure of the music database as defined in the `music.sql
-        schema`_.
-
-        Returns
-        -------
-        conn : sqlite3.Connection
-            Connection object that represents the SQLite database.
-
-        Raises
-        ------
-        sqlite3.Error
-             Raised if any SQLite-related error occurs, such as
-             :exc:`sqlite3.IntegrityError` or :exc:`sqlite3.OperationalError`.
-
-        """
-        # Connect to the music database
-        try:
-            logger.info("<color>Connecting to db '{}'"
-                        "</color>".format(self.db_filepath))
-            conn = connect_db(self.db_filepath)
-        except sqlite3.Error:
-            raise
-        else:
-            logger.debug("<color>Db connection established!</color>")
-            return conn
-
-    def _count_empty_items(self, data):
+    @staticmethod
+    def _count_empty_items(data):
         """Count empty items in a tuple.
 
          Returns the number of empty items in a list or tuple which can be empty
@@ -957,7 +944,7 @@ class LyricsScraper:
         """
         cur = self.db_conn.cursor()
         try:
-            sql_sanity_check(sql, values)
+            sql_sanity_checks(sql, values)
             cur.execute(sql, values)
         except sqlite3.IntegrityError as e:
             # Duplicate data can't be inserted
@@ -1039,13 +1026,13 @@ class LyricsScraper:
               " lyrics_url, lyrics, year) VALUES (?, ?, ?, ?, ?, ?)"
         self._execute_sql(sql, song)
 
-    def _select_song(self, lyrics_url):
-        """Select a song from the database based on a lyrics URL.
+    def _select_song_from_url(self, lyrics_url):
+        """Select a song from the database based on a song URL.
 
-        The lyrics URL is used as the WHERE condition to be used for retrieving
-        the associated song from the database.
+        The song URL is used as the WHERE condition to be used for retrieving
+        the associated row from the database.
 
-        See the `songs` table as defined in the `music.sql schema`_.
+        See the `songs_urls` table as defined in the `music.sql schema`_.
 
         Parameters
         ----------
@@ -1061,11 +1048,21 @@ class LyricsScraper:
         """
         logger.debug("Selecting the song where "
                      "lyrics_url={}".format(lyrics_url))
-        sql = "SELECT * FROM songs WHERE lyrics_url=?"
+        sql = "SELECT * FROM songs_urls WHERE lyrics_url=?"
         return self._execute_sql(sql, (lyrics_url,))
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        # print("Exception has been handled")
+        self.compute_cache.db_conn.close()
+        return True
 
 
 class Lyrics:
+    """TODO: remove, to be replaced by Song
+    """
     def __init__(self, song_title, artist_name, album_title, lyrics_url,
                  lyrics_text, year):
         self.song_title = song_title
@@ -1098,6 +1095,26 @@ class Album:
         self.album_url = album_url
         self.year = year
 
+    @staticmethod
+    def check_album_year(year_result):
+        """TODO
+
+        Parameters
+        ----------
+        year_result : list
+            TODO
+
+        """
+        # TODO: explain
+        if len(year_result) != 1:
+            raise lyrics_scraping.exceptions.NonUniqueAlbumYearError(
+                "The album year extraction doesn't result in a UNIQUE number")
+        elif not (len(year_result[0]) == 4 and
+                  year_result[0].isdecimal()):
+            raise lyrics_scraping.exceptions.WrongAlbumYearError(
+                "The Album year extraction scheme broke: the year '{}' is not a "
+                "number with four digits".format(year_result[0]))
+
 
 class Artist:
     """TODO
@@ -1109,6 +1126,29 @@ class Artist:
 
 
 class ComputeCache:
-    def __init__(self, ram_size):
+    """TODO
+    """
+    def __init__(self, schema_filepath, ram_size):
+        self.schema_filepath = schema_filepath
+        self.db_conn = self._setup_db()
         self.ram_size = ram_size
-        self.data = {}
+
+    def _setup_db(self):
+        """TODO
+
+        Returns
+        -------
+        db_conn
+            TODO
+
+        """
+
+        db_conn = connect_db(':memory:')
+        # db_conn = sqlite3.connect(':memory:')
+        logger.debug("<color>Executing schema for db ':memory:' ...</color>")
+        with open(self.schema_filepath, 'rt') as f:
+            schema = f.read()
+        db_conn.executescript(schema)
+        # cur = db_conn.cursor()
+        # cur.executescript(schema)
+        return db_conn

@@ -155,12 +155,20 @@ class TestScrapingScript(TestLyricsScraping):
         No year_before and year_after
         """
         # TODO: explain
+        print("\n")
+        db_filepath = os.path.join(self.sandbox_tmpdir, "music.sqlite")
+        with AZLyricsScraper(db_filepath=db_filepath) as scraper:
+            scraper.get_lyrics_from_artist(artist_name="Depeche Mode",
+                                           max_songs=5000,
+                                           include_unknown_year=True)
+        """
         init_params = {}
         meth_params = {"artist_name": "Depeche Mode",
                        "max_songs": 5000}
         extra_msg = "- A <color>valid artist name</color> is given"
         songs = self._test_get_lyrics(init_params, meth_params, extra_msg)
         self.check_bulk_lyrics(songs, meth_params)
+        """
 
     @unittest.skip("test_get_song_lyrics_case_1()")
     def test_get_song_lyrics_case_1(self):

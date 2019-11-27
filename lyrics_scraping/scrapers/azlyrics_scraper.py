@@ -471,14 +471,13 @@ class AZLyricsScraper(LyricsScraper):
                 # name of the album, e.g. Depeche Mode - Speak & Spell
                 text = t.select_one("b").text
                 search_results_list.append(text)
-                search_results_str += "[{}] <color>{}</color>\n".format(i, text)
+                search_results_str += "[{}] {}\n".format(i, text)
             else:  # song
                 title, artist = t.select("b")
                 title = title.text
                 artist = artist.text
                 search_results_list.append(title + " by " + artist)
-                search_results_str += "[{}] <color>{}</color> by " \
-                                      "{}\n".format(i, title, artist)
+                search_results_str += "[{}] {} by {}\n".format(i, title, artist)
         search_results = namedtuple("search_results",
                                     "search_results_str search_results_list")
         search_results.search_results_str = search_results_str
@@ -736,7 +735,7 @@ class AZLyricsScraper(LyricsScraper):
                     tag = tags[num - 1]
             else:
                 # No interaction
-                logger.debug("<color>{} result{}:</color>{}".format(
+                logger.debug("<color>{} result{}: {}</color>".format(
                     which.upper(), plural(tags), search_results_str[:-1]))
                 if self.best_match:  # Select best match
                     if artist_name:
@@ -755,12 +754,13 @@ class AZLyricsScraper(LyricsScraper):
                         return None
                 else:  # No match
                     # We choose the first search result
-                    logger.debug("<color>Choosing the first search result:"
-                                 "</color> {}".format(search_results_list[0]))
+                    logger.debug("<color>Choosing the first search result: "
+                                 "{}</color>".format(search_results_list[0]))
                     tag = tags[0]
             url = tag.find("a").attrs['href']
-            logger.debug("{}'s URL: {}".format(which, url))
-            logger.debug("Getting lyrics from the {}'s webpage ...".format(which))
+            logger.debug("<color>{}'s URL: {}</color>".format(which, url))
+            logger.debug("<color>Getting lyrics from the {}'s webpage ..."
+                         "</color>".format(which))
             return self._get_lyrics_from_url(
                 url,
                 max_songs,
@@ -812,7 +812,8 @@ class AZLyricsScraper(LyricsScraper):
         # and start the scraping of the webpage
         if urlparse(url).path.startswith('/lyrics/'):
             # Lyrics URL
-            logger.debug("The URL refers to a lyrics webpage: {}".format(url))
+            logger.debug("<color>The URL refers to a lyrics webpage: {}"
+                         "</color>".format(url))
             # TODO: raise error from _scrape_lyrics_page
             return self._scrape_lyrics_page(url)
         elif urlparse(url).path.startswith('/19/') or \
@@ -821,7 +822,8 @@ class AZLyricsScraper(LyricsScraper):
             # NOTE: artists' names that start with a number have their webpages
             # placed within the directory /19/
             # e.g. https://www.azlyrics.com/19/50cent.html
-            logger.debug("The URL {} refers to an artist webpage".format(url))
+            logger.debug("<color>The URL {} refers to an artist webpage"
+                         "</color>".format(url))
             # TODO: raise error from _scrape_artist_page
             return self._scrape_artist_page(
                 url,
@@ -877,7 +879,8 @@ class AZLyricsScraper(LyricsScraper):
         year_after, year_before = y.year_after, y.year_before
         # Check first if the URL was already processed, e.g. is found in the db
         # TODO: ...
-        logger.debug("Scraping the artist webpage {}".format(artist_url))
+        logger.debug("<color>Scraping the artist webpage {}</color>".format(
+                     artist_url))
         ipdb.set_trace()
         artist_webpage = ArtistWebpage(artist_url, self.webcache,
                                        include_unknown_year, self.ignore_errors)
@@ -1000,8 +1003,8 @@ class AZLyricsScraper(LyricsScraper):
                 len(album_result), plural(album_result)))
             if len(album_result) == 0:
                 # No album found
-                logger.debug("No album found in the lyrics webpage: "
-                             "{}".format(lyrics_url))
+                logger.debug("<color>No album found in the lyrics webpage: "
+                             "{}</color>".format(lyrics_url))
                 # Add empty string to the album result to notify that no album
                 # was found when processing each album in the result
                 album_result.append("")

@@ -262,15 +262,15 @@ class LyricsScraper:
         self.headers = headers
         if self.use_webcache:
             logger.debug("<color>Setting up web-cache ...</color>")
-            logger.debug("<color>Creating the web-cache directory:</color> "
-                         "{}".format(self.webcache_dirpath))
+            logger.debug("<color>Creating the web-cache directory: "
+                         "{}</color>".format(self.webcache_dirpath))
             try:
                 # TODO: FileExistsError and PermissionError are raised
                 create_dir(self.webcache_dirpath, overwrite=False)
             except FileExistsError as e:
                 logger.debug("<color>{}</color>".format(e))
-                logger.debug("<color>The webcache directory already exists:"
-                             "</color> {}".format(self.webcache_dirpath))
+                logger.debug("<color>The webcache directory already exists: "
+                             "{}</color>".format(self.webcache_dirpath))
             self.webcache = WebCache(
                 cache_name=self.cache_name,
                 expire_after=self.expire_after,
@@ -299,8 +299,8 @@ class LyricsScraper:
         # ==============
         self.seed = seed
         random.seed(self.seed)
-        logger.info("<color>Random number generator</color> initialized with "
-                    "<color>seed={}</color>".format(self.seed))
+        logger.info("<color>Random number generator initialized with seed={}"
+                    "</color>".format(self.seed))
         self.interactive = interactive
         self.delay_interactive = delay_interactive
         self.best_match = best_match

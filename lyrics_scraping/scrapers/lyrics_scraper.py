@@ -262,7 +262,7 @@ class LyricsScraper:
         self.headers = headers
         if self.use_webcache:
             logger.debug("<color>Setting up web-cache ...</color>")
-            logger.debug("<color>Creating the webcache directory:</color> "
+            logger.debug("<color>Creating the web-cache directory:</color> "
                          "{}".format(self.webcache_dirpath))
             try:
                 # TODO: FileExistsError and PermissionError are raised

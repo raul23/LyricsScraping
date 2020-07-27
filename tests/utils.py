@@ -19,7 +19,7 @@ class TestLyricsScraping(TestBase):
     LOGGING_FILENAME = "scraping.log"
     SHOW_FIRST_CHARS_IN_LOG = 1000
     SCHEMA_FILEPATH = None
-    DB_FILENAME = "db.qlite"
+    DB_FILENAME = "db.sqlite"
 
 
 # Decorator

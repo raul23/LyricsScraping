@@ -27,7 +27,6 @@ setup(name='LyricsScraping',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Topic :: Internet :: WWW/HTTP',
-        'Topic :: Software Development :: Libraries'
       ],
       keywords='lyrics web scraping python',
       url='https://github.com/raul23/LyricsScraping',

@@ -1,4 +1,4 @@
-"""Package that defines modules for testing the whole lyrics_scraping library.
+"""Package that defines modules for testing the whole lyrics_scraping module.
 
 The command to execute the :mod:`unittest` test runner::
 
